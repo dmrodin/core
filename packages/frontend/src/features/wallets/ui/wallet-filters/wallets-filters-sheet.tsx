@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { useRouter, useSearchParams } from 'next/navigation';
+
 import { FilterIcon } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 
@@ -66,12 +68,35 @@ export function WalletsFiltersSheet({
   const { data: currencies } = useCurrency();
   const { data: users } = useUsers();
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const updateQueryParam = (key: string, value?: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (!value) {
+      params.delete(key);
+    } else {
+      params.set(key, value);
+    }
+
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
   const [localFilters, setLocalFilters] = useState<Partial<GetWalletsFilter>>(
     {},
   );
 
-  const handleApplyFilters = () => {
+  /* const handleApplyFilters = () => {
     form.reset({ ...baseFilters, ...localFilters });
+    setSheetOpen(false);
+  }; */
+
+  const handleApplyFilters = () => {
+    Object.entries(localFilters).forEach(([key, value]) => {
+      form.setValue(key as any, value);
+    });
+
     setSheetOpen(false);
   };
 
@@ -176,12 +201,12 @@ export function WalletsFiltersSheet({
             <Label>Валюта</Label>
             <Select
               value={localFilters.currencyId ?? ''}
-              onValueChange={(val) =>
+              onValueChange={(val) => {
                 setLocalFilters((prev) => ({
                   ...prev,
                   currencyId: val || undefined,
-                }))
-              }
+                }));
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Все" />
