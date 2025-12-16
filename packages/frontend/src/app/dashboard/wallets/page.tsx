@@ -346,42 +346,27 @@ export default function WalletsPage() {
         }
         onValueChange={(val) => {
           if (val === 'all') {
-            form.reset({
-              ...baseFilters,
-              walletTypeId: undefined,
-              pinned: false,
-              visible: true,
-              deleted: false,
-            });
+            form.setValue('walletTypeId', undefined);
+            form.setValue('pinned', false);
+            form.setValue('visible', true);
+            form.setValue('deleted', false);
           } else if (val === 'deleted') {
-            form.reset({
-              ...baseFilters,
-              deleted: true,
-              visible: true,
-              pinned: false,
-            });
+            form.setValue('deleted', true);
+            form.setValue('visible', true);
+            form.setValue('pinned', false);
           } else if (val === 'hidden') {
-            form.reset({
-              ...baseFilters,
-              visible: false,
-              deleted: false,
-              pinned: false,
-            });
+            form.setValue('visible', false);
+            form.setValue('deleted', false);
+            form.setValue('pinned', false);
           } else if (val === 'pinned') {
-            form.reset({
-              ...baseFilters,
-              pinned: true,
-              visible: true,
-              deleted: false,
-            });
+            form.setValue('pinned', true);
+            form.setValue('visible', true);
+            form.setValue('deleted', false);
           } else {
-            form.reset({
-              ...baseFilters,
-              walletTypeId: val,
-              pinned: false,
-              visible: true,
-              deleted: false,
-            });
+            form.setValue('walletTypeId', val);
+            form.setValue('pinned', false);
+            form.setValue('visible', true);
+            form.setValue('deleted', false);
           }
         }}
       >
