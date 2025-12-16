@@ -1,8 +1,5 @@
 'use client';
-
 import { useState } from 'react';
-
-import { useRouter, useSearchParams } from 'next/navigation';
 
 import { FilterIcon } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
@@ -68,21 +65,6 @@ export function WalletsFiltersSheet({
   const { data: currencies } = useCurrency();
   const { data: users } = useUsers();
 
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const updateQueryParam = (key: string, value?: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (!value) {
-      params.delete(key);
-    } else {
-      params.set(key, value);
-    }
-
-    router.push(`?${params.toString()}`, { scroll: false });
-  };
-
   const [localFilters, setLocalFilters] = useState<Partial<GetWalletsFilter>>(
     {},
   );
@@ -93,8 +75,13 @@ export function WalletsFiltersSheet({
   }; */
 
   const handleApplyFilters = () => {
-    Object.entries(localFilters).forEach(([key, value]) => {
-      form.setValue(key as any, value);
+    (
+      Object.entries(localFilters) as [
+        keyof GetWalletsFilter,
+        GetWalletsFilter[keyof GetWalletsFilter],
+      ][]
+    ).forEach(([key, value]) => {
+      form.setValue(key, value);
     });
 
     setSheetOpen(false);
