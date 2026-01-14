@@ -249,6 +249,7 @@ export function WalletForm({ initialData, walletId }: WalletFormProps) {
                 </FormLabel>
                 <FormControl>
                   <Input
+                    disabled={isEditMode}
                     value={
                       typeof field.value === 'number'
                         ? formatNumber(field.value)

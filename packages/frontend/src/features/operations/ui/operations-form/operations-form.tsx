@@ -49,6 +49,7 @@ import {
   formatNumber,
   parseFormattedNumber,
 } from '@/shared/lib/utils/format-number';
+import { useBanks } from '@/entities/bank';
 
 export function OperationForm({
   initialData,
@@ -63,6 +64,7 @@ export function OperationForm({
   const [walletSearch, setWalletSearch] = React.useState('');
 
   const { data: wallets } = useWallets();
+  const { data: banks } = useBanks();
   const { data: operationTypes, isLoading: isOperationTypesLoading } =
     useOperationTypes();
   const { data: applications, isLoading: isApplicationsLoading } =
@@ -102,6 +104,7 @@ export function OperationForm({
           applicationId: initialData.applicationId || undefined,
           description: initialData.description ?? '',
           conversionGroupId: initialData.conversionGroupId ?? null,
+          banksGroupId: initialData.banksGroupId ?? null,
           entries: initialData.entries.map((e) => ({
             wallet: e.wallet,
             direction: e.direction,
@@ -114,6 +117,7 @@ export function OperationForm({
           applicationId: undefined,
           description: '',
           conversionGroupId: null,
+          banksGroupId: null,
           entries: [],
           creatureDate: undefined,
         },
@@ -124,12 +128,33 @@ export function OperationForm({
     name: 'entries',
   });
 
+  const entries = form.watch('entries');
+
+  const isBankDisabled =
+    !entries.length ||
+    !entries.every((entry) => {
+      const wallet = wallets?.wallets.find((w) => w.id === entry.wallet?.id);
+      return wallet?.walletTypeId === 'dbc78423-dfb0-4ba4-86f4-533bd9efd027';
+    });
+
   const selectedTypeId = form.watch('typeId');
   const selectedOperationType = operationTypes?.find(
     (type) => type.id === selectedTypeId,
   );
   const isCorrection = selectedOperationType?.isCorrection ?? false;
   const isConversion = selectedOperationType?.isConversion ?? false;
+
+  const isCreditAllowed = selectedOperationType?.isCredit ?? false;
+  const isDebitAllowed = selectedOperationType?.isDebit ?? false;
+
+  const directions = React.useMemo(() => {
+    const result: Array<'credit' | 'debit'> = [];
+
+    if (isCreditAllowed) result.push('credit');
+    if (isDebitAllowed) result.push('debit');
+
+    return result;
+  }, [isCreditAllowed, isDebitAllowed]);
 
   React.useEffect(() => {
     if (isCorrection) {
@@ -168,6 +193,7 @@ export function OperationForm({
       }),
       entries: transformedEntries,
       creatureDate: data.creatureDate,
+      banksGroupId: isBankDisabled ? null : data.banksGroupId,
     };
 
     if (initialData) {
@@ -204,6 +230,7 @@ export function OperationForm({
           conversionGroupId: data.conversionGroupId,
         }),
         entries: mergedEntries,
+        banksGroupId: isBankDisabled ? null : data.banksGroupId,
       };
 
       updateMutation.mutate(updatePayload);
@@ -228,6 +255,11 @@ export function OperationForm({
           )}
         >
           {/* Тип операции */}
+          {/* isDebit - {isDebit ? 'true' : 'false'}, isCredit -{' '}
+          {isCredit ? 'true' : 'false'} */}
+          {selectedOperationType?.isCredit ? 'true' : 'false'} -
+          {selectedOperationType?.isDebit ? 'true' : 'false'} -
+          {selectedOperationType?.name} -
           <FormField
             control={form.control}
             name="typeId"
@@ -256,17 +288,19 @@ export function OperationForm({
                         Загрузка...
                       </SelectItem>
                     )}
-                    {operationTypes?.map((t) => (
-                      <SelectItem key={t.id} value={t.id}>
-                        {t.name}
-                      </SelectItem>
-                    ))}
+                    {operationTypes
+                      ?.slice()
+                      .sort((a, b) => a.name.localeCompare(b.name, 'ru'))
+                      .map((t) => (
+                        <SelectItem key={t.id} value={String(t.id)}>
+                          {t.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </FormItem>
             )}
           />
-
           {/* Заявка */}
           <FormField
             control={form.control}
@@ -301,37 +335,67 @@ export function OperationForm({
               </FormItem>
             )}
           />
-
           {/* Номер конвертации - только для типа "Конвертация" */}
           {isConversion && (
-            <FormField
-              control={form.control}
-              name="conversionGroupId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Номер конвертации{' '}
-                    <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="Введите номер"
-                      required
-                      {...field}
-                      value={field.value ?? ''}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value ? Number(value) : null);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <>
+              <FormField
+                control={form.control}
+                name="conversionGroupId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Номер конвертации{' '}
+                      <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Введите номер"
+                        required
+                        {...field}
+                        value={field.value ?? ''}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value ? Number(value) : null);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`banksGroupId`}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>
+                      Банк <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value?.toString() || ''}
+                      disabled={isBankDisabled}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Выберите банк" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {banks?.banks.map((bank) => (
+                          <SelectItem key={bank.id} value={bank.id}>
+                            {bank.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
           )}
-
           {/* Дата */}
           <FormField
             control={form.control}
@@ -446,11 +510,14 @@ export function OperationForm({
                             />
                           </div>
                           {wallets?.wallets
-                            ?.filter((wallet) =>
-                              wallet.name
+                            ?.filter((wallet) => {
+                              const matchesSearch = wallet.name
                                 .toLowerCase()
-                                .includes(walletSearch.toLowerCase()),
-                            )
+                                .includes(walletSearch.toLowerCase());
+                              const isActive = wallet.active;
+                              const isSelected = wallet.id === field.value;
+                              return matchesSearch && (isActive || isSelected);
+                            })
                             .map((wallet) => (
                               <SelectItem key={wallet.id} value={wallet.id}>
                                 {wallet.name}
@@ -512,7 +579,7 @@ export function OperationForm({
         ) : (
           // Для обычных операций - две колонки
           <div className="lg:grid lg:grid-cols-2 gap-4">
-            {['credit', 'debit'].map((dir) => (
+            {directions.map((dir) => (
               <div key={dir} className="flex flex-col gap-3 mt-2">
                 <div className="lg:flex justify-between items-center">
                   <p className="font-medium">
@@ -569,11 +636,17 @@ export function OperationForm({
                                   />
                                 </div>
                                 {wallets?.wallets
-                                  ?.filter((wallet) =>
-                                    wallet.name
+                                  ?.filter((wallet) => {
+                                    const matchesSearch = wallet.name
                                       .toLowerCase()
-                                      .includes(walletSearch.toLowerCase()),
-                                  )
+                                      .includes(walletSearch.toLowerCase());
+                                    const isActive = wallet.active;
+                                    const isSelected =
+                                      wallet.id === field.value;
+                                    return (
+                                      matchesSearch && (isActive || isSelected)
+                                    );
+                                  })
                                   .map((wallet) => (
                                     <SelectItem
                                       key={wallet.id}
@@ -612,6 +685,16 @@ export function OperationForm({
                                   field.onChange(
                                     isNaN(numValue) ? '' : numValue,
                                   );
+                                }}
+                                onFocus={(e) => {
+                                  if (e.currentTarget.value === '0') {
+                                    e.currentTarget.value = '';
+                                  }
+                                }}
+                                onBlur={(e) => {
+                                  if (e.currentTarget.value === '') {
+                                    e.currentTarget.value = '0';
+                                  }
                                 }}
                                 className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                               />

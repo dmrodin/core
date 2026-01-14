@@ -7,6 +7,7 @@ model Operation {
   conversionGroupId Int?         @map("conversion_group_id")
   applicationId     Int?         @unique
   application       Application? @relation(fields: [applicationId], references: [id])
+  banksGroupId      String?      @map("banks_group_id") @db.Uuid
   deleted           Boolean      @default(false)
   createdAt         DateTime     @default(now()) @map("created_at")
   updatedAt         DateTime     @updatedAt @map("updated_at")

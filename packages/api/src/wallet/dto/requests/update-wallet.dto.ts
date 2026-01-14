@@ -3,6 +3,23 @@ import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min 
 
 import { BalanceStatus, WalletKind } from '../../../../prisma/generated/prisma';
 
+export class UpdateWalletDetailsDto {
+    @ApiProperty({ description: 'Адрес', example: 'Moscow Russia', required: false })
+    @IsOptional()
+    @IsString()
+    public address?: string;
+
+    @ApiProperty({ description: 'ID сети', example: 'uuid', required: false })
+    @IsOptional()
+    @IsUUID('4')
+    public networkId?: string;
+
+    @ApiProperty({ description: 'ID типа сети', example: 'uuid', required: false })
+    @IsOptional()
+    @IsUUID('4')
+    public networkTypeId?: string;
+}
+
 export class UpdateWalletDto {
     @ApiProperty({
         description: 'Название кошелька',
@@ -137,4 +154,8 @@ export class UpdateWalletDto {
     @IsOptional()
     @IsBoolean({ message: 'Удаление должно быть булевым значением' })
     public deleted?: boolean;
+
+    @ApiProperty({ description: 'Детали кошелька', required: false })
+    @IsOptional()
+    public details?: UpdateWalletDetailsDto;
 }

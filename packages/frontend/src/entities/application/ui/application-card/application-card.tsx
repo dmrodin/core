@@ -26,6 +26,7 @@ export const CardApplication = ({ application }: CardApplicationProps) => {
     <Card className="w-full my-4">
       <CardHeader className="flex flex-col lg:flex-row lg:justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
+          <div className="text-lg font-semibold">№{application.id}</div>
           <Badge
             variant={application.status === 'open' ? 'success' : 'destructive'}
             className="font-semibold"

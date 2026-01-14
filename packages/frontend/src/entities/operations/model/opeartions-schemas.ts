@@ -21,6 +21,7 @@ export const OperationEntryApiSchema = z.object({
   wallet: z.object({
     id: z.string().uuid(),
     name: z.string(),
+    walletTypeId: z.string().uuid().optional().nullable(),
   }),
   direction: z.enum(['credit', 'debit']),
   amount: z.number(),
@@ -67,6 +68,7 @@ export const CreateOperationDtoSchema = z.object({
     .optional()
     .nullable(),
   conversionGroupId: z.number().int().positive().optional().nullable(),
+  banksGroupId: z.string().optional().nullable(),
   entries: z
     .array(OperationEntryCreateDtoSchema)
     .min(1, 'Добавьте хотя бы одну запись операции'),
@@ -88,6 +90,7 @@ export const CreateOperationBackendDtoSchema = z.object({
     )
     .min(1),
   creatureDate: z.string().optional(),
+  banksGroupId: z.string().optional().nullable(),
 });
 
 export const OperationEntryUpdateDtoSchema = z.object({
@@ -138,6 +141,7 @@ export const UpdateOperationBackendDtoSchema = z.object({
   conversionGroupId: z.number().int().positive().optional().nullable(),
   entries: z.array(UpdateOperationEntryBackendSchema).optional(),
   creatureDate: z.string().optional(),
+  banksGroupId: z.string().optional().nullable(),
 });
 
 export const OperationResponseDtoSchema = z.object({
@@ -152,6 +156,7 @@ export const OperationResponseDtoSchema = z.object({
     .optional()
     .nullable(),
   conversionGroupId: z.number().int().positive().nullable(),
+  banksGroupId: z.string().nullable().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   entries: z.array(OperationEntryApiSchema),

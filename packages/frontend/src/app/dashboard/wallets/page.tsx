@@ -53,7 +53,7 @@ const baseFilters: GetWalletsFilter = {
   currencyId: undefined,
   userId: undefined,
   active: undefined,
-  pinned: true,
+  pinned: undefined,
   visible: true,
   deleted: false,
   sortField: WalletSortField.CREATED_AT,
@@ -206,6 +206,8 @@ export default function WalletsPage() {
     [infiniteData],
   );
 
+  const totalCount = wallets.length;
+
   const lastWalletRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -227,6 +229,16 @@ export default function WalletsPage() {
       if (node) observer.unobserve(node);
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handleSelectAll = () => {
+    setSelectionMode(true);
+    setSelectedWallets(new Set(wallets.map((w) => w.id)));
+  };
+
+  const handleCancelSelectionAll = () => {
+    setSelectionMode(false);
+    setSelectedWallets(new Set());
+  };
 
   const handleToggleSelection = (walletId: string) => {
     setSelectedWallets((prev) => {
@@ -347,13 +359,13 @@ export default function WalletsPage() {
         onValueChange={(val) => {
           if (val === 'all') {
             form.setValue('walletTypeId', undefined);
-            form.setValue('pinned', false);
+            form.setValue('pinned', undefined);
             form.setValue('visible', true);
             form.setValue('deleted', false);
           } else if (val === 'deleted') {
             form.setValue('deleted', true);
             form.setValue('visible', true);
-            form.setValue('pinned', false);
+            form.setValue('pinned', undefined);
           } else if (val === 'hidden') {
             form.setValue('visible', false);
             form.setValue('deleted', false);
@@ -429,6 +441,9 @@ export default function WalletsPage() {
         }
         onDelete={handleBulkDelete}
         onBalanceStatusChange={handleBulkBalanceStatusChange}
+        totalCount={totalCount}
+        onSelectAll={handleSelectAll}
+        onCancelAll={handleCancelSelectionAll}
       />
     </div>
   );

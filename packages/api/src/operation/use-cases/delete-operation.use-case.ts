@@ -36,6 +36,7 @@ export class DeleteOperationUseCase {
                 data: {
                     deleted: true,
                     updatedById: deletedById,
+                    applicationId: null,
                 },
             });
 

@@ -70,8 +70,11 @@ export default function OperationsPage() {
   };
 
   const router = useRouter();
+
+  const filters = form.watch();
+
   const { data, error, hasNextPage, isFetching, isLoading } =
-    useInfiniteOperations();
+    useInfiniteOperations(filters);
   const { data: operationTypes } = useOperationTypes();
   const { copyOperation } = useCopyOperation();
   const { mutate: deleteOperation } = useDeleteOperation();
@@ -81,7 +84,7 @@ export default function OperationsPage() {
   const tabTypes = operationTypes?.filter((type) => type.isSeparateTab) || [];
 
   const currentTypeId = form.watch('typeId');
-  const activeTab = currentTypeId || 'all';
+  const activeTab = currentTypeId === null ? 'all' : String(currentTypeId);
 
   return (
     <Form {...form}>
@@ -111,11 +114,7 @@ export default function OperationsPage() {
         <Tabs
           value={activeTab}
           onValueChange={(val) => {
-            if (val === 'all') {
-              form.setValue('typeId', null);
-            } else {
-              form.setValue('typeId', val);
-            }
+            form.setValue('typeId', val === 'all' ? null : val);
           }}
         >
           <TabsList
@@ -167,9 +166,9 @@ export default function OperationsPage() {
                   <Fragment key={pageIndex}>
                     {page.operations
                       .filter((operation) =>
-                        activeTab === 'deposit'
-                          ? operation.type.name.toLowerCase().includes('попол')
-                          : true,
+                        activeTab === 'all'
+                          ? true
+                          : operation.type.id === activeTab,
                       )
                       .map((operation, operationIndex) => {
                         const isLast =

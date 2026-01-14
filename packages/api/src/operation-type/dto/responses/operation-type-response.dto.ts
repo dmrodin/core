@@ -85,4 +85,16 @@ export class OperationTypeResponseDto {
         example: '2024-01-02T00:00:00.000Z',
     })
     public updatedAt: Date;
+
+    @ApiProperty({
+        description: 'Можно ли вычесть из',
+        example: false,
+    })
+    public isDebit?: boolean;
+
+    @ApiProperty({
+        description: 'Можно ли добавить в',
+        example: false,
+    })
+    public isCredit?: boolean;
 }

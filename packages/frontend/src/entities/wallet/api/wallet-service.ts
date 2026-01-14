@@ -155,6 +155,16 @@ export class WalletService {
     return WalletSchema.parse(wallet);
   }
 
+  public static async deleteWallet(
+    walletId: string,
+  ): Promise<string | undefined> {
+    const { data } = await axiosInstance.delete(
+      `${API_MAP.WALLETS.WALLETS}/${walletId}`,
+    );
+
+    return data?.message;
+  }
+
   public static async toggleVisible(
     walletId: string,
     visible: boolean,

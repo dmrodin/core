@@ -136,8 +136,19 @@ export const SimpleWalletCard = ({
     onEnterSelectionMode?.();
   };
 
+  const toggleDeleteMutation = useMutation({
+    mutationFn: () => WalletService.deleteWallet(wallet.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
+      queryClient.invalidateQueries({ queryKey: ['wallet', wallet.id] });
+      queryClient.invalidateQueries({ queryKey: ['pinnedWallets'] });
+      if (wallet.deleted) toast.success('Кошелек удален');
+    },
+  });
+
   const handleDelete = () => {
     console.info('Delete wallet', wallet.id);
+    toggleDeleteMutation.mutate();
     setMenuOpen(false);
   };
 
@@ -316,7 +327,19 @@ export const SimpleWalletCard = ({
                   {wallet.description && (
                     <CardDescription>{wallet.description}</CardDescription>
                   )}
-
+                </div>
+                <div className="text-left sm:text-right">
+                  <p className="text-xl font-bold leading-tight sm:text-2xl">
+                    {formatNumber(wallet.amount)} {wallet.currency.code}
+                  </p>
+                  <div className="mt-2 space-y-1">
+                    <p className="text-xs text-muted-foreground">
+                      Создан: {formatDate(new Date(wallet.createdAt))}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Обновлен: {formatDate(new Date(wallet.updatedAt))}
+                    </p>
+                  </div>
                   {/* Кнопка копирования реквизитов */}
                   {formatWalletRequisites(wallet) && (
                     <div className="mt-3">
@@ -334,19 +357,6 @@ export const SimpleWalletCard = ({
                       </Button>
                     </div>
                   )}
-                </div>
-                <div className="text-left sm:text-right">
-                  <p className="text-xl font-bold leading-tight sm:text-2xl">
-                    {formatNumber(wallet.amount)} {wallet.currency.code}
-                  </p>
-                  <div className="mt-2 space-y-1">
-                    <p className="text-xs text-muted-foreground">
-                      Создан: {formatDate(new Date(wallet.createdAt))}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Обновлен: {formatDate(new Date(wallet.updatedAt))}
-                    </p>
-                  </div>
                 </div>
               </div>
             </CardContent>
@@ -411,7 +421,7 @@ export const SimpleWalletCard = ({
             {wallet.visible ? 'Скрыть' : 'Показать'}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={handleTogglePinned}>
-            {wallet.pinned ? 'Открепить' : 'Закрепить'}
+            {wallet.pinned ? 'Открепить' : 'Быстрый доступ'}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={handleTogglePinOnMain}>
             {wallet.pinOnMain ? 'Открепить с главной' : 'Закрепить на главной'}

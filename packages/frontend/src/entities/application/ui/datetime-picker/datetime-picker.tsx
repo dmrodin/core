@@ -179,7 +179,7 @@ export function DateTimePicker({
             onChange={handleTimeInputChange}
             placeholder="00:00"
             className="w-full"
-            maxLength={5}
+            //maxLength={5}
             inputMode="numeric"
             onKeyDown={(e) => {
               const allowedKeys = [
