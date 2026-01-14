@@ -96,4 +96,15 @@ export class CreateOperationDto {
     })
     @IsDateString({}, { message: 'Дата создания должна быть валидной датой' })
     public creatureDate: string;
+
+    @ApiProperty({
+        description: 'ID группы банков',
+        example: '123e4567-e89b-12d3-a456-426614174200',
+        format: 'uuid',
+        required: false,
+        nullable: true,
+    })
+    @IsOptional()
+    @IsUUID('4', { message: 'ID группы банков должен быть валидным UUID' })
+    public banksGroupId?: string;
 }

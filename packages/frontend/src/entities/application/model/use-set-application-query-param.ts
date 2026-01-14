@@ -34,6 +34,8 @@ export function useSetApplicationQueryParam() {
     if (filters.status) params.set('status', filters.status);
     if (filters.sortField) params.set('sortField', filters.sortField);
     if (filters.sortOrder) params.set('sortOrder', filters.sortOrder);
+    if (filters.createdFrom) params.set('createdFrom', filters.createdFrom);
+    if (filters.createdTo) params.set('createdTo', filters.createdTo);
     window.history.replaceState(
       null,
       '',

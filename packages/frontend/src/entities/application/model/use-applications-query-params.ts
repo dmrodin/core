@@ -20,6 +20,9 @@ export function useApplicationsQueryParams(): GetApplicationsFilters {
   const pageParam = searchParams.get('page');
   const limit = limitParam ? Number(limitParam) : 10;
 
+  const createdFrom = searchParams.get('createdFrom') ?? undefined;
+  const createdTo = searchParams.get('createdTo') ?? undefined;
+
   return useMemo(() => {
     const params: GetApplicationsFilters = {};
 
@@ -33,9 +36,22 @@ export function useApplicationsQueryParams(): GetApplicationsFilters {
         | 'createdAt'
         | 'updatedAt';
     if (sortOrder) params.sortOrder = sortOrder as 'asc' | 'desc';
+
+    if (createdFrom) params.createdFrom = createdFrom;
+    if (createdTo) params.createdTo = createdTo;
+
     params.page = pageParam ? Number(pageParam) : 1;
     params.limit = limit;
 
     return params;
-  }, [search, status, sortField, sortOrder, limit, pageParam]);
+  }, [
+    search,
+    status,
+    sortField,
+    sortOrder,
+    limit,
+    pageParam,
+    createdFrom,
+    createdTo,
+  ]);
 }

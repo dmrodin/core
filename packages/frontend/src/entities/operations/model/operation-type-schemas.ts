@@ -15,6 +15,8 @@ export const OperationTypeSchema = z.object({
   isCorrection: z.boolean(),
   isConversion: z.boolean(),
   isAvans: z.boolean(),
+  isDebit: z.boolean().optional(),
+  isCredit: z.boolean().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   created_by: z

@@ -56,6 +56,13 @@ export class UpdateWalletUseCase {
                 ...(visible !== undefined && { visible }),
                 ...(deleted !== undefined && { deleted }),
                 ...(monthlyLimit !== undefined && { monthlyLimit }),
+                ...(updateWalletDto.details && {
+                    details: {
+                        update: {
+                            ...updateWalletDto.details,
+                        },
+                    },
+                }),
             },
             include: {
                 user: {

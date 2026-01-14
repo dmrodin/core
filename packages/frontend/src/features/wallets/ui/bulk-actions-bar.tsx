@@ -20,6 +20,9 @@ interface BulkActionsBarProps {
   onTogglePinOnMain: (pinOnMain: boolean) => void;
   onDelete: () => void;
   onBalanceStatusChange: (status: string) => void;
+  totalCount: number;
+  onSelectAll: () => void;
+  onCancelAll: () => void;
 }
 
 export function BulkActionsBar({
@@ -31,10 +34,15 @@ export function BulkActionsBar({
   onTogglePinOnMain,
   onDelete,
   onBalanceStatusChange,
+  totalCount,
+  onSelectAll,
+  onCancelAll,
 }: BulkActionsBarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (selectedCount === 0) return null;
+
+  const allSelected = selectedCount === totalCount;
 
   const handleAction = (action: () => void) => {
     action();
@@ -47,6 +55,14 @@ export function BulkActionsBar({
         <div className="flex items-center gap-2 mr-auto">
           <Check className="size-5 text-primary" />
           <span className="font-semibold">Выбрано: {selectedCount}</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={allSelected ? onCancelAll : onSelectAll}
+            className="text-primary"
+          >
+            {allSelected ? 'Снять выделение' : 'Выбрать все'}
+          </Button>
         </div>
 
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
@@ -117,7 +133,7 @@ export function BulkActionsBar({
             <DropdownMenuItem
               onSelect={() => handleAction(() => onTogglePinned(true))}
             >
-              Закрепить
+              Быстрый доступ
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => handleAction(() => onTogglePinned(false))}

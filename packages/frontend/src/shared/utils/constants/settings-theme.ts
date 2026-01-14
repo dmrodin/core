@@ -112,13 +112,13 @@ export const THEME_GROUPS: Record<string, string[]> = {
     'background',
     'foreground',
     'primary',
-    'primary-foreground',
+    //'primary-foreground',
     'secondary',
-    'secondary-foreground',
-    'accent',
-    'accent-foreground',
-    'muted',
-    'muted-foreground',
+    //'secondary-foreground',
+    //'accent',
+    //'accent-foreground',
+    //'muted',
+    //'muted-foreground',
     'destructive',
     'destructive-foreground',
     'success',
@@ -126,7 +126,7 @@ export const THEME_GROUPS: Record<string, string[]> = {
     'input',
     // "ring",
   ],
-  'Карточки и всплывающие окна': [
+  /* 'Карточки и всплывающие окна': [
     'card',
     'card-foreground',
     'popover',
@@ -142,5 +142,5 @@ export const THEME_GROUPS: Record<string, string[]> = {
     'sidebar-accent-foreground',
     // "sidebar-border",
     // "sidebar-ring",
-  ],
+  ], */
 };

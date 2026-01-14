@@ -66,6 +66,8 @@ export class GetOperationTypesUseCase {
                 active: true,
                 createdAt: true,
                 updatedAt: true,
+                isCredit: true,
+                isDebit: true,
             },
         } satisfies Prisma.OperationTypeFindManyArgs;
 

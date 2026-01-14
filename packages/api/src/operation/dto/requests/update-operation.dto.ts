@@ -116,4 +116,15 @@ export class UpdateOperationDto {
     @IsOptional()
     @IsDateString({}, { message: 'Дата операции должна быть валидной датой' })
     public creatureDate?: string;
+
+    @ApiProperty({
+        description: 'ID выбранного банка',
+        example: '123e4567-e89b-12d3-a456-426614174000',
+        format: 'uuid',
+        required: false,
+        nullable: true,
+    })
+    @IsOptional()
+    @IsUUID('4', { message: 'ID банка должен быть валидным UUID' })
+    public banksGroupId?: string;
 }

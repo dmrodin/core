@@ -6,6 +6,8 @@ model OperationType {
   name          String
   description   String?
   isSeparateTab Boolean  @default(false) @map("is_separate_tab")
+  isDebit       Boolean  @default(true) @map("is_debit")
+  isCredit      Boolean  @default(true) @map("is_credit")
   active        Boolean  @default(true)
   deleted       Boolean  @default(false)
   createdAt     DateTime @default(now()) @map("created_at")

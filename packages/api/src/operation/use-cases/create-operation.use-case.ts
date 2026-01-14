@@ -14,7 +14,8 @@ export class CreateOperationUseCase {
     ) {}
 
     public async execute(createOperationDto: CreateOperationDto, userId: string): Promise<CreateOperationResponse> {
-        const { typeId, description, conversionGroupId, entries, applicationId, creatureDate } = createOperationDto;
+        const { typeId, description, conversionGroupId, entries, applicationId, creatureDate, banksGroupId } =
+            createOperationDto;
 
         return this.prisma.$transaction(async (tx) => {
             const operationType = await tx.operationType.findUnique({
@@ -119,6 +120,7 @@ export class CreateOperationUseCase {
                     description,
                     conversionGroupId,
                     createdAt: creatureDate,
+                    banksGroupId,
                 },
             });
 

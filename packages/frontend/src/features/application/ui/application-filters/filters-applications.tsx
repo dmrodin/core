@@ -4,12 +4,15 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { FilterIcon } from 'lucide-react';
 import { z } from 'zod';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 import {
   getApplicationsFiltersSchema,
   useSetApplicationQueryParam,
 } from '@/entities/application';
 import {
+  cn,
   Badge,
   Button,
   Label,
@@ -24,7 +27,13 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  Calendar,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from '@/shared';
+
+import { CalendarIcon } from 'lucide-react';
 
 type ApplicationsFiltersState = z.infer<typeof getApplicationsFiltersSchema>;
 
@@ -47,6 +56,7 @@ const STATUS_OPTIONS: {
 export function ApplicationsFilters() {
   const { setAllQueryParams } = useSetApplicationQueryParam();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const defaults = useMemo<ApplicationsFiltersState>(
     () => ({
@@ -78,6 +88,8 @@ export function ApplicationsFilters() {
     localFilters.status,
     localFilters.sortField,
     localFilters.sortOrder,
+    localFilters.createdFrom,
+    localFilters.createdTo,
   ].filter(Boolean).length;
 
   return (
@@ -128,6 +140,125 @@ export function ApplicationsFilters() {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Период</Label>
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    'w-full justify-start text-left font-normal',
+                    !localFilters.createdFrom && 'text-muted-foreground',
+                  )}
+                >
+                  <CalendarIcon className="h-4 w-4 mr-2" />
+                  {localFilters.createdFrom ? (
+                    localFilters.createdTo ? (
+                      <>
+                        {format(
+                          new Date(localFilters.createdFrom),
+                          'dd.MM.yyyy',
+                          {
+                            locale: ru,
+                          },
+                        )}{' '}
+                        –{' '}
+                        {format(
+                          new Date(localFilters.createdTo),
+                          'dd.MM.yyyy',
+                          {
+                            locale: ru,
+                          },
+                        )}
+                      </>
+                    ) : (
+                      format(new Date(localFilters.createdFrom), 'dd.MM.yyyy', {
+                        locale: ru,
+                      })
+                    )
+                  ) : (
+                    <span>Выбрать даты</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="start"
+                sideOffset={4}
+                className="p-0 w-auto bg-white border rounded-xl shadow-lg z-50 overflow-hidden"
+              >
+                <div className="bg-white">
+                  <Calendar
+                    mode="range"
+                    numberOfMonths={2}
+                    selected={{
+                      from: localFilters.createdFrom
+                        ? new Date(localFilters.createdFrom)
+                        : undefined,
+                      to: localFilters.createdTo
+                        ? new Date(localFilters.createdTo)
+                        : undefined,
+                    }}
+                    onSelect={(range) => {
+                      console.log(localFilters);
+                      console.log('asdasdad');
+                      if (!range) return;
+
+                      if (range.from && !range.to) {
+                        /* const fromDate = new Date(range.from);
+                        fromDate.setUTCHours(0, 0, 0, 0); */
+
+                        // Создаем дату в UTC
+                        const utcFrom = new Date(
+                          Date.UTC(
+                            range.from.getFullYear(),
+                            range.from.getMonth(),
+                            range.from.getDate(),
+                          ),
+                        );
+                        setLocalFilters((prev) => ({
+                          ...prev,
+                          createdFrom: utcFrom.toISOString(),
+                          createdTo: undefined,
+                        }));
+                        return;
+                      }
+
+                      if (range.from && range.to) {
+                        /* const fromDate = new Date(range.from);
+                        fromDate.setUTCHours(0, 0, 0, 0);
+                        const toDate = new Date(range.to);
+                        toDate.setUTCHours(23, 59, 59, 999); */
+                        // Создаем даты в UTC
+                        const utcFrom = new Date(
+                          Date.UTC(
+                            range.from.getFullYear(),
+                            range.from.getMonth(),
+                            range.from.getDate(),
+                          ),
+                        );
+                        const utcTo = new Date(
+                          Date.UTC(
+                            range.to.getFullYear(),
+                            range.to.getMonth(),
+                            range.to.getDate(),
+                          ),
+                        );
+                        setLocalFilters((prev) => ({
+                          ...prev,
+                          createdFrom: utcFrom.toISOString(),
+                          createdTo: utcTo.toISOString(),
+                        }));
+                        setCalendarOpen(false);
+                        console.log(localFilters);
+                      }
+                    }}
+                    locale={ru}
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-2">
