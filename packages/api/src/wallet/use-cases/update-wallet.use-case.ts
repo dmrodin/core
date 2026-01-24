@@ -45,7 +45,11 @@ export class UpdateWalletUseCase {
                 ...(name !== undefined && { name }),
                 ...(description !== undefined && { description }),
                 ...(amount !== undefined && { amount }),
-                ...(balanceStatus !== undefined && { balanceStatus }),
+                ...(balanceStatus !== undefined && {
+                    balanceStatus,
+                    lastReconciledAt: new Date(),
+                    lastReconciledBy: updatedById,
+                }),
                 ...(walletKind !== undefined && { walletKind }),
                 ...(walletTypeId !== undefined && { walletTypeId }),
                 ...(currencyId !== undefined && { currencyId }),

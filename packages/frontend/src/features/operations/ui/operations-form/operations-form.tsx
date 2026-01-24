@@ -257,9 +257,6 @@ export function OperationForm({
           {/* Тип операции */}
           {/* isDebit - {isDebit ? 'true' : 'false'}, isCredit -{' '}
           {isCredit ? 'true' : 'false'} */}
-          {selectedOperationType?.isCredit ? 'true' : 'false'} -
-          {selectedOperationType?.isDebit ? 'true' : 'false'} -
-          {selectedOperationType?.name} -
           <FormField
             control={form.control}
             name="typeId"

@@ -9,6 +9,7 @@ import {
   GetWalletsResponseSchema,
   Wallet,
   WalletSchema,
+  BalanceStatusPayload,
 } from '@/entities/wallet/model/wallet-schemas';
 import { axiosInstance } from '@/shared/api/axios-instance';
 import { API_MAP } from '@/shared/utils/constants/api-map';
@@ -133,11 +134,11 @@ export class WalletService {
 
   public static async updateBalanceStatus(
     walletId: string,
-    balanceStatus: string,
+    payload: BalanceStatusPayload,
   ): Promise<Wallet> {
     const { data } = await axiosInstance.patch(
       `${API_MAP.WALLETS.WALLETS}/${walletId}`,
-      { balanceStatus },
+      payload,
     );
     const wallet = data?.wallet ?? data;
     return WalletSchema.parse(wallet);

@@ -98,8 +98,6 @@ export class OperationTypeController {
     ): Promise<GetOperationTypesResponseDto> {
         const result = await this.getOperationTypesUseCase.execute(getOperationTypesDto);
 
-        console.warn(result);
-
         return {
             operationTypes: result.operationTypes,
             pagination: result.pagination,
