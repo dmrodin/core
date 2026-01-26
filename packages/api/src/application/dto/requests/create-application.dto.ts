@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
 
+import { AdvanceDto } from './advance.dto';
+
 export class CreateApplicationDto {
     @ApiProperty({
         description: 'Описание заявки',
@@ -78,4 +80,12 @@ export class CreateApplicationDto {
     })
     @IsDateString({}, { message: 'Дата встречи должна быть валидной датой' })
     public meetingDate: string;
+
+    @ApiProperty({
+        description: 'Аванс (опционально)',
+        required: false,
+        type: () => AdvanceDto,
+    })
+    @IsOptional()
+    public advance?: AdvanceDto;
 }

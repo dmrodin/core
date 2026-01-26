@@ -32,6 +32,8 @@ model Application {
 
   operation Operation?
 
+  advance ApplicationAdvance?
+
   @@index([userId], map: "applications_user_id_idx")
   @@index([updatedById], map: "applications_updated_by_id_idx")
   @@index([assigneeUserId], map: "applications_assignee_user_id_idx")
@@ -50,4 +52,20 @@ model Application {
   @@index([assigneeUserId, status, deleted], map: "applications_assignee_status_deleted_idx")
   @@index([status, deleted], map: "applications_status_deleted_idx")
   @@map("applications")
+}
+
+model ApplicationAdvance {
+  id            Int      @id @default(autoincrement())
+  applicationId Int      @unique @map("application_id")
+  amount        Int
+  currencyId    String   @map("currency_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  currency    Currency    @relation(fields: [currencyId], references: [id])
+
+  @@index([applicationId], map: "application_advances_application_id_idx")
+  @@index([currencyId], map: "application_advances_currency_id_idx")
+  @@map("application_advances")
 }

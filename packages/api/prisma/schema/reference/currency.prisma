@@ -13,6 +13,7 @@ model Currency {
   updated_by   User          @relation("currencies_updated_by", fields: [updatedById], references: [id])
   wallets      Wallet[]
   applications Application[]
+  applicationAdvances ApplicationAdvance[]
 
   @@unique([code, deleted], map: "currencies_code_deleted_unique")
   @@unique([name, deleted], map: "currencies_name_deleted_unique")
