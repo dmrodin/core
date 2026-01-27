@@ -132,6 +132,13 @@ export const UpdateApplicationSchema = z.object({
     telegramUsername: z.string().max(100).optional(),
     phone: z.string().max(20).optional(),
     meetingDate: z.string().datetime().optional(),
+    advance: z
+        .object({
+            amount: z.number().min(0),
+            currencyId: z.string().uuid(),
+        })
+        .optional()
+        .nullable(),
 });
 
 export type UpdateApplicationRequest = z.infer<typeof UpdateApplicationSchema>;

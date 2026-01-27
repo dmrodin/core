@@ -50,6 +50,12 @@ export class GetApplicationByIdUseCase {
                         description: true,
                     },
                 },
+                advance: {
+                    select: {
+                        amount: true,
+                        currencyId: true,
+                    },
+                },
             },
         });
 
@@ -62,6 +68,12 @@ export class GetApplicationByIdUseCase {
         return {
             application: {
                 ...applicationResponse,
+                advance: applicationResponse.advance
+                    ? {
+                          amount: applicationResponse.advance.amount,
+                          currency: applicationResponse.advance.currencyId,
+                      }
+                    : null,
                 operation_type: addOperationTypeFlags(applicationResponse.operation_type),
             },
         };

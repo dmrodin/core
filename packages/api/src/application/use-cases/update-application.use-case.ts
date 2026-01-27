@@ -25,6 +25,7 @@ export class UpdateApplicationUseCase {
             telegramUsername,
             phone,
             meetingDate,
+            advance,
         } = updateApplicationDto;
 
         const existingApplication = await this.prisma.application.findUnique({
@@ -63,6 +64,14 @@ export class UpdateApplicationUseCase {
                     meetingDate: new Date(meetingDate),
                 }),
                 ...(hasAdvance !== undefined && { hasAdvance }),
+                ...(advance !== undefined && {
+                    advance: {
+                        update: {
+                            amount: advance.amount,
+                            currencyId: advance.currencyId,
+                        },
+                    },
+                }),
             },
             include: {
                 created_by: {
@@ -103,6 +112,12 @@ export class UpdateApplicationUseCase {
                         description: true,
                     },
                 },
+                advance: {
+                    select: {
+                        amount: true,
+                        currencyId: true,
+                    },
+                },
             },
         });
 
@@ -112,6 +127,12 @@ export class UpdateApplicationUseCase {
             message: 'Заявка успешно обновлена',
             application: {
                 ...applicationResponse,
+                advance: applicationResponse.advance
+                    ? {
+                          amount: applicationResponse.advance.amount,
+                          currency: applicationResponse.advance.currencyId,
+                      }
+                    : null,
                 operation_type: addOperationTypeFlags(applicationResponse.operation_type),
             },
         };

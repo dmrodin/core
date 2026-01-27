@@ -48,7 +48,12 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                   telegramUsername: initialData.telegramUsername ? initialData.telegramUsername.replace('@', '') : '',
                   phone: initialData.phone ?? '',
                   meetingDate: initialData.meetingDate ?? '',
-                  advance: initialData.advance ?? null,
+                  advance: initialData.advance
+                      ? {
+                            amount: initialData.advance.amount,
+                            currencyId: initialData.advance.currency,
+                        }
+                      : null,
               }
             : {
                   currencyId: '',

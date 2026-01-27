@@ -133,6 +133,12 @@ export class CreateApplicationUseCase {
             message: 'Заявка успешно создана',
             application: {
                 ...applicationResponse,
+                advance: applicationResponse.advance
+                    ? {
+                          amount: applicationResponse.advance.amount,
+                          currency: applicationResponse.advance.currencyId,
+                      }
+                    : null,
                 operation_type: addOperationTypeFlags(applicationResponse.operation_type),
             },
         };
