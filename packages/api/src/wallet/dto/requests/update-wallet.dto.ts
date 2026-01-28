@@ -158,4 +158,21 @@ export class UpdateWalletDto {
     @ApiProperty({ description: 'Детали кошелька', required: false })
     @IsOptional()
     public details?: UpdateWalletDetailsDto;
+
+    @ApiProperty({
+        description: 'Дата последней сверки',
+        example: '2026-01-20T23:56:00.000Z',
+        required: false,
+    })
+    @IsOptional()
+    public lastReconciledAt?: Date;
+
+    @ApiProperty({
+        description: 'Пользователь, который сделал сверку',
+        example: '123e4567-e89b-12d3-a456-426614174000',
+        required: false,
+    })
+    @IsOptional()
+    @IsUUID('4')
+    public lastReconciledBy?: string;
 }

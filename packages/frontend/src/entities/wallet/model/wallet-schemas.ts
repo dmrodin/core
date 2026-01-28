@@ -106,6 +106,8 @@ export const WalletSchema = z.object({
   updated_by: WalletUserSchema,
   currency: WalletCurrencySchema,
   details: WalletDetailsSchema.nullable().optional(),
+  lastReconciledAt: z.string().datetime().nullable().optional(),
+  lastReconciledBy: z.string().uuid().nullable().optional(),
 });
 
 export const WalletCurrencyGroupSchema = z.object({
@@ -338,6 +340,12 @@ export const GetWalletsFilterSchema = z.object({
   page: z.number().int().min(1).default(1).optional(),
   limit: z.number().int().min(1).max(100).default(10).optional(),
 });
+
+export interface BalanceStatusPayload {
+  balanceStatus: string;
+  lastReconciledAt?: string;
+  lastReconciledBy?: string;
+}
 
 export type GetWalletsFilter = z.infer<typeof GetWalletsFilterSchema>;
 export type WalletPagination = z.infer<typeof WalletPaginationSchema>;

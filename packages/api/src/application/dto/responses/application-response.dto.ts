@@ -181,4 +181,17 @@ export class ApplicationResponseDto {
         example: '2024-01-01T00:00:00.000Z',
     })
     public updatedAt: Date;
+
+    @ApiProperty({
+        description: 'Аванс по заявке',
+        nullable: true,
+        example: {
+            amount: 1000,
+            currency: 'USD',
+        },
+    })
+    public advance: {
+        amount: number;
+        currency: string;
+    } | null;
 }

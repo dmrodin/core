@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
+import { BalanceStatus } from '../../../prisma/generated/prisma';
 import { PrismaService } from '../../common';
 import { addOperationTypeFlags, OPERATION_TYPE_CODES } from '../../operation-type/constants/operation-type.constants';
 import { WalletRecalculationService } from '../../wallet/services';
@@ -67,6 +68,7 @@ export class CreateOperationUseCase {
                         id: true,
                         name: true,
                         monthlyLimit: true,
+                        balanceStatus: true,
                         currency: {
                             select: {
                                 code: true,
@@ -108,6 +110,17 @@ export class CreateOperationUseCase {
                                 `требуется: ${entry.amount.toLocaleString('ru-RU')} ${wallet.currency.code}`,
                         );
                     }
+                }
+
+                if (wallet.balanceStatus === BalanceStatus.positive) {
+                    await tx.wallet.update({
+                        where: { id: wallet.id },
+                        data: {
+                            balanceStatus: BalanceStatus.unknown,
+                            lastReconciledAt: null,
+                            lastReconciledBy: null,
+                        },
+                    });
                 }
             }
 

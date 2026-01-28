@@ -12,7 +12,7 @@ import { ChangeOwnerDialog } from '@/features/wallets/ui/change-owner-dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { ROUTER_MAP } from '@/shared/utils/constants/router-map';
-import { cn, formatDate } from '@/shared/lib/utils';
+import { cn, formatDate, formatDateTime } from '@/shared/lib/utils';
 import {
   formatWalletCopyText,
   formatWalletRequisites,
@@ -174,8 +174,13 @@ export const SimpleWalletCard = ({
   };
 
   const balanceStatusMutation = useMutation({
-    mutationFn: (status: string) =>
-      WalletService.updateBalanceStatus(wallet.id, status),
+    mutationFn: (status: string) => {
+      const payload = {
+        balanceStatus: status,
+        lastReconciledAt: new Date().toISOString(),
+      };
+      return WalletService.updateBalanceStatus(wallet.id, payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wallets'] });
       queryClient.invalidateQueries({ queryKey: ['wallet', wallet.id] });
@@ -339,6 +344,16 @@ export const SimpleWalletCard = ({
                     <p className="text-xs text-muted-foreground">
                       Обновлен: {formatDate(new Date(wallet.updatedAt))}
                     </p>
+                    {wallet.lastReconciledAt && (
+                      <p className="text-xs text-muted-foreground">
+                        Дата последней сверки:{' '}
+                        {formatDateTime(wallet.lastReconciledAt)} <br />
+                        Выполнил:{' '}
+                        {wallet.lastReconciledBy
+                          ? wallet.updated_by.username
+                          : '-'}
+                      </p>
+                    )}
                   </div>
                   {/* Кнопка копирования реквизитов */}
                   {formatWalletRequisites(wallet) && (
@@ -410,6 +425,16 @@ export const SimpleWalletCard = ({
               />
             </div>
           </div>
+          <DropdownMenuItem
+            onSelect={() => handleBalanceStatusChange('positive')}
+          >
+            Баланс верный
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => handleBalanceStatusChange('negative')}
+          >
+            Баланс неверный
+          </DropdownMenuItem>
           <DropdownMenuItem onSelect={handleEnterSelectionMode}>
             Выбрать
           </DropdownMenuItem>

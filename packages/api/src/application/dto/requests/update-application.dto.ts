@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsEnum, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
 
 import { ApplicationStatus } from '../../../../prisma/generated/prisma';
+import { AdvanceDto } from './advance.dto';
 
 export class UpdateApplicationDto {
     @ApiProperty({
@@ -104,4 +105,12 @@ export class UpdateApplicationDto {
     @IsOptional()
     @IsDateString({}, { message: 'Дата встречи должна быть валидной датой' })
     public meetingDate?: string;
+
+    @ApiProperty({
+        description: 'Аванс (опционально)',
+        required: false,
+        type: () => AdvanceDto,
+    })
+    @IsOptional()
+    public advance?: AdvanceDto;
 }

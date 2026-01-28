@@ -40,13 +40,13 @@ export class WalletRecalculationService {
 
         for (const walletId of uniqueIds) {
             const amount = await this.calculateWalletAmount(tx, walletId);
-            const balanceStatus = this.determineBalanceStatus(amount);
+            // const balanceStatus = this.determineBalanceStatus(amount);
 
             await tx.wallet.update({
                 where: { id: walletId },
                 data: {
                     amount,
-                    balanceStatus,
+                    // balanceStatus,
                     ...(updatedById && { updatedById }),
                 },
             });

@@ -157,6 +157,15 @@ export class GetApplicationsUseCase {
                         description: true,
                     },
                 },
+                advance: {
+                    include: {
+                        currency: {
+                            select: {
+                                code: true,
+                            },
+                        },
+                    },
+                },
             },
         };
 
@@ -170,9 +179,15 @@ export class GetApplicationsUseCase {
 
         const applications = await this.prisma.application.findMany(findManyOptions);
 
-        const applicationsResponse = applications.map(({ deleted: _, ...application }) => ({
+        const applicationsResponse = applications.map(({ deleted: _, advance, ...application }) => ({
             ...application,
             operation_type: addOperationTypeFlags(application.operation_type),
+            advance: advance
+                ? {
+                      amount: advance.amount,
+                      currency: advance.currency?.code,
+                  }
+                : null,
         }));
 
         const paginationResponse = pagination.shouldPaginate
