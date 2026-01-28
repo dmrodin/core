@@ -7,22 +7,14 @@ import { CardDashboard } from '@/features/dashboard/ui/dashboard-card/dashboard-
 import { DashboardCurrency } from '@/features/dashboard/ui/dashboard-currency/dashboard-currency';
 
 export function DashboardPinnedWallets() {
-  const { data, isLoading, isError } = usePinnedWallets();
+    const { data, isLoading, isError } = usePinnedWallets();
 
-  const currencyGroups = data?.currencyGroups ?? [];
+    const currencyGroups = data?.currencyGroups ?? [];
 
-  return (
-    <Fragment>
-      <DashboardCurrency
-        isLoading={isLoading}
-        hasError={isError}
-        currencyGroups={currencyGroups}
-      />
-      <CardDashboard
-        isLoading={isLoading}
-        hasError={isError}
-        currencyGroups={currencyGroups}
-      />
-    </Fragment>
-  );
+    return (
+        <Fragment>
+            <DashboardCurrency isLoading={isLoading} hasError={isError} currencyGroups={currencyGroups} />
+            <CardDashboard isLoading={isLoading} hasError={isError} currencyGroups={currencyGroups} />
+        </Fragment>
+    );
 }

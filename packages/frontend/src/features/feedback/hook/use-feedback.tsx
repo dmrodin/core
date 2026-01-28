@@ -10,16 +10,16 @@ import { CreateHelp } from '@/entities/help';
 import { ROUTER_MAP } from '@/shared';
 
 export const useCreateHelp = () => {
-  const router = useRouter();
-  const queryClient = useQueryClient();
+    const router = useRouter();
+    const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationKey: ['help', 'create'],
-    mutationFn: (data: CreateHelp) => HelpService.create(data),
-    onSuccess: () => {
-      toast.success('Обращение успешно отправленно!');
-      queryClient.invalidateQueries({ queryKey: ['help'] });
-      router.push(ROUTER_MAP.HELP);
-    },
-  });
+    return useMutation({
+        mutationKey: ['help', 'create'],
+        mutationFn: (data: CreateHelp) => HelpService.create(data),
+        onSuccess: () => {
+            toast.success('Обращение успешно отправленно!');
+            queryClient.invalidateQueries({ queryKey: ['help'] });
+            router.push(ROUTER_MAP.HELP);
+        },
+    });
 };

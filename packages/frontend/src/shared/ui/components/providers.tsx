@@ -12,23 +12,18 @@ import { ThemeColorLoader } from '@/shared/ui/components/theme-color-loader';
 const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const initializeAuth = useAuthStore((state) => state.initializeAuth);
+    const initializeAuth = useAuthStore((state) => state.initializeAuth);
 
-  useEffect(() => {
-    initializeAuth();
-  }, [initializeAuth]);
+    useEffect(() => {
+        initializeAuth();
+    }, [initializeAuth]);
 
-  return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <QueryClientProvider client={queryClient}>
-        <ThemeColorLoader />
-        {children}
-      </QueryClientProvider>
-    </ThemeProvider>
-  );
+    return (
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <QueryClientProvider client={queryClient}>
+                <ThemeColorLoader />
+                {children}
+            </QueryClientProvider>
+        </ThemeProvider>
+    );
 }

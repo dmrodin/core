@@ -1,101 +1,101 @@
 import type { Wallet } from '@/entities/wallet/model/wallet-schemas';
 
 const warningText =
-  'Убедительная просьба - переводить на строго указанные реквизиты.\n' +
-  'При переводе на некорректные реквизиты мы не сможем провести обмен и возврат средств!';
+    'Убедительная просьба - переводить на строго указанные реквизиты.\n' +
+    'При переводе на некорректные реквизиты мы не сможем провести обмен и возврат средств!';
 
 /**
  * Формирует текст реквизитов для копирования в зависимости от типа кошелька
  */
 export const formatWalletRequisites = (wallet: Wallet): string | null => {
-  const parts: string[] = [];
-  const details = wallet.details;
+    const parts: string[] = [];
+    const details = wallet.details;
 
-  if (!details) {
-    return null;
-  }
-
-  if (wallet.walletKind === 'crypto') {
-    if (details.address) {
-      parts.push(details.address);
+    if (!details) {
+        return null;
     }
 
-    const networkInfo: string[] = [];
-    if (details.network?.name) {
-      networkInfo.push(details.network.name);
-    }
-    if (details.networkType?.name) {
-      networkInfo.push(details.networkType.name);
-    }
-    if (networkInfo.length > 0) {
-      parts.push(`Сеть: ${networkInfo.join(' ')}`);
+    if (wallet.walletKind === 'crypto') {
+        if (details.address) {
+            parts.push(details.address);
+        }
+
+        const networkInfo: string[] = [];
+        if (details.network?.name) {
+            networkInfo.push(details.network.name);
+        }
+        if (details.networkType?.name) {
+            networkInfo.push(details.networkType.name);
+        }
+        if (networkInfo.length > 0) {
+            parts.push(`Сеть: ${networkInfo.join(' ')}`);
+        }
+
+        if (details.exchangeUid) {
+            parts.push(`UID: ${details.exchangeUid}`);
+        }
+
+        if (details.username) {
+            parts.push(`Username: ${details.username}`);
+        }
+
+        if (details.platform?.name) {
+            parts.push(`Платформа: ${details.platform.name}`);
+        }
     }
 
-    if (details.exchangeUid) {
-      parts.push(`UID: ${details.exchangeUid}`);
+    if (wallet.walletKind === 'bank') {
+        if (details.card) {
+            parts.push(`Карта: ${details.card}`);
+        }
+
+        if (details.phone) {
+            parts.push(`Телефон: ${details.phone}`);
+        }
+
+        if (details.ownerFullName) {
+            parts.push(`Владелец: ${details.ownerFullName}`);
+        }
+
+        if (details.bank?.name) {
+            parts.push(`Банк: ${details.bank.name}`);
+        }
+
+        if (details.accountId) {
+            parts.push(`ID: ${details.accountId}`);
+        }
     }
 
-    if (details.username) {
-      parts.push(`Username: ${details.username}`);
+    if (wallet.walletKind === 'simple') {
+        if (wallet.description) {
+            parts.push(wallet.description);
+        }
+        if (details.phone) {
+            parts.push(`Телефон: ${details.phone}`);
+        }
+        if (details.accountId) {
+            parts.push(`ID: ${details.accountId}`);
+        }
     }
 
-    if (details.platform?.name) {
-      parts.push(`Платформа: ${details.platform.name}`);
-    }
-  }
-
-  if (wallet.walletKind === 'bank') {
-    if (details.card) {
-      parts.push(`Карта: ${details.card}`);
+    if (parts.length === 0) {
+        return null;
     }
 
-    if (details.phone) {
-      parts.push(`Телефон: ${details.phone}`);
-    }
-
-    if (details.ownerFullName) {
-      parts.push(`Владелец: ${details.ownerFullName}`);
-    }
-
-    if (details.bank?.name) {
-      parts.push(`Банк: ${details.bank.name}`);
-    }
-
-    if (details.accountId) {
-      parts.push(`ID: ${details.accountId}`);
-    }
-  }
-
-  if (wallet.walletKind === 'simple') {
-    if (wallet.description) {
-      parts.push(wallet.description);
-    }
-    if (details.phone) {
-      parts.push(`Телефон: ${details.phone}`);
-    }
-    if (details.accountId) {
-      parts.push(`ID: ${details.accountId}`);
-    }
-  }
-
-  if (parts.length === 0) {
-    return null;
-  }
-
-  return parts.join('\n');
+    return parts.join('\n');
 };
 
 /**
  * Формирует полный текст для копирования с предупреждением
  */
 export const formatWalletCopyText = (wallet: Wallet): string | null => {
-  const requisites = formatWalletRequisites(wallet);
+    const requisites = formatWalletRequisites(wallet);
 
-  if (!requisites) {
-    return null;
-  }
+    if (!requisites) {
+        return null;
+    }
 
-  return `${warningText}
+    return `${warningText}
 
 ${requisites}`;
 };
@@ -103,11 +103,8 @@ ${requisites}`;
 /**
  * Формирует краткий текст реквизитов для специальных случаев (Bybit, Trust и т.д.)
  */
-export const formatSpecialWalletCopyText = (
-  wallet: Wallet,
-  template: string,
-): string => {
-  return `${warningText}
+export const formatSpecialWalletCopyText = (wallet: Wallet, template: string): string => {
+    return `${warningText}
 
 ${template}`;
 };
@@ -117,41 +114,41 @@ ${template}`;
  * Проверка по платформе из details
  */
 export const isSpecialWallet = (wallet: Wallet): boolean => {
-  const platformCode = wallet.details?.platform?.code;
-  return platformCode === 'bybit' || platformCode === 'trust';
+    const platformCode = wallet.details?.platform?.code;
+    return platformCode === 'bybit' || platformCode === 'trust';
 };
 
 /**
  * Проверяет, является ли кошелек Bybit
  */
 export const isBybitWallet = (wallet: Wallet): boolean => {
-  const platformCode = wallet.details?.platform?.code;
-  return platformCode === 'bybit';
+    const platformCode = wallet.details?.platform?.code;
+    return platformCode === 'bybit';
 };
 
 /**
  * Проверяет, является ли кошелек Trust Wallet
  */
 export const isTrustWallet = (wallet: Wallet): boolean => {
-  const platformCode = wallet.details?.platform?.code;
-  return platformCode === 'trust';
+    const platformCode = wallet.details?.platform?.code;
+    return platformCode === 'trust';
 };
 
 /**
  * Получает шаблон для специального кошелька
  */
 export const getSpecialWalletTemplate = (wallet: Wallet): string | null => {
-  const currency = wallet.currency.code;
+    const currency = wallet.currency.code;
 
-  // Байбит - показываем шаблон для UID
-  if (isBybitWallet(wallet)) {
-    return `<${currency}>, UID Bybit:`;
-  }
+    // Байбит - показываем шаблон для UID
+    if (isBybitWallet(wallet)) {
+        return `<${currency}>, UID Bybit:`;
+    }
 
-  // Траст - показываем шаблон для TRON
-  if (isTrustWallet(wallet)) {
-    return `<${currency}>, TRON (TRC-20):`;
-  }
+    // Траст - показываем шаблон для TRON
+    if (isTrustWallet(wallet)) {
+        return `<${currency}>, TRON (TRC-20):`;
+    }
 
-  return null;
+    return null;
 };
