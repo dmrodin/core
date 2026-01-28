@@ -7,8 +7,8 @@ import { GetWalletAnalyticsParams } from '@/entities/analytics/model/analytics-s
 import { ANALYTICS_QUERY_KEY } from '@/shared/utils/constants/analytics-query-key';
 
 export function useWalletAnalytics(params?: GetWalletAnalyticsParams) {
-  return useQuery({
-    queryKey: [ANALYTICS_QUERY_KEY, params],
-    queryFn: () => AnalyticsService.getWalletAnalytics(params),
-  });
+    return useQuery({
+        queryKey: [ANALYTICS_QUERY_KEY, params],
+        queryFn: () => AnalyticsService.getWalletAnalytics(params),
+    });
 }

@@ -1,20 +1,20 @@
 import { z } from 'zod';
 
 export const ReportsGeneralSchema = z.object({
-  dateStart: z.string().datetime(),
-  dateEnd: z.string().datetime(),
-  operationTypeId: z.string().uuid(),
-  typeUnloading: z.array(z.string()).min(1, 'Выберите хотя бы один тип'),
+    dateStart: z.string().datetime(),
+    dateEnd: z.string().datetime(),
+    operationTypeId: z.string().uuid(),
+    typeUnloading: z.array(z.string()).min(1, 'Выберите хотя бы один тип'),
 });
 
 export const ReportsConversionSchema = z.object({
-  dateStart: z.string().datetime(),
-  dateEnd: z.string().datetime(),
-  operationTypeId: z.string().uuid(),
+    dateStart: z.string().datetime(),
+    dateEnd: z.string().datetime(),
+    operationTypeId: z.string().uuid(),
 });
 
 export const ReportsPeriodSchema = z.object({
-  walletTypes: z.array(z.string()).min(1, 'Выберите хотя бы один тип'),
+    walletTypes: z.array(z.string()).min(1, 'Выберите хотя бы один тип'),
 });
 
 export type ReportsGeneral = z.infer<typeof ReportsGeneralSchema>;

@@ -10,17 +10,16 @@ import { OperationType } from '@/entities/operations/model/operation-type-schema
 import { OPERATION_TYPES_QUERY_KEY } from '@/shared/utils/constants/operation-types-query-key';
 
 export const useOperationTypes = (deleted?: boolean) => {
-  const queryResult = useQuery<OperationType[]>({
-    queryKey: [OPERATION_TYPES_QUERY_KEY, deleted],
-    queryFn: (): Promise<OperationType[]> =>
-      OperationTypeService.getOperationTypes(deleted),
-  });
+    const queryResult = useQuery<OperationType[]>({
+        queryKey: [OPERATION_TYPES_QUERY_KEY, deleted],
+        queryFn: (): Promise<OperationType[]> => OperationTypeService.getOperationTypes(deleted),
+    });
 
-  useEffect(() => {
-    if (queryResult.isError && queryResult.error) {
-      toast.error('Не удалось загрузить типы операций');
-    }
-  }, [queryResult.isError, queryResult.error]);
+    useEffect(() => {
+        if (queryResult.isError && queryResult.error) {
+            toast.error('Не удалось загрузить типы операций');
+        }
+    }, [queryResult.isError, queryResult.error]);
 
-  return queryResult;
+    return queryResult;
 };

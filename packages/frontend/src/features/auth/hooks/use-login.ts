@@ -15,31 +15,31 @@ import { LOGIN_QUERY_KEY } from '@/shared/utils/constants/auth-query-key';
 import { ROUTER_MAP } from '@/shared/utils/constants/router-map';
 
 export const useLogin = () => {
-  const { setToken, setUser, clearToken } = useAuthStore();
-  const navigate = useRouter();
-  const searchParams = useSearchParams();
+    const { setToken, setUser, clearToken } = useAuthStore();
+    const navigate = useRouter();
+    const searchParams = useSearchParams();
 
-  return useMutation({
-    mutationKey: LOGIN_QUERY_KEY,
-    mutationFn: (loginData: LoginRequest) => {
-      void clearToken();
-      return AuthService.Login(loginData);
-    },
-    onSuccess: async (data) => {
-      resetRefreshState();
-      setToken(data.accessToken);
-      setUser(data.user);
+    return useMutation({
+        mutationKey: LOGIN_QUERY_KEY,
+        mutationFn: (loginData: LoginRequest) => {
+            void clearToken();
+            return AuthService.Login(loginData);
+        },
+        onSuccess: async (data) => {
+            resetRefreshState();
+            setToken(data.accessToken);
+            setUser(data.user);
 
-      if (env.USE_DEV_AUTH_MARKER) {
-        await setAuthMarker();
-      }
+            if (env.USE_DEV_AUTH_MARKER) {
+                await setAuthMarker();
+            }
 
-      toast.success('Вход выполнен успешно');
+            toast.success('Вход выполнен успешно');
 
-      const nextPath = searchParams.get('next');
-      const redirectPath = nextPath || ROUTER_MAP.DASHBOARD;
+            const nextPath = searchParams.get('next');
+            const redirectPath = nextPath || ROUTER_MAP.DASHBOARD;
 
-      navigate.push(redirectPath);
-    },
-  });
+            navigate.push(redirectPath);
+        },
+    });
 };

@@ -7,8 +7,8 @@ import { PlatformService } from '../api/platform-service';
 export const PLATFORMS_QUERY_KEY = ['platforms'];
 
 export const usePlatforms = () => {
-  return useQuery({
-    queryKey: PLATFORMS_QUERY_KEY,
-    queryFn: () => PlatformService.getPlatforms(),
-  });
+    return useQuery({
+        queryKey: PLATFORMS_QUERY_KEY,
+        queryFn: () => PlatformService.getPlatforms(),
+    });
 };

@@ -5,14 +5,13 @@ import { currencyApi } from '@/entities/currency/api/currency-api';
 import type { CreateCurrencyRequest } from '@/entities/currency/model/currency-schemas';
 
 export const useCreateCurrency = () => {
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data: CreateCurrencyRequest) =>
-      currencyApi.createCurrency(data),
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ['currencies'] });
-      toast.success(response.message || 'Валюта успешно создана');
-    },
-  });
+    return useMutation({
+        mutationFn: (data: CreateCurrencyRequest) => currencyApi.createCurrency(data),
+        onSuccess: (response) => {
+            queryClient.invalidateQueries({ queryKey: ['currencies'] });
+            toast.success(response.message || 'Валюта успешно создана');
+        },
+    });
 };

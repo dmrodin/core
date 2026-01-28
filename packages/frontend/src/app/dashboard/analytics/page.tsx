@@ -7,21 +7,21 @@ import { AnalyticsTable } from '@/features/analytics/ui/analytics-table/analytic
 import { Card, CardHeader, CardTitle } from '@/shared/ui/shadcn/card';
 
 export const metadata: Metadata = {
-  title: 'Аналитика',
+    title: 'Аналитика',
 };
 
 export default function AnalyticsPage() {
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-2xl">Аналитика</CardTitle>
-          <AnalyticsFilters />
-        </CardHeader>
-      </Card>
-      <AnalyticsSummary />
-      <AnalyticsCharts />
-      <AnalyticsTable />
-    </div>
-  );
+    return (
+        <div className="space-y-6">
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                    <CardTitle className="text-2xl">Аналитика</CardTitle>
+                    <AnalyticsFilters />
+                </CardHeader>
+            </Card>
+            <AnalyticsSummary />
+            <AnalyticsCharts />
+            <AnalyticsTable />
+        </div>
+    );
 }

@@ -7,24 +7,24 @@ import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/shared/ui/shadcn/button';
 
 export function ThemeToggle() {
-  const { theme, setTheme, systemTheme } = useTheme();
+    const { theme, setTheme, systemTheme } = useTheme();
 
-  const resolved = theme === 'system' ? systemTheme : theme;
-  const isDark = resolved === 'dark';
+    const resolved = theme === 'system' ? systemTheme : theme;
+    const isDark = resolved === 'dark';
 
-  const toggle = () => setTheme(isDark ? 'light' : 'dark');
+    const toggle = () => setTheme(isDark ? 'light' : 'dark');
 
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label="Переключить тему"
-      onClick={toggle}
-      className="rounded-full relative"
-    >
-      <Sun className="size-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute size-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      <span className="sr-only">Переключить тему</span>
-    </Button>
-  );
+    return (
+        <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Переключить тему"
+            onClick={toggle}
+            className="rounded-full relative"
+        >
+            <Sun className="size-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute size-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Переключить тему</span>
+        </Button>
+    );
 }
