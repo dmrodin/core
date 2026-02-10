@@ -43,6 +43,7 @@ model User {
   platformsUpdated        Platform[]       @relation("platforms_updated_by")
   banksCreated            Bank[]           @relation("banks_created_by")
   banksUpdated            Bank[]           @relation("banks_updated_by")
+  lockedPeriods           LockedPeriod[]
 
   @@unique([username], map: "users_username_unique")
   @@unique([telegramId], map: "users_telegram_id_unique")

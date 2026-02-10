@@ -1,0 +1,15 @@
+model LockedPeriod {
+  id           String   @id @default(uuid())
+  dateFrom     DateTime @db.Date
+  dateTo       DateTime @db.Date
+
+  isActive     Boolean  @default(true)
+
+  lockedAt     DateTime @default(now())
+  lockedById   String   @db.Uuid
+
+  lockedBy     User     @relation(fields: [lockedById], references: [id])
+
+  @@index([dateFrom, dateTo])
+  @@map("locked_periods")
+}
