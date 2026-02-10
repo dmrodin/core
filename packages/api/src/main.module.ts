@@ -1,5 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 import { ApplicationModule } from './application/application.module';
@@ -11,6 +12,8 @@ import { PrismaService } from './common/services/prisma.service';
 import { CurrencyModule } from './currency/currency.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { GuideModule } from './guide/guide.module';
+import { JobsModule } from './jobs/jobs.module';
+import { LockedPeriodModule } from './locked-period/locked-period.module';
 import { NetworkModule } from './network/network.module';
 import { NetworkTypeModule } from './network-type/network-type.module';
 import { OperationModule } from './operation/operation.module';
@@ -51,6 +54,9 @@ import { WalletTypeModule } from './wallet-type/wallet-type.module';
         ParserModule,
         PlatformModule,
         BankModule,
+        LockedPeriodModule,
+        ScheduleModule.forRoot(),
+        JobsModule,
     ],
     providers: [PrismaService, BcryptHasher, AdminInitService],
 })

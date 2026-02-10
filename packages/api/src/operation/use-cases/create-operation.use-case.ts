@@ -19,6 +19,47 @@ export class CreateOperationUseCase {
             createOperationDto;
 
         return this.prisma.$transaction(async (tx) => {
+            const operationDate = new Date(creatureDate);
+            if (Number.isNaN(operationDate.getTime())) {
+                throw new BadRequestException('Дата операции должна быть валидной датой');
+            }
+
+            const operationDateOnly = new Date(
+                Date.UTC(
+                    operationDate.getUTCFullYear(),
+                    operationDate.getUTCMonth(),
+                    operationDate.getUTCDate(),
+                ),
+            );
+
+            const lockedPeriod = await tx.lockedPeriod.findFirst({
+                where: {
+                    isActive: true,
+                    dateFrom: { lte: operationDateOnly },
+                    dateTo: { gte: operationDateOnly },
+                },
+                select: {
+                    dateFrom: true,
+                    dateTo: true,
+                },
+            });
+
+            if (lockedPeriod) {
+                const formatDate = (value: Date) =>
+                    value.toLocaleDateString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        timeZone: 'UTC',
+                    });
+
+                throw new BadRequestException(
+                    `Создание операций запрещено в период ${formatDate(lockedPeriod.dateFrom)} - ${formatDate(
+                        lockedPeriod.dateTo,
+                    )}`,
+                );
+            }
+
             const operationType = await tx.operationType.findUnique({
                 where: { id: typeId },
                 select: { code: true },

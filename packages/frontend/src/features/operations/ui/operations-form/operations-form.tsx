@@ -8,6 +8,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 
 import { ApplicationService, useApplicationsList } from '@/entities/application';
+import { useLockedPeriods } from '@/entities/locked-period';
 import {
     CreateOperationBackendDto,
     CreateOperationDto,
@@ -52,6 +53,7 @@ export function OperationForm({
 }: { initialData?: OperationResponseDto } & React.ComponentProps<'form'>) {
     const createMutation = useCreateOperation();
     const updateMutation = useUpdateOperation();
+    const isEditing = Boolean(initialData);
 
     const [open, setOpen] = React.useState(false);
     const [rawInput, setRawInput] = React.useState('');
@@ -61,6 +63,7 @@ export function OperationForm({
     const { data: banks } = useBanks();
     const { data: operationTypes, isLoading: isOperationTypesLoading } = useOperationTypes();
     const { data: applications, isLoading: isApplicationsLoading } = useApplicationsList();
+    const { data: lockedPeriodsData } = useLockedPeriods();
 
     // Получаем текущую заявку операции, если она есть (даже если завершена)
     const currentApplicationId = initialData?.applicationId;
@@ -115,6 +118,58 @@ export function OperationForm({
     });
 
     const entries = form.watch('entries');
+    const creatureDateValue = form.watch('creatureDate');
+
+    const normalizeDate = React.useCallback(
+        (value: Date) => new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate())),
+        [],
+    );
+
+    const parseDateValue = React.useCallback((value?: string) => {
+        if (!value) return null;
+        if (value.includes('T')) {
+            const parsed = new Date(value);
+            return Number.isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        const parts = value.split('.');
+        if (parts.length === 3) {
+            const [dd, mm, yyyy] = parts.map(Number);
+            const parsed = new Date(Date.UTC(yyyy, mm - 1, dd));
+            return Number.isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        return null;
+    }, []);
+
+    const lockedPeriods = lockedPeriodsData?.lockedPeriods ?? [];
+    const lockedPeriodForDate = React.useMemo(() => {
+        if (isEditing || !lockedPeriods.length) return null;
+        const parsedDate = parseDateValue(creatureDateValue) ?? new Date();
+        const dateOnly = normalizeDate(parsedDate);
+
+        return (
+            lockedPeriods.find((period) => {
+                if (!period.isActive) return false;
+                const dateFrom = new Date(period.dateFrom);
+                const dateTo = new Date(period.dateTo);
+                if (Number.isNaN(dateFrom.getTime()) || Number.isNaN(dateTo.getTime())) return false;
+                const fromOnly = normalizeDate(dateFrom);
+                const toOnly = normalizeDate(dateTo);
+                return dateOnly >= fromOnly && dateOnly <= toOnly;
+            }) ?? null
+        );
+    }, [creatureDateValue, isEditing, lockedPeriods, normalizeDate, parseDateValue]);
+
+    const isCreateBlocked = Boolean(lockedPeriodForDate);
+
+    const formatRange = (dateFrom: string, dateTo: string) => {
+        const from = new Date(dateFrom);
+        const to = new Date(dateTo);
+        const fromLabel = Number.isNaN(from.getTime()) ? '-' : formatDate(from);
+        const toLabel = Number.isNaN(to.getTime()) ? '-' : formatDate(to);
+        return `${fromLabel} - ${toLabel}`;
+    };
 
     const isBankDisabled =
         !entries.length ||
@@ -157,6 +212,9 @@ export function OperationForm({
     }, [isCorrection, fields.length, remove, append]);
 
     const onSubmit = (data: CreateOperationDto) => {
+        if (!isEditing && isCreateBlocked) {
+            return;
+        }
         if (!data.creatureDate) {
             data.creatureDate = new Date().toISOString();
         }
@@ -220,11 +278,15 @@ export function OperationForm({
         }
     };
 
-    const isEditing = Boolean(initialData);
-
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className={cn('flex flex-col gap-6', className)} {...props}>
+                {!isEditing && lockedPeriodForDate && (
+                    <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                        Создание операций запрещено в период{' '}
+                        {formatRange(lockedPeriodForDate.dateFrom, lockedPeriodForDate.dateTo)}.
+                    </div>
+                )}
                 <div className={cn('grid grid-cols-1 gap-4', isConversion ? 'md:grid-cols-2' : 'md:grid-cols-3')}>
                     {/* Тип операции */}
                     {/* isDebit - {isDebit ? 'true' : 'false'}, isCredit -{' '}
@@ -684,7 +746,10 @@ export function OperationForm({
                     )}
                 />
 
-                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                <Button
+                    type="submit"
+                    disabled={createMutation.isPending || updateMutation.isPending || (!isEditing && isCreateBlocked)}
+                >
                     {isEditing
                         ? updateMutation.isPending
                             ? 'Сохранение...'

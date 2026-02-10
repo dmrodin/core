@@ -1,7 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
-import { useRef } from 'react';
+import { Fragment, useMemo, useRef, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -17,6 +16,7 @@ import {
     useInfiniteOperations,
     useOperationTypes,
 } from '@/entities/operations';
+import { useLockedPeriods } from '@/entities/locked-period';
 import {
     Button,
     Card,
@@ -34,6 +34,7 @@ import {
     EmptyMedia,
     EmptyTitle,
     Form,
+    formatDate,
     formatDateTime,
     Input,
     Loading,
@@ -75,6 +76,7 @@ export default function OperationsPage() {
 
     const { data, error, hasNextPage, isFetching, isLoading } = useInfiniteOperations(filters);
     const { data: operationTypes } = useOperationTypes();
+    const { data: lockedPeriodsData } = useLockedPeriods();
     const { copyOperation } = useCopyOperation();
     const { mutate: deleteOperation } = useDeleteOperation();
     const lastOperationRef = useRef<HTMLDivElement | null>(null);
@@ -85,11 +87,41 @@ export default function OperationsPage() {
     const currentTypeId = form.watch('typeId');
     const activeTab = currentTypeId === null ? 'all' : String(currentTypeId);
 
+    const activeLockedPeriod = useMemo(() => {
+        const lockedPeriods = lockedPeriodsData?.lockedPeriods ?? [];
+        if (!lockedPeriods.length) return null;
+
+        const today = new Date();
+        const normalizeDate = (value: Date) =>
+            new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
+        const todayOnly = normalizeDate(today);
+
+        return (
+            lockedPeriods.find((period) => {
+                if (!period.isActive) return false;
+                const dateFrom = new Date(period.dateFrom);
+                const dateTo = new Date(period.dateTo);
+                if (Number.isNaN(dateFrom.getTime()) || Number.isNaN(dateTo.getTime())) return false;
+                const fromOnly = normalizeDate(dateFrom);
+                const toOnly = normalizeDate(dateTo);
+                return todayOnly >= fromOnly && todayOnly <= toOnly;
+            }) ?? null
+        );
+    }, [lockedPeriodsData]);
+
+    const formatRange = (dateFrom: string, dateTo: string) => {
+        const from = new Date(dateFrom);
+        const to = new Date(dateTo);
+        const fromLabel = Number.isNaN(from.getTime()) ? '-' : formatDate(from);
+        const toLabel = Number.isNaN(to.getTime()) ? '-' : formatDate(to);
+        return `${fromLabel} - ${toLabel}`;
+    };
+
     return (
         <Form {...form}>
             <form className="max-w-5xl mx-auto space-y-6">
                 <Card>
-                    <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <CardHeader className="flex flex-col gap-4">
                         <CardTitle className="text-2xl">Операции</CardTitle>
                         <div className="flex gap-2 items-center flex-wrap">
                             <Input
@@ -107,6 +139,13 @@ export default function OperationsPage() {
                                 Создать операцию
                             </Button>
                         </div>
+                        {activeLockedPeriod && (
+                            <div className="w-full rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                                Сейчас закрыт период{' '}
+                                {formatRange(activeLockedPeriod.dateFrom, activeLockedPeriod.dateTo)}. Создание операций
+                                за даты в пределах периода запрещено.
+                            </div>
+                        )}
                     </CardHeader>
                 </Card>
 
