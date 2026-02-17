@@ -162,11 +162,20 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                     <SelectValue placeholder="Выберите тип" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {operationTypes?.map((operationType) => (
+                                                    {operationTypes?.sort().map((operationType) => (
                                                         <SelectItem key={operationType.id} value={operationType.id}>
                                                             {operationType.name}
                                                         </SelectItem>
                                                     ))}
+                                                </SelectContent>
+                                                <SelectContent>
+                                                    {(operationTypes ?? [])
+                                                        .toSorted((a, b) => a.name.localeCompare(b.name))
+                                                        .map((operationType) => (
+                                                            <SelectItem key={operationType.id} value={operationType.id}>
+                                                                {operationType.name}
+                                                            </SelectItem>
+                                                        ))}
                                                 </SelectContent>
                                             </Select>
                                         )}
@@ -215,7 +224,8 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                 <SelectContent>
                                                     {currency?.currencies.map((currency) => (
                                                         <SelectItem key={currency.id} value={currency.id}>
-                                                            {currency.name} ({currency.code})
+                                                            {/* {currency.name} */}
+                                                            {currency.code}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>

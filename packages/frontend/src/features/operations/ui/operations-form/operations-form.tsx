@@ -46,6 +46,8 @@ import {
 import { formatNumber, parseFormattedNumber } from '@/shared/lib/utils/format-number';
 import { useBanks } from '@/entities/bank';
 
+const SINGLE_SIDE_OPERATION_NAMES = new Set(['аванс', 'зачисление', 'расход', 'корректировка']);
+
 export function OperationForm({
     initialData,
     className,
@@ -182,6 +184,9 @@ export function OperationForm({
     const selectedOperationType = operationTypes?.find((type) => type.id === selectedTypeId);
     const isCorrection = selectedOperationType?.isCorrection ?? false;
     const isConversion = selectedOperationType?.isConversion ?? false;
+    const isSingleSideOperation = selectedOperationType
+        ? SINGLE_SIDE_OPERATION_NAMES.has(selectedOperationType.name.trim().toLocaleLowerCase('ru'))
+        : false;
 
     const isCreditAllowed = selectedOperationType?.isCredit ?? false;
     const isDebitAllowed = selectedOperationType?.isDebit ?? false;
@@ -215,6 +220,21 @@ export function OperationForm({
         if (!isEditing && isCreateBlocked) {
             return;
         }
+
+        form.clearErrors('entries');
+        if (!isSingleSideOperation) {
+            const hasDebitEntry = data.entries.some((entry) => entry.direction === 'debit');
+            const hasCreditEntry = data.entries.some((entry) => entry.direction === 'credit');
+
+            if (!hasDebitEntry || !hasCreditEntry) {
+                form.setError('entries', {
+                    type: 'manual',
+                    message: 'Для этого типа операции заполните обе стороны: "Вычесть из..." и "Прибавить к...".',
+                });
+                return;
+            }
+        }
+
         if (!data.creatureDate) {
             data.creatureDate = new Date().toISOString();
         }
@@ -534,9 +554,13 @@ export function OperationForm({
                                                             const matchesSearch = wallet.name
                                                                 .toLowerCase()
                                                                 .includes(walletSearch.toLowerCase());
-                                                            const isActive = wallet.active;
+                                                            const isSelectable =
+                                                                wallet.active && wallet.visible && !wallet.deleted;
                                                             const isSelected = wallet.id === field.value;
-                                                            return matchesSearch && (isActive || isSelected);
+                                                            return (
+                                                                matchesSearch &&
+                                                                (isEditing ? isSelectable || isSelected : isSelectable)
+                                                            );
                                                         })
                                                         .map((wallet) => (
                                                             <SelectItem key={wallet.id} value={wallet.id}>
@@ -582,6 +606,16 @@ export function OperationForm({
                                                         }
                                                         const parsed = parseFormattedNumber(value);
                                                         field.onChange(isNaN(parsed) ? '' : parsed);
+                                                    }}
+                                                    onFocus={() => {
+                                                        if (field.value === 0) {
+                                                            field.onChange('');
+                                                        }
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        if (!e.currentTarget.value.trim()) {
+                                                            field.onChange(0);
+                                                        }
                                                     }}
                                                     placeholder="0"
                                                     inputMode="numeric"
@@ -657,10 +691,16 @@ export function OperationForm({
                                                                         const matchesSearch = wallet.name
                                                                             .toLowerCase()
                                                                             .includes(walletSearch.toLowerCase());
-                                                                        const isActive = wallet.active;
+                                                                        const isSelectable =
+                                                                            wallet.active &&
+                                                                            wallet.visible &&
+                                                                            !wallet.deleted;
                                                                         const isSelected = wallet.id === field.value;
                                                                         return (
-                                                                            matchesSearch && (isActive || isSelected)
+                                                                            matchesSearch &&
+                                                                            (isEditing
+                                                                                ? isSelectable || isSelected
+                                                                                : isSelectable)
                                                                         );
                                                                     })
                                                                     .map((wallet) => (
@@ -697,14 +737,14 @@ export function OperationForm({
                                                                     const numValue = parseFloat(value);
                                                                     field.onChange(isNaN(numValue) ? '' : numValue);
                                                                 }}
-                                                                onFocus={(e) => {
-                                                                    if (e.currentTarget.value === '0') {
-                                                                        e.currentTarget.value = '';
+                                                                onFocus={() => {
+                                                                    if (field.value === 0) {
+                                                                        field.onChange('');
                                                                     }
                                                                 }}
                                                                 onBlur={(e) => {
                                                                     if (e.currentTarget.value === '') {
-                                                                        e.currentTarget.value = '0';
+                                                                        field.onChange(0);
                                                                     }
                                                                 }}
                                                                 className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
@@ -732,6 +772,9 @@ export function OperationForm({
                 )}
 
                 {/* Описание */}
+                {typeof form.formState.errors.entries?.message === 'string' && (
+                    <p className="text-sm text-destructive">{form.formState.errors.entries.message}</p>
+                )}
                 <FormField
                     control={form.control}
                     name="description"

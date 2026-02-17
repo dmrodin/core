@@ -167,9 +167,9 @@ export function ApplicationsFilters() {
                             <PopoverContent
                                 align="start"
                                 sideOffset={4}
-                                className="p-0 w-auto bg-white border rounded-xl shadow-lg z-50 overflow-hidden"
+                                className="p-0 w-auto rounded-xl shadow-lg z-50 overflow-hidden"
                             >
-                                <div className="bg-white">
+                                <div className="bg-popover">
                                     <Calendar
                                         mode="range"
                                         numberOfMonths={2}

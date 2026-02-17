@@ -16,13 +16,15 @@ export function WalletsAggregationSwiper({ filters }: WalletsAggregationSwiperPr
 
     const summaries = useMemo(
         () =>
-            (data?.currencyGroups ?? []).map((group) => ({
-                key: group.currency.id,
-                totalAmount: group.totalAmount,
-                walletsCount: group.walletsCount,
-                currencyCode: group.currency.code,
-                currencyName: group.currency.name,
-            })),
+            (data?.currencyGroups ?? [])
+                .filter((group) => group.totalAmount !== 0)
+                .map((group) => ({
+                    key: group.currency.id,
+                    totalAmount: group.totalAmount,
+                    walletsCount: group.walletsCount,
+                    currencyCode: group.currency.code,
+                    currencyName: group.currency.name,
+                })),
         [data],
     );
 
