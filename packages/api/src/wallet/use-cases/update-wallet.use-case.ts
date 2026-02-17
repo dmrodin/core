@@ -1,12 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { WalletKind } from 'prisma/generated/prisma';
 
+import { TelegramBotType } from '../../feedback/types/telegram-bot.types';
+import { TelegramService } from '../../feedback/telegram.service';
 import { PrismaService } from '../../common/services/prisma.service';
 import { UpdateWalletDto } from '../dto';
 import { UpdateWalletOutput } from '../types';
 
 @Injectable()
 export class UpdateWalletUseCase {
-    constructor(private readonly prisma: PrismaService) {}
+    private readonly logger = new Logger(UpdateWalletUseCase.name);
+
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly telegramService: TelegramService,
+    ) {}
 
     public async execute(
         walletId: string,
@@ -32,11 +40,45 @@ export class UpdateWalletUseCase {
 
         const existingWallet = await this.prisma.wallet.findUnique({
             where: { id: walletId },
+            include: {
+                details: {
+                    select: {
+                        address: true,
+                        phone: true,
+                        card: true,
+                        ownerFullName: true,
+                        bankId: true,
+                    },
+                },
+            },
         });
 
         if (!existingWallet || existingWallet.deleted) {
             throw new NotFoundException('Кошелек не найден');
         }
+
+        const nextWalletKind = walletKind ?? existingWallet.walletKind;
+        const incomingDetails = updateWalletDto.details;
+
+        const isCryptoAddressChanged =
+            nextWalletKind === WalletKind.crypto &&
+            incomingDetails?.address !== undefined &&
+            (incomingDetails.address ?? null) !== (existingWallet.details?.address ?? null);
+
+        const isCardBankRequisitesChanged =
+            nextWalletKind === WalletKind.bank &&
+            Boolean(
+                incomingDetails &&
+                    ((incomingDetails.card !== undefined &&
+                        (incomingDetails.card ?? null) !== (existingWallet.details?.card ?? null)) ||
+                        (incomingDetails.ownerFullName !== undefined &&
+                            (incomingDetails.ownerFullName ?? null) !==
+                                (existingWallet.details?.ownerFullName ?? null)) ||
+                        (incomingDetails.phone !== undefined &&
+                            (incomingDetails.phone ?? null) !== (existingWallet.details?.phone ?? null)) ||
+                        (incomingDetails.bankId !== undefined &&
+                            (incomingDetails.bankId ?? null) !== (existingWallet.details?.bankId ?? null))),
+            );
 
         const wallet = await this.prisma.wallet.update({
             where: { id: walletId },
@@ -153,9 +195,33 @@ export class UpdateWalletUseCase {
             },
         });
 
+        if (isCryptoAddressChanged || isCardBankRequisitesChanged) {
+            const changeLabels: string[] = [];
+            if (isCryptoAddressChanged) changeLabels.push('изменен адрес криптокошелька');
+            if (isCardBankRequisitesChanged) changeLabels.push('изменены реквизиты банка у карты');
+
+            const message = [
+                '🔔 <b>Изменение реквизитов кошелька</b>',
+                '',
+                `<b>Кошелек:</b> ${wallet.name}`,
+                `<b>ID:</b> <code>${wallet.id}</code>`,
+                `<b>Тип:</b> ${wallet.walletKind}`,
+                `<b>Изменения:</b> ${changeLabels.join(', ')}`,
+                `<b>Кем изменено:</b> ${wallet.updated_by?.username ?? updatedById}`,
+                `<b>Время:</b> ${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}`,
+            ].join('\n');
+
+            try {
+                await this.telegramService.sendMessage(TelegramBotType.FEEDBACK, message);
+            } catch {
+                this.logger.warn(`Не удалось отправить Telegram-уведомление об изменении кошелька ${wallet.id}`);
+            }
+        }
+
         return {
             message: 'Кошелек успешно обновлен',
             wallet,
         };
     }
 }
+

@@ -235,11 +235,11 @@ export const CryptoWalletCard = ({
     const getBorderClass = (status: string) => {
         switch (status) {
             case 'positive':
-                return 'border-l-[6px] border-l-green-600';
+                return 'border-l-[18px] border-l-green-600';
             case 'negative':
-                return 'border-l-[6px] border-l-destructive/60';
+                return 'border-l-[18px] border-l-destructive/60';
             case 'neutral':
-                return 'border-l-[6px] border-l-gray-700 dark:border-l-gray-600';
+                return 'border-l-[18px] border-l-gray-700 dark:border-l-gray-600';
             default:
                 return '';
         }

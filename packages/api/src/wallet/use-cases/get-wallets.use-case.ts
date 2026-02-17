@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 
 import { Prisma } from '../../../prisma/generated/prisma';
 import { PrismaService } from '../../common/services/prisma.service';
@@ -19,8 +19,7 @@ export class GetWalletsUseCase {
             minAmount,
             maxAmount,
             currencyId,
-            userId,
-            secondUserId,
+            userId,`r`n            ownerId,`r`n            secondUserId,
             active,
             pinOnMain,
             pinned,
@@ -72,7 +71,7 @@ export class GetWalletsUseCase {
 
             const searchLower = search.toLowerCase();
 
-            if ('касса'.startsWith(searchLower) || searchLower.startsWith('касс')) {
+            if ('РєР°СЃСЃР°'.startsWith(searchLower) || searchLower.startsWith('РєР°СЃСЃ')) {
                 orConditions.push({ walletKind: 'simple' });
             }
         }
@@ -124,6 +123,16 @@ export class GetWalletsUseCase {
             where.currencyId = currencyId;
         }
 
+        if (ownerId) {
+            const andConditions = Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : [];
+
+            where.AND = [
+                ...andConditions,
+                {
+                    OR: [{ userId: ownerId }, { secondUserId: ownerId }],
+                },
+            ];
+        }
         if (userId) {
             where.userId = userId;
         }
@@ -252,3 +261,4 @@ export class GetWalletsUseCase {
         };
     }
 }
+
