@@ -12,7 +12,7 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { formatDateTime } from '@/shared/lib/utils';
+import { formatDate, formatDateTime } from '@/shared/lib/utils';
 
 import { GuideService } from '@/entities/guides/api/guide-service';
 import {
@@ -150,7 +150,7 @@ export function useCopyGuide() {
             lines.push(`Телефон: ${guide.phone}`);
         }
         if (guide.birthDate) {
-            lines.push(`Дата рождения: ${guide.birthDate}`);
+            lines.push(`Дата рождения: ${formatDate(new Date(guide.birthDate))}`);
         }
         if (guide.cardNumber) {
             lines.push(`Номер карты: ${guide.cardNumber}`);
