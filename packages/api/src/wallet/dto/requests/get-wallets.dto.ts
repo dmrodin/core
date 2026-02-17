@@ -20,104 +20,96 @@ export enum WalletSortField {
 
 export class GetWalletsDto {
     @ApiProperty({
-        description: 'РџРѕРёСЃРє РїРѕ РІСЃРµРј С‚РµРєСЃС‚РѕРІС‹Рј РїРѕР»СЏРј (name, description)',
-        example: 'РћСЃРЅРѕРІРЅРѕР№ РєРѕС€РµР»РµРє',
+        description: 'Поиск по всем текстовым полям (name, description)',
+        example: 'Основной кошелек',
         required: false,
     })
     @IsOptional()
-    @IsString({ message: 'РџРѕРёСЃРє РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЃС‚СЂРѕРєРѕР№' })
+    @IsString({ message: 'Поиск должен быть строкой' })
     public search?: string;
 
     @ApiProperty({
-        description: 'Р¤РёР»СЊС‚СЂ РїРѕ СЃС‚Р°С‚СѓСЃСѓ Р±Р°Р»Р°РЅСЃР°',
+        description: 'Фильтр по статусу баланса',
         enum: BalanceStatus,
         example: BalanceStatus.positive,
         required: false,
     })
     @IsOptional()
-    @IsEnum(BalanceStatus, { message: 'РќРµРІРµСЂРЅС‹Р№ СЃС‚Р°С‚СѓСЃ Р±Р°Р»Р°РЅСЃР°' })
+    @IsEnum(BalanceStatus, { message: 'Неверный статус баланса' })
     public balanceStatus?: BalanceStatus;
 
     @ApiProperty({
-        description: 'Р¤РёР»СЊС‚СЂ РїРѕ С‚РёРїСѓ РєРѕС€РµР»СЊРєР°',
+        description: 'Фильтр по типу кошелька',
         enum: WalletKind,
         example: WalletKind.simple,
         required: false,
     })
     @IsOptional()
-    @IsEnum(WalletKind, { message: 'РќРµРІРµСЂРЅС‹Р№ С‚РёРї РєРѕС€РµР»СЊРєР°' })
+    @IsEnum(WalletKind, { message: 'Неверный тип кошелька' })
     public walletKind?: WalletKind;
 
     @ApiProperty({
-        description: 'Р¤РёР»СЊС‚СЂ РїРѕ ID С‚РёРїР° РєРѕС€РµР»СЊРєР°',
+        description: 'Фильтр по ID типа кошелька',
         example: '123e4567-e89b-12d3-a456-426614174000',
         required: false,
     })
     @IsOptional()
-    @IsUUID('4', { message: 'ID С‚РёРїР° РєРѕС€РµР»СЊРєР° РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІР°Р»РёРґРЅС‹Рј UUID' })
+    @IsUUID('4', { message: 'ID типа кошелька должен быть валидным UUID' })
     public walletTypeId?: string;
 
     @ApiProperty({
-        description: 'РњРёРЅРёРјР°Р»СЊРЅР°СЏ СЃСѓРјРјР° РІ РєРѕС€РµР»СЊРєРµ',
+        description: 'Минимальная сумма в кошельке',
         example: 1000,
         minimum: 0,
         required: false,
     })
     @IsOptional()
     @Type(() => Number)
-    @IsInt({ message: 'РњРёРЅРёРјР°Р»СЊРЅР°СЏ СЃСѓРјРјР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ С‡РёСЃР»РѕРј' })
-    @Min(0, { message: 'РњРёРЅРёРјР°Р»СЊРЅР°СЏ СЃСѓРјРјР° РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅРѕР№' })
+    @IsInt({ message: 'Минимальная сумма должна быть числом' })
+    @Min(0, { message: 'Минимальная сумма не может быть отрицательной' })
     public minAmount?: number;
 
     @ApiProperty({
-        description: 'РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ СЃСѓРјРјР° РІ РєРѕС€РµР»СЊРєРµ',
+        description: 'Максимальная сумма в кошельке',
         example: 100000,
         minimum: 0,
         required: false,
     })
     @IsOptional()
     @Type(() => Number)
-    @IsInt({ message: 'РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ СЃСѓРјРјР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ С‡РёСЃР»РѕРј' })
-    @Min(0, { message: 'РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ СЃСѓРјРјР° РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅРѕР№' })
+    @IsInt({ message: 'Максимальная сумма должна быть числом' })
+    @Min(0, { message: 'Максимальная сумма не может быть отрицательной' })
     public maxAmount?: number;
 
     @ApiProperty({
-        description: 'Р¤РёР»СЊС‚СЂ РїРѕ ID РІР°Р»СЋС‚С‹',
+        description: 'Фильтр по ID валюты',
         example: '123e4567-e89b-12d3-a456-426614174000',
         required: false,
     })
     @IsOptional()
-    @IsUUID('4', { message: 'ID РІР°Р»СЋС‚С‹ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІР°Р»РёРґРЅС‹Рј UUID' })
+    @IsUUID('4', { message: 'ID валюты должен быть валидным UUID' })
     public currencyId?: string;
 
     @ApiProperty({
-        description: 'Р¤РёР»СЊС‚СЂ РїРѕ ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ',
+        description: 'Фильтр по ID пользователя',
         example: '123e4567-e89b-12d3-a456-426614174000',
         required: false,
     })
     @IsOptional()
-    @IsUUID('4', { message: 'ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІР°Р»РёРґРЅС‹Рј UUID' })
+    @IsUUID('4', { message: 'ID пользователя должен быть валидным UUID' })
     public userId?: string;
-    @ApiProperty({
-        description: ''Фильтр по владельцу (владелец 1 или владелец 2)'',
-        example: ''123e4567-e89b-12d3-a456-426614174000'',
-        required: false,
-    })
-    @IsOptional()
-    @IsUUID(''4'', { message: ''ID владельца должен быть валидным UUID'' })
-    public ownerId?: string;
 
     @ApiProperty({
-        description: 'Р¤РёР»СЊС‚СЂ РїРѕ ID РІС‚РѕСЂРѕРіРѕ РІР»Р°РґРµР»СЊС†Р° РєРѕС€РµР»СЊРєР°',
+        description: 'Фильтр по ID второго владельца кошелька',
         example: '123e4567-e89b-12d3-a456-426614174001',
         required: false,
     })
     @IsOptional()
-    @IsUUID('4', { message: 'ID РІС‚РѕСЂРѕРіРѕ РІР»Р°РґРµР»СЊС†Р° РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІР°Р»РёРґРЅС‹Рј UUID' })
+    @IsUUID('4', { message: 'ID второго владельца должен быть валидным UUID' })
     public secondUserId?: string;
 
     @ApiProperty({
-        description: 'Р¤РёР»СЊС‚СЂ РїРѕ Р°РєС‚РёРІРЅРѕСЃС‚Рё РєРѕС€РµР»СЊРєР°',
+        description: 'Фильтр по активности кошелька',
         example: true,
         required: false,
     })
@@ -132,11 +124,11 @@ export class GetWalletsDto {
 
         return value;
     })
-    @IsBoolean({ message: 'РђРєС‚РёРІРЅРѕСЃС‚СЊ РґРѕР»Р¶РЅР° Р±С‹С‚СЊ Р±СѓР»РµРІС‹Рј Р·РЅР°С‡РµРЅРёРµРј' })
+    @IsBoolean({ message: 'Активность должна быть булевым значением' })
     public active?: boolean;
 
     @ApiProperty({
-        description: 'Р¤РёР»СЊС‚СЂ РїРѕ Р·Р°РєСЂРµРїР»РµРЅРёСЋ РЅР° РіР»Р°РІРЅРѕР№',
+        description: 'Фильтр по закреплению на главной',
         example: true,
         required: false,
     })
@@ -152,12 +144,12 @@ export class GetWalletsDto {
         return value;
     })
     @IsBoolean({
-        message: 'Р—Р°РєСЂРµРїР»РµРЅРёРµ РЅР° РіР»Р°РІРЅРѕР№ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ Р±СѓР»РµРІС‹Рј Р·РЅР°С‡РµРЅРёРµРј',
+        message: 'Закрепление на главной должно быть булевым значением',
     })
     public pinOnMain?: boolean;
 
     @ApiProperty({
-        description: 'Р¤РёР»СЊС‚СЂ РїРѕ Р·Р°РєСЂРµРїР»РµРЅРёСЋ',
+        description: 'Фильтр по закреплению',
         example: true,
         required: false,
     })
@@ -172,11 +164,11 @@ export class GetWalletsDto {
 
         return value;
     })
-    @IsBoolean({ message: 'Р—Р°РєСЂРµРїР»РµРЅРёРµ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ Р±СѓР»РµРІС‹Рј Р·РЅР°С‡РµРЅРёРµРј' })
+    @IsBoolean({ message: 'Закрепление должно быть булевым значением' })
     public pinned?: boolean;
 
     @ApiProperty({
-        description: 'Р¤РёР»СЊС‚СЂ РїРѕ РІРёРґРёРјРѕСЃС‚Рё',
+        description: 'Фильтр по видимости',
         example: true,
         required: false,
     })
@@ -191,11 +183,11 @@ export class GetWalletsDto {
 
         return value;
     })
-    @IsBoolean({ message: 'Р’РёРґРёРјРѕСЃС‚СЊ РґРѕР»Р¶РЅР° Р±С‹С‚СЊ Р±СѓР»РµРІС‹Рј Р·РЅР°С‡РµРЅРёРµРј' })
+    @IsBoolean({ message: 'Видимость должна быть булевым значением' })
     public visible?: boolean;
 
     @ApiProperty({
-        description: 'Р¤РёР»СЊС‚СЂ РїРѕ СѓРґР°Р»РµРЅРЅС‹Рј РєРѕС€РµР»СЊРєР°Рј',
+        description: 'Фильтр по удаленным кошелькам',
         example: false,
         required: false,
     })
@@ -210,43 +202,43 @@ export class GetWalletsDto {
 
         return value;
     })
-    @IsBoolean({ message: 'РЈРґР°Р»РµРЅРёРµ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ Р±СѓР»РµРІС‹Рј Р·РЅР°С‡РµРЅРёРµРј' })
+    @IsBoolean({ message: 'Удаление должно быть булевым значением' })
     public deleted?: boolean;
 
     @ApiProperty({
-        description: 'РџРѕР»Рµ РґР»СЏ СЃРѕСЂС‚РёСЂРѕРІРєРё',
+        description: 'Поле для сортировки',
         enum: WalletSortField,
         example: WalletSortField.CREATED_AT,
         required: false,
     })
     @IsOptional()
-    @IsEnum(WalletSortField, { message: 'РќРµРІРµСЂРЅРѕРµ РїРѕР»Рµ РґР»СЏ СЃРѕСЂС‚РёСЂРѕРІРєРё' })
+    @IsEnum(WalletSortField, { message: 'Неверное поле для сортировки' })
     public sortField?: WalletSortField = WalletSortField.CREATED_AT;
 
     @ApiProperty({
-        description: 'РџРѕСЂСЏРґРѕРє СЃРѕСЂС‚РёСЂРѕРІРєРё',
+        description: 'Порядок сортировки',
         enum: SortOrder,
         example: SortOrder.DESC,
         required: false,
     })
     @IsOptional()
-    @IsEnum(SortOrder, { message: 'РќРµРІРµСЂРЅС‹Р№ РїРѕСЂСЏРґРѕРє СЃРѕСЂС‚РёСЂРѕРІРєРё' })
+    @IsEnum(SortOrder, { message: 'Неверный порядок сортировки' })
     public sortOrder?: SortOrder = SortOrder.DESC;
 
     @ApiProperty({
-        description: 'РќРѕРјРµСЂ СЃС‚СЂР°РЅРёС†С‹',
+        description: 'Номер страницы',
         example: 1,
         minimum: 1,
         required: false,
     })
     @IsOptional()
     @Type(() => Number)
-    @IsInt({ message: 'РќРѕРјРµСЂ СЃС‚СЂР°РЅРёС†С‹ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ С‡РёСЃР»РѕРј' })
-    @Min(1, { message: 'РќРѕРјРµСЂ СЃС‚СЂР°РЅРёС†С‹ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ 0' })
+    @IsInt({ message: 'Номер страницы должен быть числом' })
+    @Min(1, { message: 'Номер страницы должен быть больше 0' })
     public page?: number = 1;
 
     @ApiProperty({
-        description: 'Р Р°Р·РјРµСЂ СЃС‚СЂР°РЅРёС†С‹',
+        description: 'Размер страницы',
         example: 10,
         minimum: 1,
         maximum: 100,
@@ -254,9 +246,8 @@ export class GetWalletsDto {
     })
     @IsOptional()
     @Type(() => Number)
-    @IsInt({ message: 'Р Р°Р·РјРµСЂ СЃС‚СЂР°РЅРёС†С‹ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ С‡РёСЃР»РѕРј' })
-    @Min(1, { message: 'Р Р°Р·РјРµСЂ СЃС‚СЂР°РЅРёС†С‹ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ 0' })
-    @Max(100, { message: 'Р Р°Р·РјРµСЂ СЃС‚СЂР°РЅРёС†С‹ РЅРµ РґРѕР»Р¶РµРЅ РїСЂРµРІС‹С€Р°С‚СЊ 100' })
+    @IsInt({ message: 'Размер страницы должен быть числом' })
+    @Min(1, { message: 'Размер страницы должен быть больше 0' })
+    @Max(100, { message: 'Размер страницы не должен превышать 100' })
     public limit?: number = 10;
 }
-

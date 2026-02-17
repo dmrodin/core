@@ -17,7 +17,8 @@ export class GetWalletsAggregationUseCase {
             walletTypeId,
             minAmount,
             maxAmount,
-            currencyId,`r`n            userId,`r`n            ownerId,
+            currencyId,
+            userId,
             active,
             pinOnMain,
             pinned,
@@ -62,7 +63,7 @@ export class GetWalletsAggregationUseCase {
 
             const searchLower = search.toLowerCase();
 
-            if ('РєР°СЃСЃР°'.startsWith(searchLower) || searchLower.startsWith('РєР°СЃСЃ')) {
+            if ('касса'.startsWith(searchLower) || searchLower.startsWith('касс')) {
                 orConditions.push({ walletKind: 'simple' });
             }
         }
@@ -114,16 +115,6 @@ export class GetWalletsAggregationUseCase {
             where.currencyId = currencyId;
         }
 
-        if (ownerId) {
-            const andConditions = Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : [];
-
-            where.AND = [
-                ...andConditions,
-                {
-                    OR: [{ userId: ownerId }, { secondUserId: ownerId }],
-                },
-            ];
-        }
         if (userId) {
             where.userId = userId;
         }
@@ -183,4 +174,3 @@ export class GetWalletsAggregationUseCase {
         };
     }
 }
-
