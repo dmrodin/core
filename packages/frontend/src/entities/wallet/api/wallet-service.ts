@@ -1,6 +1,8 @@
 import {
     CreateWalletRequest,
     CreateWalletSchema,
+    UpdateWalletRequest,
+    UpdateWalletSchema,
     GetPinnedWalletsResponse,
     GetPinnedWalletsResponseSchema,
     GetWalletsFilter,
@@ -82,8 +84,8 @@ export class WalletService {
         return WalletSchema.parse(wallet);
     }
 
-    public static async updateWallet(walletId: string, payload: CreateWalletRequest): Promise<Wallet> {
-        const validated = CreateWalletSchema.parse(payload);
+    public static async updateWallet(walletId: string, payload: UpdateWalletRequest): Promise<Wallet> {
+        const validated = UpdateWalletSchema.parse(payload);
         const { data } = await axiosInstance.put(`${API_MAP.WALLETS.WALLETS}/${walletId}`, validated);
         const wallet = data?.wallet ?? data;
         return WalletSchema.parse(wallet);

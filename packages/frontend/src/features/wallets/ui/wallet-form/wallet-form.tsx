@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 import { useCurrency } from '@/entities/currency/model/use-currency';
 import { useNetworkTypes } from '@/entities/network/model/use-network-types';
@@ -11,7 +12,15 @@ import { useNetworks } from '@/entities/network/model/use-networks';
 import { usePlatforms } from '@/entities/platform';
 import { useBanks } from '@/entities/bank';
 import { useUsers } from '@/entities/users';
-import { CreateWalletFormValues, CreateWalletRequest, CreateWalletSchema, Wallet, WalletKind } from '@/entities/wallet';
+import {
+    CreateWalletFormValues,
+    CreateWalletRequest,
+    CreateWalletSchema,
+    UpdateWalletRequest,
+    UpdateWalletSchema,
+    Wallet,
+    WalletKind,
+} from '@/entities/wallet';
 import { useWalletTypes } from '@/entities/wallet-type';
 import { useCreateWallet, useUpdateWallet } from '@/features/wallets';
 
@@ -50,6 +59,10 @@ interface WalletFormProps {
     walletId?: string;
 }
 
+const EditWalletFormSchema = CreateWalletSchema.safeExtend({
+    amount: z.coerce.number().int('Сумма должна быть целым числом'),
+});
+
 export function WalletForm({ initialData, walletId }: WalletFormProps) {
     const isEditMode = !!walletId && !!initialData;
     const createWalletMutation = useCreateWallet();
@@ -62,7 +75,7 @@ export function WalletForm({ initialData, walletId }: WalletFormProps) {
     const { data: usersData } = useUsers();
 
     const form = useForm<CreateWalletFormValues>({
-        resolver: zodResolver(CreateWalletSchema),
+        resolver: zodResolver(isEditMode ? EditWalletFormSchema : CreateWalletSchema),
         defaultValues: initialData
             ? {
                   name: initialData.name,
@@ -201,10 +214,13 @@ export function WalletForm({ initialData, walletId }: WalletFormProps) {
     }, [isCrypto, networkTypes, form]);
 
     const onSubmit = (values: CreateWalletFormValues) => {
-        const payload: CreateWalletRequest = CreateWalletSchema.parse(values);
         if (isEditMode && updateWalletMutation) {
+            const payload: UpdateWalletRequest = UpdateWalletSchema.parse(
+                Object.fromEntries(Object.entries(values).filter(([key]) => key !== 'amount')),
+            );
             updateWalletMutation.mutate(payload);
         } else {
+            const payload: CreateWalletRequest = CreateWalletSchema.parse(values);
             createWalletMutation.mutate(payload);
         }
     };
