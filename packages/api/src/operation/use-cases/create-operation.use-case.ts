@@ -20,16 +20,13 @@ export class CreateOperationUseCase {
 
         return this.prisma.$transaction(async (tx) => {
             const operationDate = new Date(creatureDate);
+
             if (Number.isNaN(operationDate.getTime())) {
                 throw new BadRequestException('Дата операции должна быть валидной датой');
             }
 
             const operationDateOnly = new Date(
-                Date.UTC(
-                    operationDate.getUTCFullYear(),
-                    operationDate.getUTCMonth(),
-                    operationDate.getUTCDate(),
-                ),
+                Date.UTC(operationDate.getUTCFullYear(), operationDate.getUTCMonth(), operationDate.getUTCDate()),
             );
 
             const lockedPeriod = await tx.lockedPeriod.findFirst({
@@ -122,7 +119,7 @@ export class CreateOperationUseCase {
                     throw new BadRequestException(`Кошелек с ID ${entry.walletId} не найден`);
                 }
 
-                if (wallet.monthlyLimit && wallet.monthlyLimit > 0) {
+                if (entry.direction === 'credit' && wallet.monthlyLimit && wallet.monthlyLimit > 0) {
                     const now = new Date();
                     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
                     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
