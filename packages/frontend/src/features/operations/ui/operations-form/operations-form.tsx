@@ -2,12 +2,14 @@
 
 import React from 'react';
 
+import { useRouter, useSearchParams } from 'next/navigation';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CalendarIcon, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 
-import { ApplicationService, useApplicationsList } from '@/entities/application';
+import { ApplicationService, useApplicationsList, useUpdateStatusApplication } from '@/entities/application';
 import { useLockedPeriods } from '@/entities/locked-period';
 import {
     CreateOperationBackendDto,
@@ -42,6 +44,7 @@ import {
     Textarea,
     cn,
     formatDate,
+    ROUTER_MAP,
 } from '@/shared';
 import { formatNumber, parseFormattedNumber } from '@/shared/lib/utils/format-number';
 import { useBanks } from '@/entities/bank';
@@ -53,9 +56,20 @@ export function OperationForm({
     className,
     ...props
 }: { initialData?: OperationResponseDto } & React.ComponentProps<'form'>) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const createMutation = useCreateOperation();
     const updateMutation = useUpdateOperation();
+    const updateStatusMutation = useUpdateStatusApplication();
     const isEditing = Boolean(initialData);
+    const prefilledApplicationId = React.useMemo(() => {
+        if (isEditing) return undefined;
+        const raw = searchParams.get('applicationId');
+        if (!raw) return undefined;
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+    }, [isEditing, searchParams]);
+    const shouldCompleteApplicationOnCreate = !isEditing && searchParams.get('completeOnCreate') === '1';
 
     const [open, setOpen] = React.useState(false);
     const [rawInput, setRawInput] = React.useState('');
@@ -105,7 +119,7 @@ export function OperationForm({
               }
             : {
                   typeId: '',
-                  applicationId: undefined,
+                  applicationId: prefilledApplicationId,
                   description: '',
                   conversionGroupId: null,
                   banksGroupId: null,
@@ -294,7 +308,22 @@ export function OperationForm({
 
             updateMutation.mutate(updatePayload);
         } else {
-            createMutation.mutate(payload);
+            createMutation.mutate(payload, {
+                onSuccess: async () => {
+                    if (shouldCompleteApplicationOnCreate && data.applicationId && data.applicationId > 0) {
+                        try {
+                            await updateStatusMutation.mutateAsync({
+                                id: String(data.applicationId),
+                                status: 'done',
+                            });
+                        } catch {
+                            // Ошибка обновления статуса уже обработана в мутации
+                        }
+                    }
+
+                    router.push(ROUTER_MAP.OPERATIONS);
+                },
+            });
         }
     };
 

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { Fragment, useMemo, useState } from 'react';
 
@@ -89,20 +89,9 @@ export const InfiniteApplicationsList = () => {
                                                 status: 'open',
                                             });
                                         } else {
-                                            // Завершить заявку
-                                            // Если заявка с авансом и НЕТ операции - открываем создание операции
-                                            if (app.hasAdvance && !app.operationId) {
-                                                router.push(ROUTER_MAP.OPERATIONS_CREATE + '?applicationId=' + app.id);
-                                            } else if (app.hasAdvance && app.operationId) {
-                                                // Если заявка с авансом и ЕСТЬ операция - открываем редактирование операции
-                                                router.push(ROUTER_MAP.OPERATIONS_EDIT + '/' + app.operationId);
-                                            } else {
-                                                // Обычная заявка - просто меняем статус
-                                                updateStatuseApplicationMutation({
-                                                    id: app.id.toString(),
-                                                    status: 'done',
-                                                });
-                                            }
+                                            router.push(
+                                                `${ROUTER_MAP.OPERATIONS_CREATE}?applicationId=${app.id}&completeOnCreate=1`,
+                                            );
                                         }
                                     }}
                                 >

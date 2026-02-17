@@ -33,12 +33,13 @@ import {
 } from './opeartions-schemas';
 
 export const useCreateOperation = () => {
-    const router = useRouter();
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationKey: OPERATIONS_CREATE_QUERY_KEY,
         mutationFn: (data: CreateOperationBackendDto) => OperationsService.create(data),
         onSuccess: () => {
-            router.push(ROUTER_MAP.OPERATIONS);
+            queryClient.invalidateQueries({ queryKey: OPERATIONS_QUERY_KEY });
             toast.success('Справочник успешно создан');
         },
     });
