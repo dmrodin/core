@@ -33,6 +33,8 @@ export function useSetQueryParam() {
         params.set('limit', String(filters.limit ?? 100));
         if (filters.search && filters.search.trim() !== '') params.set('search', filters.search);
         if (filters.roleCode) params.set('roleCode', filters.roleCode);
+        if (filters.isHolder !== undefined) params.set('isHolder', String(filters.isHolder));
+        if (filters.isCourier !== undefined) params.set('isCourier', String(filters.isCourier));
         if (filters.blocked !== undefined) params.set('blocked', String(filters.blocked));
         if (filters.telegramNotifications !== undefined)
             params.set('telegramNotifications', String(filters.telegramNotifications));
