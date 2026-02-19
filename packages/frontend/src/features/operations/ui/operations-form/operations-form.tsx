@@ -158,14 +158,15 @@ export function OperationForm({
         return null;
     }, []);
 
-    const lockedPeriods = lockedPeriodsData?.lockedPeriods ?? [];
+    const lockedPeriods = lockedPeriodsData?.lockedPeriods;
     const lockedPeriodForDate = React.useMemo(() => {
-        if (isEditing || !lockedPeriods.length) return null;
+        const periods = lockedPeriods ?? [];
+        if (isEditing || !periods.length) return null;
         const parsedDate = parseDateValue(creatureDateValue) ?? new Date();
         const dateOnly = normalizeDate(parsedDate);
 
         return (
-            lockedPeriods.find((period) => {
+            periods.find((period) => {
                 if (!period.isActive) return false;
                 const dateFrom = new Date(period.dateFrom);
                 const dateTo = new Date(period.dateTo);

@@ -199,5 +199,3 @@ export class UpdateWalletDto {
     @IsUUID('4')
     public lastReconciledBy?: string;
 }
-
-

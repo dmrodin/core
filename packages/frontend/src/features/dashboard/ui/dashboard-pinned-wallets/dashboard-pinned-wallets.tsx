@@ -11,12 +11,11 @@ import { DashboardCurrency } from '@/features/dashboard/ui/dashboard-currency/da
 export function DashboardPinnedWallets() {
     const user = useAuthStore((state) => state.user);
     const isAdmin = user?.roles?.some((role) => role.code === UserRole.ADMIN);
+    const { data, isLoading, isError } = usePinnedWallets(isAdmin);
 
     if (!isAdmin) {
         return null;
     }
-
-    const { data, isLoading, isError } = usePinnedWallets();
 
     const currencyGroups = data?.currencyGroups ?? [];
 
