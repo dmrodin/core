@@ -17,6 +17,7 @@ import {
     Layers,
     LifeBuoy,
     ListChecks,
+    LockKeyhole,
     MessageCircle,
     Network,
     Ticket,
@@ -34,6 +35,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/shared';
+import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import { NavMain } from '@/widgets';
 import { NavSecondary } from '@/widgets';
 import { NavUser } from '@/widgets';
@@ -112,6 +114,11 @@ const data = {
             url: ROUTER_MAP.BANKS,
             icon: Building2,
         },
+        {
+            title: 'Блокировка периодов',
+            url: ROUTER_MAP.ADMIN,
+            icon: LockKeyhole,
+        },
     ],
     navSecondary: [
         {
@@ -141,6 +148,8 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
+    const currentUser = useAuthStore((state) => state.user);
+
     return (
         <Sidebar variant="inset" {...props}>
             <SidebarHeader>
@@ -170,7 +179,13 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             </SidebarContent>
             <SidebarFooter>
                 <div className="flex items-center justify-between gap-2">
-                    <NavUser user={data.user} />
+                    <NavUser
+                        user={{
+                            name: currentUser?.username ?? data.user.name,
+                            email: data.user.email,
+                            avatar: data.user.avatar,
+                        }}
+                    />
                     <ThemeToggle />
                 </div>
             </SidebarFooter>

@@ -1,9 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 import { useCurrency } from '@/entities/currency/model/use-currency';
 import { useNetworkTypes } from '@/entities/network/model/use-network-types';
@@ -11,7 +12,15 @@ import { useNetworks } from '@/entities/network/model/use-networks';
 import { usePlatforms } from '@/entities/platform';
 import { useBanks } from '@/entities/bank';
 import { useUsers } from '@/entities/users';
-import { CreateWalletFormValues, CreateWalletRequest, CreateWalletSchema, Wallet, WalletKind } from '@/entities/wallet';
+import {
+    CreateWalletFormValues,
+    CreateWalletRequest,
+    CreateWalletSchema,
+    UpdateWalletRequest,
+    UpdateWalletSchema,
+    Wallet,
+    WalletKind,
+} from '@/entities/wallet';
 import { useWalletTypes } from '@/entities/wallet-type';
 import { useCreateWallet, useUpdateWallet } from '@/features/wallets';
 
@@ -50,6 +59,10 @@ interface WalletFormProps {
     walletId?: string;
 }
 
+const EditWalletFormSchema = CreateWalletSchema.safeExtend({
+    amount: z.coerce.number().int('Сумма должна быть целым числом'),
+});
+
 export function WalletForm({ initialData, walletId }: WalletFormProps) {
     const isEditMode = !!walletId && !!initialData;
     const createWalletMutation = useCreateWallet();
@@ -62,7 +75,7 @@ export function WalletForm({ initialData, walletId }: WalletFormProps) {
     const { data: usersData } = useUsers();
 
     const form = useForm<CreateWalletFormValues>({
-        resolver: zodResolver(CreateWalletSchema),
+        resolver: zodResolver(isEditMode ? EditWalletFormSchema : CreateWalletSchema),
         defaultValues: initialData
             ? {
                   name: initialData.name,
@@ -121,7 +134,7 @@ export function WalletForm({ initialData, walletId }: WalletFormProps) {
     const walletKind = form.watch('walletKind');
     const selectedNetworkId = form.watch('details.networkId') ?? '';
 
-    const { data: networkTypesData, isLoading: isNetworkTypesLoading } = useNetworkTypes();
+    const { data: networkTypesData } = useNetworkTypes();
 
     const currencies = useMemo(() => currenciesData?.currencies ?? [], [currenciesData]);
     const networks = useMemo(() => networksData?.networks ?? [], [networksData]);
@@ -176,12 +189,38 @@ export function WalletForm({ initialData, walletId }: WalletFormProps) {
 
     const isCrypto = walletKind === WalletKind.crypto;
     const isBank = walletKind === WalletKind.bank;
+    useEffect(() => {
+        if (!isCrypto) return;
+
+        const firstNetworkTypeId = networkTypes[0]?.id;
+        const currentNetworkTypeId = form.getValues('details.networkTypeId') ?? '';
+
+        if (!firstNetworkTypeId) {
+            if (currentNetworkTypeId) {
+                form.setValue('details.networkTypeId', '', {
+                    shouldValidate: true,
+                    shouldDirty: false,
+                });
+            }
+            return;
+        }
+
+        if (currentNetworkTypeId !== firstNetworkTypeId) {
+            form.setValue('details.networkTypeId', firstNetworkTypeId, {
+                shouldValidate: true,
+                shouldDirty: false,
+            });
+        }
+    }, [isCrypto, networkTypes, form]);
 
     const onSubmit = (values: CreateWalletFormValues) => {
-        const payload: CreateWalletRequest = CreateWalletSchema.parse(values);
         if (isEditMode && updateWalletMutation) {
+            const payload: UpdateWalletRequest = UpdateWalletSchema.parse(
+                Object.fromEntries(Object.entries(values).filter(([key]) => key !== 'amount')),
+            );
             updateWalletMutation.mutate(payload);
         } else {
+            const payload: CreateWalletRequest = CreateWalletSchema.parse(values);
             createWalletMutation.mutate(payload);
         }
     };
@@ -557,7 +596,7 @@ export function WalletForm({ initialData, walletId }: WalletFormProps) {
                             />
                         </div>
 
-                        <div className="grid gap-4 md:grid-cols-2">
+                        <div className="grid gap-4 md:grid-cols-1">
                             <FormField
                                 control={form.control}
                                 name="details.networkId"
@@ -587,42 +626,6 @@ export function WalletForm({ initialData, walletId }: WalletFormProps) {
                                                 {networks.map((network) => (
                                                     <SelectItem key={network.id} value={network.id}>
                                                         {network.code} — {network.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="details.networkTypeId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            Тип сети <span className="text-destructive">*</span>
-                                        </FormLabel>
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            value={field.value ?? ''}
-                                            disabled={isNetworkTypesLoading}
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Выберите тип сети" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {isNetworkTypesLoading && (
-                                                    <SelectItem value="loading" disabled>
-                                                        Загрузка...
-                                                    </SelectItem>
-                                                )}
-                                                {networkTypes.map((networkType) => (
-                                                    <SelectItem key={networkType.id} value={networkType.id}>
-                                                        {networkType.code} — {networkType.name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>

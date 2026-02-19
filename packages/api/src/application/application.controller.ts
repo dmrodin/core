@@ -14,6 +14,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+// import { CreateOperationDto } from 'src/operation/dto/requests/create-operation.dto';
+// import { CreateOperationUseCase } from 'src/operation/use-cases/create-operation.use-case';
 import { RoleCode } from '../../prisma/generated/prisma';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -114,6 +116,24 @@ export class ApplicationController {
         @CurrentUserId() userId: string,
     ): Promise<CreateApplicationResponseDto> {
         const result = await this.createApplicationUseCase.execute(createApplicationDto, userId);
+
+        /* if (createApplicationDto.advance && createApplicationDto.advance.amount > 0) {
+            const operationDto: CreateOperationDto = {
+                typeId: createApplicationDto.operationTypeId,
+                applicationId: result.application.id,
+                creatureDate: new Date().toISOString(),
+                description: `Аванс по заявке №${result.application.id}`,
+                entries: [
+                    {
+                        amount: createApplicationDto.advance.amount,
+                        direction: OperationDirection.credit,
+                        walletId: '',
+                    },
+                ],
+            };
+
+            await this.createOperationUseCase.execute(operationDto, userId);
+        } */
 
         return {
             message: result.message,

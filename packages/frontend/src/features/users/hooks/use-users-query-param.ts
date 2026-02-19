@@ -14,6 +14,8 @@ export function useUsersQueryParams(): Partial<GetUsersParams> {
     const sortOrder = searchParams.get('sortOrder') ?? undefined;
     const search = searchParams.get('search') ?? undefined;
     const blocked = searchParams.get('blocked') !== null ? searchParams.get('blocked') === 'true' : undefined;
+    const isHolder = searchParams.get('isHolder') !== null ? searchParams.get('isHolder') === 'true' : undefined;
+    const isCourier = searchParams.get('isCourier') !== null ? searchParams.get('isCourier') === 'true' : undefined;
     const telegramNotifications =
         searchParams.get('telegramNotifications') !== null
             ? searchParams.get('telegramNotifications') === 'true'
@@ -35,10 +37,25 @@ export function useUsersQueryParams(): Partial<GetUsersParams> {
         if (sortField) params.sortField = sortField as GetUsersParams['sortField'];
         if (sortOrder) params.sortOrder = sortOrder as GetUsersParams['sortOrder'];
         if (blocked !== undefined) params.blocked = blocked;
+        if (isHolder !== undefined) params.isHolder = isHolder;
+        if (isCourier !== undefined) params.isCourier = isCourier;
         if (telegramNotifications !== undefined) params.telegramNotifications = telegramNotifications;
         if (deleted !== undefined) params.deleted = deleted;
         if (roleCode) params.roleCode = roleCode as GetUsersParams['roleCode'];
         if (telegramId) params.telegramId = telegramId;
         return params;
-    }, [search, sortField, sortOrder, blocked, telegramNotifications, deleted, roleCode, telegramId, page, limit]);
+    }, [
+        search,
+        sortField,
+        sortOrder,
+        blocked,
+        isHolder,
+        isCourier,
+        telegramNotifications,
+        deleted,
+        roleCode,
+        telegramId,
+        page,
+        limit,
+    ]);
 }

@@ -14,4 +14,12 @@ export class CreateApplicationResponseDto {
         type: ApplicationResponseDto,
     })
     public application: ApplicationResponseDto;
+
+    /* @ApiProperty({
+        description: 'Информация о созданной операции (если был аванс)',
+        type: OperationResponseDto,
+        required: false,
+        nullable: true,
+    })
+    public operation?: OperationResponseDto | undefined; */
 }

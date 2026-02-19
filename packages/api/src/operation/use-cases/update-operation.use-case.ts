@@ -186,7 +186,7 @@ export class UpdateOperationUseCase {
                     }
 
                     // Если у кошелька установлен месячный лимит, проверяем его
-                    if (wallet.monthlyLimit && wallet.monthlyLimit > 0) {
+                    if (entry.direction === 'credit' && wallet.monthlyLimit && wallet.monthlyLimit > 0) {
                         // Определяем границы текущего месяца
                         const now = new Date();
                         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);

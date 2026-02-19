@@ -74,4 +74,8 @@ export const API_MAP = {
     FEEDBACK: {
         FEEDBACK: '/feedback',
     },
+    LOCKED_PERIODS: {
+        LOCKED_PERIODS: '/locked-periods',
+        OPEN_LOCKED_PERIOD: (id: string) => `/locked-periods/${id}/open`,
+    },
 };

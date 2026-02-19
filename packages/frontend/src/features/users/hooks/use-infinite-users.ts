@@ -30,6 +30,8 @@ export const useInfiniteUsers = (filters?: GetUsersParams, defaultLimit = 100) =
             };
             if (queryFilters.search) safeFilters.search = queryFilters.search;
             if (queryFilters.blocked !== undefined) safeFilters.blocked = queryFilters.blocked;
+            if (queryFilters.isHolder !== undefined) safeFilters.isHolder = queryFilters.isHolder;
+            if (queryFilters.isCourier !== undefined) safeFilters.isCourier = queryFilters.isCourier;
             if (queryFilters.telegramNotifications !== undefined)
                 safeFilters.telegramNotifications = queryFilters.telegramNotifications;
             if (queryFilters.deleted !== undefined) safeFilters.deleted = queryFilters.deleted;

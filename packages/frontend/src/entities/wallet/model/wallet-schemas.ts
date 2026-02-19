@@ -280,6 +280,8 @@ export const CreateWalletSchema = z
         }
     });
 
+export const UpdateWalletSchema = CreateWalletSchema.partial({ amount: true });
+
 export const GetWalletsFilterSchema = z.object({
     search: z.string().optional(),
 
@@ -329,3 +331,4 @@ export type GetWalletsResponseDto = z.infer<typeof GetWalletsResponseDtoSchema>;
 export type WalletDetailsCreate = NonNullable<z.infer<typeof WalletDetailsCreateSchema>>;
 export type CreateWalletRequest = z.infer<typeof CreateWalletSchema>;
 export type CreateWalletFormValues = z.input<typeof CreateWalletSchema>;
+export type UpdateWalletRequest = z.infer<typeof UpdateWalletSchema>;

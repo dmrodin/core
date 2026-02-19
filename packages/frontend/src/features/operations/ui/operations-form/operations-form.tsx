@@ -2,12 +2,15 @@
 
 import React from 'react';
 
+import { useRouter, useSearchParams } from 'next/navigation';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CalendarIcon, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 
-import { ApplicationService, useApplicationsList } from '@/entities/application';
+import { ApplicationService, useApplicationsList, useUpdateStatusApplication } from '@/entities/application';
+import { useLockedPeriods } from '@/entities/locked-period';
 import {
     CreateOperationBackendDto,
     CreateOperationDto,
@@ -41,17 +44,32 @@ import {
     Textarea,
     cn,
     formatDate,
+    ROUTER_MAP,
 } from '@/shared';
 import { formatNumber, parseFormattedNumber } from '@/shared/lib/utils/format-number';
 import { useBanks } from '@/entities/bank';
+
+const SINGLE_SIDE_OPERATION_NAMES = new Set(['аванс', 'зачисление', 'расход', 'корректировка']);
 
 export function OperationForm({
     initialData,
     className,
     ...props
 }: { initialData?: OperationResponseDto } & React.ComponentProps<'form'>) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const createMutation = useCreateOperation();
     const updateMutation = useUpdateOperation();
+    const updateStatusMutation = useUpdateStatusApplication();
+    const isEditing = Boolean(initialData);
+    const prefilledApplicationId = React.useMemo(() => {
+        if (isEditing) return undefined;
+        const raw = searchParams.get('applicationId');
+        if (!raw) return undefined;
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+    }, [isEditing, searchParams]);
+    const shouldCompleteApplicationOnCreate = !isEditing && searchParams.get('completeOnCreate') === '1';
 
     const [open, setOpen] = React.useState(false);
     const [rawInput, setRawInput] = React.useState('');
@@ -61,6 +79,7 @@ export function OperationForm({
     const { data: banks } = useBanks();
     const { data: operationTypes, isLoading: isOperationTypesLoading } = useOperationTypes();
     const { data: applications, isLoading: isApplicationsLoading } = useApplicationsList();
+    const { data: lockedPeriodsData } = useLockedPeriods();
 
     // Получаем текущую заявку операции, если она есть (даже если завершена)
     const currentApplicationId = initialData?.applicationId;
@@ -100,7 +119,7 @@ export function OperationForm({
               }
             : {
                   typeId: '',
-                  applicationId: undefined,
+                  applicationId: prefilledApplicationId,
                   description: '',
                   conversionGroupId: null,
                   banksGroupId: null,
@@ -115,6 +134,58 @@ export function OperationForm({
     });
 
     const entries = form.watch('entries');
+    const creatureDateValue = form.watch('creatureDate');
+
+    const normalizeDate = React.useCallback(
+        (value: Date) => new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate())),
+        [],
+    );
+
+    const parseDateValue = React.useCallback((value?: string) => {
+        if (!value) return null;
+        if (value.includes('T')) {
+            const parsed = new Date(value);
+            return Number.isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        const parts = value.split('.');
+        if (parts.length === 3) {
+            const [dd, mm, yyyy] = parts.map(Number);
+            const parsed = new Date(Date.UTC(yyyy, mm - 1, dd));
+            return Number.isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        return null;
+    }, []);
+
+    const lockedPeriods = lockedPeriodsData?.lockedPeriods ?? [];
+    const lockedPeriodForDate = React.useMemo(() => {
+        if (isEditing || !lockedPeriods.length) return null;
+        const parsedDate = parseDateValue(creatureDateValue) ?? new Date();
+        const dateOnly = normalizeDate(parsedDate);
+
+        return (
+            lockedPeriods.find((period) => {
+                if (!period.isActive) return false;
+                const dateFrom = new Date(period.dateFrom);
+                const dateTo = new Date(period.dateTo);
+                if (Number.isNaN(dateFrom.getTime()) || Number.isNaN(dateTo.getTime())) return false;
+                const fromOnly = normalizeDate(dateFrom);
+                const toOnly = normalizeDate(dateTo);
+                return dateOnly >= fromOnly && dateOnly <= toOnly;
+            }) ?? null
+        );
+    }, [creatureDateValue, isEditing, lockedPeriods, normalizeDate, parseDateValue]);
+
+    const isCreateBlocked = Boolean(lockedPeriodForDate);
+
+    const formatRange = (dateFrom: string, dateTo: string) => {
+        const from = new Date(dateFrom);
+        const to = new Date(dateTo);
+        const fromLabel = Number.isNaN(from.getTime()) ? '-' : formatDate(from);
+        const toLabel = Number.isNaN(to.getTime()) ? '-' : formatDate(to);
+        return `${fromLabel} - ${toLabel}`;
+    };
 
     const isBankDisabled =
         !entries.length ||
@@ -127,6 +198,9 @@ export function OperationForm({
     const selectedOperationType = operationTypes?.find((type) => type.id === selectedTypeId);
     const isCorrection = selectedOperationType?.isCorrection ?? false;
     const isConversion = selectedOperationType?.isConversion ?? false;
+    const isSingleSideOperation = selectedOperationType
+        ? SINGLE_SIDE_OPERATION_NAMES.has(selectedOperationType.name.trim().toLocaleLowerCase('ru'))
+        : false;
 
     const isCreditAllowed = selectedOperationType?.isCredit ?? false;
     const isDebitAllowed = selectedOperationType?.isDebit ?? false;
@@ -157,6 +231,24 @@ export function OperationForm({
     }, [isCorrection, fields.length, remove, append]);
 
     const onSubmit = (data: CreateOperationDto) => {
+        if (!isEditing && isCreateBlocked) {
+            return;
+        }
+
+        form.clearErrors('entries');
+        if (!isSingleSideOperation) {
+            const hasDebitEntry = data.entries.some((entry) => entry.direction === 'debit');
+            const hasCreditEntry = data.entries.some((entry) => entry.direction === 'credit');
+
+            if (!hasDebitEntry || !hasCreditEntry) {
+                form.setError('entries', {
+                    type: 'manual',
+                    message: 'Для этого типа операции заполните обе стороны: "Вычесть из..." и "Прибавить к...".',
+                });
+                return;
+            }
+        }
+
         if (!data.creatureDate) {
             data.creatureDate = new Date().toISOString();
         }
@@ -216,15 +308,34 @@ export function OperationForm({
 
             updateMutation.mutate(updatePayload);
         } else {
-            createMutation.mutate(payload);
+            createMutation.mutate(payload, {
+                onSuccess: async () => {
+                    if (shouldCompleteApplicationOnCreate && data.applicationId && data.applicationId > 0) {
+                        try {
+                            await updateStatusMutation.mutateAsync({
+                                id: String(data.applicationId),
+                                status: 'done',
+                            });
+                        } catch {
+                            // Ошибка обновления статуса уже обработана в мутации
+                        }
+                    }
+
+                    router.push(ROUTER_MAP.OPERATIONS);
+                },
+            });
         }
     };
-
-    const isEditing = Boolean(initialData);
 
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className={cn('flex flex-col gap-6', className)} {...props}>
+                {!isEditing && lockedPeriodForDate && (
+                    <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                        Создание операций запрещено в период{' '}
+                        {formatRange(lockedPeriodForDate.dateFrom, lockedPeriodForDate.dateTo)}.
+                    </div>
+                )}
                 <div className={cn('grid grid-cols-1 gap-4', isConversion ? 'md:grid-cols-2' : 'md:grid-cols-3')}>
                     {/* Тип операции */}
                     {/* isDebit - {isDebit ? 'true' : 'false'}, isCredit -{' '}
@@ -472,9 +583,13 @@ export function OperationForm({
                                                             const matchesSearch = wallet.name
                                                                 .toLowerCase()
                                                                 .includes(walletSearch.toLowerCase());
-                                                            const isActive = wallet.active;
+                                                            const isSelectable =
+                                                                wallet.active && wallet.visible && !wallet.deleted;
                                                             const isSelected = wallet.id === field.value;
-                                                            return matchesSearch && (isActive || isSelected);
+                                                            return (
+                                                                matchesSearch &&
+                                                                (isEditing ? isSelectable || isSelected : isSelectable)
+                                                            );
                                                         })
                                                         .map((wallet) => (
                                                             <SelectItem key={wallet.id} value={wallet.id}>
@@ -520,6 +635,16 @@ export function OperationForm({
                                                         }
                                                         const parsed = parseFormattedNumber(value);
                                                         field.onChange(isNaN(parsed) ? '' : parsed);
+                                                    }}
+                                                    onFocus={() => {
+                                                        if (field.value === 0) {
+                                                            field.onChange('');
+                                                        }
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        if (!e.currentTarget.value.trim()) {
+                                                            field.onChange(0);
+                                                        }
                                                     }}
                                                     placeholder="0"
                                                     inputMode="numeric"
@@ -595,10 +720,16 @@ export function OperationForm({
                                                                         const matchesSearch = wallet.name
                                                                             .toLowerCase()
                                                                             .includes(walletSearch.toLowerCase());
-                                                                        const isActive = wallet.active;
+                                                                        const isSelectable =
+                                                                            wallet.active &&
+                                                                            wallet.visible &&
+                                                                            !wallet.deleted;
                                                                         const isSelected = wallet.id === field.value;
                                                                         return (
-                                                                            matchesSearch && (isActive || isSelected)
+                                                                            matchesSearch &&
+                                                                            (isEditing
+                                                                                ? isSelectable || isSelected
+                                                                                : isSelectable)
                                                                         );
                                                                     })
                                                                     .map((wallet) => (
@@ -635,14 +766,14 @@ export function OperationForm({
                                                                     const numValue = parseFloat(value);
                                                                     field.onChange(isNaN(numValue) ? '' : numValue);
                                                                 }}
-                                                                onFocus={(e) => {
-                                                                    if (e.currentTarget.value === '0') {
-                                                                        e.currentTarget.value = '';
+                                                                onFocus={() => {
+                                                                    if (field.value === 0) {
+                                                                        field.onChange('');
                                                                     }
                                                                 }}
                                                                 onBlur={(e) => {
                                                                     if (e.currentTarget.value === '') {
-                                                                        e.currentTarget.value = '0';
+                                                                        field.onChange(0);
                                                                     }
                                                                 }}
                                                                 className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
@@ -670,6 +801,9 @@ export function OperationForm({
                 )}
 
                 {/* Описание */}
+                {typeof form.formState.errors.entries?.message === 'string' && (
+                    <p className="text-sm text-destructive">{form.formState.errors.entries.message}</p>
+                )}
                 <FormField
                     control={form.control}
                     name="description"
@@ -684,7 +818,10 @@ export function OperationForm({
                     )}
                 />
 
-                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                <Button
+                    type="submit"
+                    disabled={createMutation.isPending || updateMutation.isPending || (!isEditing && isCreateBlocked)}
+                >
                     {isEditing
                         ? updateMutation.isPending
                             ? 'Сохранение...'
