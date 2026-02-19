@@ -25,7 +25,7 @@ self.addEventListener('fetch', (event) => {
                     if (preload) return preload;
 
                     return await fetch(event.request);
-                } catch (_) {
+                } catch {
                     return caches.match(OFFLINE_URL);
                 }
             })(),

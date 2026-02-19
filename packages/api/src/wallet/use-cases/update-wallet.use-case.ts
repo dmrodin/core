@@ -1,9 +1,9 @@
 ﻿import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { WalletKind } from 'prisma/generated/prisma';
 
-import { TelegramBotType } from '../../feedback/types/telegram-bot.types';
-import { TelegramService } from '../../feedback/telegram.service';
 import { PrismaService } from '../../common/services/prisma.service';
+import { TelegramService } from '../../feedback/telegram.service';
+import { TelegramBotType } from '../../feedback/types/telegram-bot.types';
 import { UpdateWalletDto } from '../dto';
 import { UpdateWalletOutput } from '../types';
 
@@ -197,8 +197,13 @@ export class UpdateWalletUseCase {
 
         if (isCryptoAddressChanged || isCardBankRequisitesChanged) {
             const changeLabels: string[] = [];
-            if (isCryptoAddressChanged) changeLabels.push('изменен адрес криптокошелька');
-            if (isCardBankRequisitesChanged) changeLabels.push('изменены реквизиты банка у карты');
+
+            if (isCryptoAddressChanged) {
+                changeLabels.push('изменен адрес криптокошелька');
+            }
+            if (isCardBankRequisitesChanged) {
+                changeLabels.push('изменены реквизиты банка у карты');
+            }
 
             const message = [
                 '🔔 <b>Изменение реквизитов кошелька</b>',
@@ -224,4 +229,3 @@ export class UpdateWalletUseCase {
         };
     }
 }
-

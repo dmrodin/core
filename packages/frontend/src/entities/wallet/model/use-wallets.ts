@@ -13,10 +13,11 @@ import {
     WALLETS_WITH_FILTERS_KEY,
 } from '@/shared/utils/constants/wallets-query-key';
 
-export const usePinnedWallets = () => {
+export const usePinnedWallets = (enabled = true) => {
     const queryResult = useQuery({
         queryKey: PINNED_WALLETS_QUERY_KEY,
         queryFn: () => WalletService.getPinnedWallets(),
+        enabled,
     });
 
     useEffect(() => {

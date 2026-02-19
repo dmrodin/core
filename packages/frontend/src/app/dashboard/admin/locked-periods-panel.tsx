@@ -6,11 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { LockOpen, Plus } from 'lucide-react';
 
-import {
-    CreateLockedPeriodRequest,
-    CreateLockedPeriodSchema,
-    useLockedPeriods,
-} from '@/entities/locked-period';
+import { CreateLockedPeriodRequest, CreateLockedPeriodSchema, useLockedPeriods } from '@/entities/locked-period';
 import { useCreateLockedPeriod, useOpenLockedPeriod } from '@/features/locked-periods';
 import {
     AlertDialog,
