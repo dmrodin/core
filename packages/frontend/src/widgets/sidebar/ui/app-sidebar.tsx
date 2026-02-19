@@ -17,6 +17,7 @@ import {
     Layers,
     LifeBuoy,
     ListChecks,
+    LockKeyhole,
     MessageCircle,
     Network,
     Ticket,
@@ -112,6 +113,11 @@ const data = {
             title: 'Банки',
             url: ROUTER_MAP.BANKS,
             icon: Building2,
+        },
+        {
+            title: 'Блокировка периодов',
+            url: ROUTER_MAP.ADMIN,
+            icon: LockKeyhole,
         },
     ],
     navSecondary: [
