@@ -59,7 +59,7 @@ export const useApplications = (id: number) => {
     });
 };
 
-export const useInfiniteApplications = (filters?: GetApplicationsFilters, defaultLimit = 100) => {
+export const useInfiniteApplications = (filters?: GetApplicationsFilters, defaultLimit = 100, enabled = true) => {
     return useInfiniteQuery<
         GetApplicationsResponse,
         Error,
@@ -100,6 +100,7 @@ export const useInfiniteApplications = (filters?: GetApplicationsFilters, defaul
             const { page } = firstPage.pagination;
             return page > 1 ? page - 1 : undefined;
         },
+        enabled,
     });
 };
 
