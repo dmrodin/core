@@ -10,6 +10,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 
 import { ApplicationService, useApplicationsList, useUpdateStatusApplication } from '@/entities/application';
+import { UserRole } from '@/entities/users/model/user-schemas';
 import { useLockedPeriods } from '@/entities/locked-period';
 import {
     CreateOperationBackendDto,
@@ -48,6 +49,7 @@ import {
 } from '@/shared';
 import { formatNumber, parseFormattedNumber } from '@/shared/lib/utils/format-number';
 import { useBanks } from '@/entities/bank';
+import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 
 const SINGLE_SIDE_OPERATION_NAMES = new Set(['аванс', 'зачисление', 'расход', 'корректировка']);
 
@@ -58,6 +60,12 @@ export function OperationForm({
 }: { initialData?: OperationResponseDto } & React.ComponentProps<'form'>) {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const user = useAuthStore((state) => state.user);
+    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
+    const isRestrictedRole =
+        !hasAdminRole &&
+        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
+    const canLoadApplications = Boolean(user) && !isRestrictedRole;
     const createMutation = useCreateOperation();
     const updateMutation = useUpdateOperation();
     const updateStatusMutation = useUpdateStatusApplication();
@@ -78,7 +86,7 @@ export function OperationForm({
     const { data: wallets } = useWallets();
     const { data: banks } = useBanks();
     const { data: operationTypes, isLoading: isOperationTypesLoading } = useOperationTypes();
-    const { data: applications, isLoading: isApplicationsLoading } = useApplicationsList();
+    const { data: applications, isLoading: isApplicationsLoading } = useApplicationsList(canLoadApplications);
     const { data: lockedPeriodsData } = useLockedPeriods();
 
     // Получаем текущую заявку операции, если она есть (даже если завершена)
@@ -86,7 +94,7 @@ export function OperationForm({
     const { data: currentApplication } = useQuery({
         queryKey: ['application', currentApplicationId],
         queryFn: () => (currentApplicationId ? ApplicationService.getById(String(currentApplicationId)) : null),
-        enabled: !!currentApplicationId,
+        enabled: !!currentApplicationId && canLoadApplications,
     });
 
     // Объединяем открытые заявки и текущую заявку (если она завершена)

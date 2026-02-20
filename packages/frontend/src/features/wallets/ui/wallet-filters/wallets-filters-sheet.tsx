@@ -59,10 +59,11 @@ export function WalletsFiltersSheet({
 }) {
     const [sheetOpen, setSheetOpen] = useState(false);
     const user = useAuthStore((state) => state.user);
-    const hasElevatedRole =
-        user?.roles?.some((role) => role.code === UserRole.ADMIN || role.code === UserRole.MODERATOR) ?? false;
-    const isUserRole = (user?.roles?.some((role) => role.code === UserRole.USER) ?? false) && !hasElevatedRole;
-    const canLoadReferenceFilters = Boolean(user) && !isUserRole;
+    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
+    const isRestrictedRole =
+        !hasAdminRole &&
+        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
+    const canLoadReferenceFilters = Boolean(user) && !isRestrictedRole;
 
     const { data: currencies } = useCurrency(canLoadReferenceFilters);
     const { data: users } = useUsers(canLoadReferenceFilters);

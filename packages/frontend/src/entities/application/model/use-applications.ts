@@ -120,7 +120,7 @@ export const useDeleteApplication = (filters?: GetApplicationsFilters) => {
     });
 };
 
-export const useApplicationsList = () => {
+export const useApplicationsList = (enabled = true) => {
     return useQuery({
         queryKey: ['applications', 'list', 'open'],
         queryFn: () =>
@@ -129,6 +129,7 @@ export const useApplicationsList = () => {
                 limit: 100,
                 status: 'open',
             }),
+        enabled,
     });
 };
 
