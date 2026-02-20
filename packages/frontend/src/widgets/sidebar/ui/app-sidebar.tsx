@@ -35,6 +35,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/shared';
+import { UserRole } from '@/entities/users/model/user-schemas';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import { NavMain } from '@/widgets';
 import { NavSecondary } from '@/widgets';
@@ -147,8 +148,25 @@ const data = {
     ],
 };
 
+const USER_RESTRICTED_NAV_URLS = new Set<string>([
+    ROUTER_MAP.USERS,
+    ROUTER_MAP.CURRENCIES,
+    ROUTER_MAP.NETWORKS,
+    ROUTER_MAP.NETWORK_TYPES,
+    ROUTER_MAP.OPERATION_TYPES,
+    ROUTER_MAP.WALLET_TYPES,
+    ROUTER_MAP.PLATFORMS,
+    ROUTER_MAP.BANKS,
+]);
+
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     const currentUser = useAuthStore((state) => state.user);
+    const hasElevatedRole =
+        currentUser?.roles?.some((role) => role.code === UserRole.ADMIN || role.code === UserRole.MODERATOR) ?? false;
+    const isUserRole = (currentUser?.roles?.some((role) => role.code === UserRole.USER) ?? false) && !hasElevatedRole;
+    const navMainItems = isUserRole
+        ? data.navMain.filter((item) => !USER_RESTRICTED_NAV_URLS.has(item.url))
+        : data.navMain;
 
     return (
         <Sidebar variant="inset" {...props}>
@@ -173,7 +191,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
-                <NavMain items={data.navMain} label="Главное" />
+                <NavMain items={navMainItems} label="Главное" />
                 <NavSecondary items={data.projects} label="Данные" />
                 <NavSecondary items={data.navSecondary} className="mt-auto" label="Другое" />
             </SidebarContent>

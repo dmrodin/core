@@ -5,8 +5,10 @@ import { FilterIcon } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 
 import { useCurrency } from '@/entities/currency';
+import { UserRole } from '@/entities/users/model/user-schemas';
 import { useUsers } from '@/entities/users';
 import { BalanceStatus, GetWalletsFilter, SortOrder, WalletKind, WalletSortField } from '@/entities/wallet';
+import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import {
     Badge,
     Button,
@@ -56,8 +58,14 @@ export function WalletsFiltersSheet({
     baseFilters: GetWalletsFilter;
 }) {
     const [sheetOpen, setSheetOpen] = useState(false);
-    const { data: currencies } = useCurrency();
-    const { data: users } = useUsers();
+    const user = useAuthStore((state) => state.user);
+    const hasElevatedRole =
+        user?.roles?.some((role) => role.code === UserRole.ADMIN || role.code === UserRole.MODERATOR) ?? false;
+    const isUserRole = (user?.roles?.some((role) => role.code === UserRole.USER) ?? false) && !hasElevatedRole;
+    const canLoadReferenceFilters = Boolean(user) && !isUserRole;
+
+    const { data: currencies } = useCurrency(canLoadReferenceFilters);
+    const { data: users } = useUsers(canLoadReferenceFilters);
 
     const [localFilters, setLocalFilters] = useState<Partial<GetWalletsFilter>>({});
 
