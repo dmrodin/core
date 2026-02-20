@@ -161,10 +161,12 @@ const USER_RESTRICTED_NAV_URLS = new Set<string>([
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     const currentUser = useAuthStore((state) => state.user);
-    const hasElevatedRole =
-        currentUser?.roles?.some((role) => role.code === UserRole.ADMIN || role.code === UserRole.MODERATOR) ?? false;
-    const isUserRole = (currentUser?.roles?.some((role) => role.code === UserRole.USER) ?? false) && !hasElevatedRole;
-    const navMainItems = isUserRole
+    const hasAdminRole = currentUser?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
+    const isRestrictedRole =
+        !hasAdminRole &&
+        (currentUser?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ??
+            false);
+    const navMainItems = isRestrictedRole
         ? data.navMain.filter((item) => !USER_RESTRICTED_NAV_URLS.has(item.url))
         : data.navMain;
 

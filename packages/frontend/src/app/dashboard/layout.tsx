@@ -39,12 +39,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const router = useRouter();
     const user = useAuthStore((state) => state.user);
 
-    const hasElevatedRole =
-        user?.roles?.some((role) => role.code === UserRole.ADMIN || role.code === UserRole.MODERATOR) ?? false;
-    const isUserRole = (user?.roles?.some((role) => role.code === UserRole.USER) ?? false) && !hasElevatedRole;
+    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
+    const isRestrictedRole =
+        !hasAdminRole &&
+        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
 
     useEffect(() => {
-        if (!isUserRole) return;
+        if (!isRestrictedRole) return;
 
         const isRestrictedRoute = USER_RESTRICTED_ROUTE_PREFIXES.some(
             (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
@@ -53,7 +54,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         if (isRestrictedRoute) {
             router.replace(ROUTER_MAP.DASHBOARD);
         }
-    }, [isUserRole, pathname, router]);
+    }, [isRestrictedRole, pathname, router]);
 
     return (
         <SidebarProvider>
