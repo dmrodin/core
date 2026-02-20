@@ -9,7 +9,9 @@ import { Input } from '@/shared/ui/shadcn/input';
 import { Badge } from '@/shared/ui/shadcn/badge';
 
 import { useCurrencies } from '@/entities/currency/model/use-currencies';
+import { UserRole } from '@/entities/users/model/user-schemas';
 import { useUsers } from '@/entities/users/model/use-users';
+import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import { useAnalyticsFilters } from '@/features/analytics/hook/use-analytics-filters';
 import { Button } from '@/shared/ui/shadcn/button';
 import { Calendar } from '@/shared/ui/shadcn/calendar';
@@ -19,9 +21,16 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/shadcn/popo
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/shared/ui/shadcn/sheet';
 
 export const AnalyticsFilters = () => {
+    const user = useAuthStore((state) => state.user);
+    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
+    const isRestrictedRole =
+        !hasAdminRole &&
+        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
+    const canLoadReferenceData = Boolean(user) && !isRestrictedRole;
+
     const { filters, setFilters, resetFilters } = useAnalyticsFilters();
-    const { data: currenciesData } = useCurrencies();
-    const { data: usersData } = useUsers();
+    const { data: currenciesData } = useCurrencies(undefined, canLoadReferenceData);
+    const { data: usersData } = useUsers(canLoadReferenceData);
     const [sheetOpen, setSheetOpen] = useState(false);
     const [dateFromOpen, setDateFromOpen] = useState(false);
     const [dateToOpen, setDateToOpen] = useState(false);

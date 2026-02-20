@@ -31,7 +31,7 @@ export const useLogin = () => {
             setUser(data.user);
 
             if (env.USE_DEV_AUTH_MARKER) {
-                await setAuthMarker();
+                void setAuthMarker();
             }
 
             toast.success('Вход выполнен успешно');

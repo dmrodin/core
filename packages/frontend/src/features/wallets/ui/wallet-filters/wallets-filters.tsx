@@ -3,8 +3,10 @@
 import { UseFormReturn } from 'react-hook-form';
 
 import { useCurrency } from '@/entities/currency';
+import { UserRole } from '@/entities/users/model/user-schemas';
 import { useUsers } from '@/entities/users';
 import { BalanceStatus, GetWalletsFilter, SortOrder, WalletKind } from '@/entities/wallet';
+import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import { Button } from '@/shared/ui/shadcn/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/shadcn/form';
 import { Input } from '@/shared/ui/shadcn/input';
@@ -25,8 +27,15 @@ const balanceStatusLabels: Record<BalanceStatus, string> = {
 };
 
 export function WalletsFilters({ form }: { form: UseFormReturn<GetWalletsFilter> }) {
-    const { data: currencies } = useCurrency();
-    const { data: users } = useUsers();
+    const user = useAuthStore((state) => state.user);
+    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
+    const isRestrictedRole =
+        !hasAdminRole &&
+        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
+    const canLoadReferenceFilters = Boolean(user) && !isRestrictedRole;
+
+    const { data: currencies } = useCurrency(canLoadReferenceFilters);
+    const { data: users } = useUsers(canLoadReferenceFilters);
 
     return (
         <Form {...form}>

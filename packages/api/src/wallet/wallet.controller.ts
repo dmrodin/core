@@ -106,7 +106,7 @@ export class WalletController {
 
     @Get('aggregation')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить агрегацию кошельков',
         description:
@@ -126,7 +126,7 @@ export class WalletController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить список кошельков',
         description:
@@ -174,7 +174,7 @@ export class WalletController {
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить кошелек по ID',
         description: 'Возвращает информацию о конкретном кошельке. Доступно только администраторам.',
@@ -194,7 +194,7 @@ export class WalletController {
 
     @Get(':id/monthly-limit')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить месячный лимит кошелька',
         description:
@@ -295,7 +295,7 @@ export class WalletController {
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Частично обновить кошелек',
         description:

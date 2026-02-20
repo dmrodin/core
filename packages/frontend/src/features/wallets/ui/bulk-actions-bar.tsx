@@ -23,6 +23,7 @@ interface BulkActionsBarProps {
     totalCount: number;
     onSelectAll: () => void;
     onCancelAll: () => void;
+    isUserRole?: boolean;
 }
 
 export function BulkActionsBar({
@@ -37,6 +38,7 @@ export function BulkActionsBar({
     totalCount,
     onSelectAll,
     onCancelAll,
+    isUserRole = false,
 }: BulkActionsBarProps) {
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -110,10 +112,16 @@ export function BulkActionsBar({
                                 />
                             </div>
                         </div>
-                        <DropdownMenuItem onSelect={() => handleAction(() => onToggleVisible(false))}>
+                        <DropdownMenuItem
+                            className={isUserRole ? 'hidden' : ''}
+                            onSelect={() => handleAction(() => onToggleVisible(false))}
+                        >
                             Скрыть
                         </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleAction(() => onToggleVisible(true))}>
+                        <DropdownMenuItem
+                            className={isUserRole ? 'hidden' : ''}
+                            onSelect={() => handleAction(() => onToggleVisible(true))}
+                        >
                             Показать
                         </DropdownMenuItem>
                         <DropdownMenuItem onSelect={() => handleAction(() => onTogglePinned(true))}>
@@ -122,19 +130,34 @@ export function BulkActionsBar({
                         <DropdownMenuItem onSelect={() => handleAction(() => onTogglePinned(false))}>
                             Открепить
                         </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleAction(() => onTogglePinOnMain(true))}>
+                        <DropdownMenuItem
+                            className={isUserRole ? 'hidden' : ''}
+                            onSelect={() => handleAction(() => onTogglePinOnMain(true))}
+                        >
                             Закрепить на главной
                         </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleAction(() => onTogglePinOnMain(false))}>
+                        <DropdownMenuItem
+                            className={isUserRole ? 'hidden' : ''}
+                            onSelect={() => handleAction(() => onTogglePinOnMain(false))}
+                        >
                             Открепить с главной
                         </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleAction(() => onToggleActive(false))}>
+                        <DropdownMenuItem
+                            className={isUserRole ? 'hidden' : ''}
+                            onSelect={() => handleAction(() => onToggleActive(false))}
+                        >
                             Деактивировать
                         </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleAction(() => onToggleActive(true))}>
+                        <DropdownMenuItem
+                            className={isUserRole ? 'hidden' : ''}
+                            onSelect={() => handleAction(() => onToggleActive(true))}
+                        >
                             Активировать
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive/60" onSelect={() => handleAction(onDelete)}>
+                        <DropdownMenuItem
+                            className={isUserRole ? 'hidden' : 'text-destructive/60'}
+                            onSelect={() => handleAction(onDelete)}
+                        >
                             Удалить
                         </DropdownMenuItem>
                     </DropdownMenuContent>

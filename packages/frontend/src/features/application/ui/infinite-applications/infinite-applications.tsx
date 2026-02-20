@@ -14,6 +14,8 @@ import {
     useInfiniteApplications,
     useUpdateStatusApplication,
 } from '@/entities/application';
+import { UserRole } from '@/entities/users/model/user-schemas';
+import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import { OperationViewDialog } from '@/features/operations';
 import {
     DropdownMenu,
@@ -33,16 +35,31 @@ import { useLastItemObserver } from '@/shared/lib/hooks/use-last-Item-observer';
 
 export const InfiniteApplicationsList = () => {
     const router = useRouter();
+    const user = useAuthStore((state) => state.user);
+    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
+    const isRestrictedRole =
+        !hasAdminRole &&
+        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
+    const canLoadApplications = Boolean(user) && !isRestrictedRole;
+
     const params = useApplicationsQueryParams();
     const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
 
-    const { data: infiniteData, isLoading, fetchNextPage, hasNextPage } = useInfiniteApplications(params);
+    const {
+        data: infiniteData,
+        isLoading,
+        fetchNextPage,
+        hasNextPage,
+    } = useInfiniteApplications(params, 10, canLoadApplications);
 
     const { mutate: deleteApplicationMutation } = useDeleteApplication(params);
     const { mutate: updateStatuseApplicationMutation } = useUpdateStatusApplication();
     const { copyApplication } = useCopyApplication();
 
-    const applications = useMemo(() => infiniteData?.pages.flatMap((page) => page.applications) || [], [infiniteData]);
+    const applications = useMemo(
+        () => (canLoadApplications ? infiniteData?.pages.flatMap((page) => page.applications) || [] : []),
+        [canLoadApplications, infiniteData],
+    );
 
     const lastApplicationRef = useLastItemObserver<HTMLDivElement>(fetchNextPage, isLoading, hasNextPage);
 

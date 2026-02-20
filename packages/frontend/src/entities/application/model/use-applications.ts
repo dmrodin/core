@@ -59,7 +59,7 @@ export const useApplications = (id: number) => {
     });
 };
 
-export const useInfiniteApplications = (filters?: GetApplicationsFilters, defaultLimit = 100) => {
+export const useInfiniteApplications = (filters?: GetApplicationsFilters, defaultLimit = 100, enabled = true) => {
     return useInfiniteQuery<
         GetApplicationsResponse,
         Error,
@@ -100,6 +100,7 @@ export const useInfiniteApplications = (filters?: GetApplicationsFilters, defaul
             const { page } = firstPage.pagination;
             return page > 1 ? page - 1 : undefined;
         },
+        enabled,
     });
 };
 
@@ -120,7 +121,7 @@ export const useDeleteApplication = (filters?: GetApplicationsFilters) => {
     });
 };
 
-export const useApplicationsList = () => {
+export const useApplicationsList = (enabled = true) => {
     return useQuery({
         queryKey: ['applications', 'list', 'open'],
         queryFn: () =>
@@ -129,6 +130,7 @@ export const useApplicationsList = () => {
                 limit: 100,
                 status: 'open',
             }),
+        enabled,
     });
 };
 

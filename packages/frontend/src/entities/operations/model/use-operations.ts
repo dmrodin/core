@@ -78,7 +78,7 @@ type OperationFilterWithPagination = GetOperationsParams & {
     limit?: number;
 };
 
-export const useInfiniteOperations = (filters?: GetOperationsParams, defaultLimit = 100) => {
+export const useInfiniteOperations = (filters?: GetOperationsParams, defaultLimit = 100, enabled = true) => {
     return useInfiniteQuery<
         GetOperationsResponseDto,
         Error,
@@ -86,6 +86,7 @@ export const useInfiniteOperations = (filters?: GetOperationsParams, defaultLimi
         [string, GetOperationsParams | undefined]
     >({
         queryKey: OPERATIONS_WITH_FILTERS_KEY(filters),
+        enabled,
 
         queryFn: async (context: QueryFunctionContext<[string, GetOperationsParams | undefined]>) => {
             const rawPageParam = context.pageParam;

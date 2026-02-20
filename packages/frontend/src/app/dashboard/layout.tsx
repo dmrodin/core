@@ -1,9 +1,13 @@
 'use client';
 
+import { useEffect } from 'react';
+
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { FileText, Plus, Wallet } from 'lucide-react';
 
+import { UserRole } from '@/entities/users/model/user-schemas';
+import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import { ReportsSheet } from '@/features/reports';
 import { useIsMobile, Button, ROUTER_MAP } from '@/shared';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/shared';
@@ -18,9 +22,43 @@ interface DashboardLayoutProps {
     children: React.ReactNode;
 }
 
+const USER_RESTRICTED_ROUTE_PREFIXES = [
+    ROUTER_MAP.USERS,
+    ROUTER_MAP.CURRENCIES,
+    ROUTER_MAP.NETWORKS,
+    ROUTER_MAP.NETWORK_TYPES,
+    ROUTER_MAP.OPERATION_TYPES,
+    ROUTER_MAP.WALLET_TYPES,
+    ROUTER_MAP.PLATFORMS,
+    ROUTER_MAP.BANKS,
+];
+
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const { isTablet } = useIsMobile();
+    const pathname = usePathname();
     const router = useRouter();
+    const user = useAuthStore((state) => state.user);
+    const token = useAuthStore((state) => state.token);
+    const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
+
+    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
+    const isAuthResolving = !isAuthInitialized || (Boolean(token) && !user);
+    const isRestrictedRole =
+        isAuthResolving ||
+        (!hasAdminRole &&
+            (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false));
+
+    useEffect(() => {
+        if (!isRestrictedRole) return;
+
+        const isRestrictedRoute = USER_RESTRICTED_ROUTE_PREFIXES.some(
+            (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+        );
+
+        if (isRestrictedRoute) {
+            router.replace(ROUTER_MAP.DASHBOARD);
+        }
+    }, [isRestrictedRole, pathname, router]);
 
     return (
         <SidebarProvider>

@@ -9,10 +9,11 @@ import { UserService } from '@/entities/users/api/users-service';
 
 export const USERS_QUERY_KEY = 'users';
 
-export const useUsers = () => {
+export const useUsers = (enabled = true) => {
     const queryResult = useQuery({
         queryKey: [USERS_QUERY_KEY],
         queryFn: () => UserService.getUsers(),
+        enabled,
     });
 
     useEffect(() => {

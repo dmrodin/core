@@ -16,7 +16,7 @@ export const useLogout = () => {
     return useMutation({
         mutationKey: [LOGOUT_QUERY_KEY],
         mutationFn: async () => await AuthService.Logout(),
-        onSuccess: async () => {
+        onSettled: async () => {
             await clearToken();
 
             if (env.USE_DEV_AUTH_MARKER) {

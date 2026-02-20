@@ -35,6 +35,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/shared';
+import { UserRole } from '@/entities/users/model/user-schemas';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import { NavMain } from '@/widgets';
 import { NavSecondary } from '@/widgets';
@@ -43,8 +44,8 @@ import { ThemeToggle } from '@/widgets';
 
 const data = {
     user: {
-        name: 'Admin',
-        email: 'admin@example.com',
+        name: 'User',
+        email: '',
         avatar: '/avatars/admin.jpg',
     },
     navMain: [
@@ -147,8 +148,32 @@ const data = {
     ],
 };
 
+const USER_RESTRICTED_NAV_URLS = new Set<string>([
+    ROUTER_MAP.USERS,
+    ROUTER_MAP.CURRENCIES,
+    ROUTER_MAP.NETWORKS,
+    ROUTER_MAP.NETWORK_TYPES,
+    ROUTER_MAP.OPERATION_TYPES,
+    ROUTER_MAP.WALLET_TYPES,
+    ROUTER_MAP.PLATFORMS,
+    ROUTER_MAP.BANKS,
+    ROUTER_MAP.ADMIN,
+]);
+
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     const currentUser = useAuthStore((state) => state.user);
+    const token = useAuthStore((state) => state.token);
+    const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
+    const hasAdminRole = currentUser?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
+    const isAuthResolving = !isAuthInitialized || (Boolean(token) && !currentUser);
+    const isRestrictedRole =
+        isAuthResolving ||
+        (!hasAdminRole &&
+            (currentUser?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ??
+                false));
+    const navMainItems = isRestrictedRole
+        ? data.navMain.filter((item) => !USER_RESTRICTED_NAV_URLS.has(item.url))
+        : data.navMain;
 
     return (
         <Sidebar variant="inset" {...props}>
@@ -173,7 +198,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
-                <NavMain items={data.navMain} label="Главное" />
+                <NavMain items={navMainItems} label="Главное" />
                 <NavSecondary items={data.projects} label="Данные" />
                 <NavSecondary items={data.navSecondary} className="mt-auto" label="Другое" />
             </SidebarContent>
