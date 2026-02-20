@@ -44,8 +44,8 @@ import { ThemeToggle } from '@/widgets';
 
 const data = {
     user: {
-        name: 'Admin',
-        email: 'admin@example.com',
+        name: 'User',
+        email: '',
         avatar: '/avatars/admin.jpg',
     },
     navMain: [
