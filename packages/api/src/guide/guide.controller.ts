@@ -78,7 +78,7 @@ export class GuideController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить список гайдов',
         description:
@@ -102,7 +102,7 @@ export class GuideController {
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить гайд по ID',
         description: 'Возвращает информацию о конкретном гайде. Доступно только администраторам.',
