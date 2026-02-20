@@ -157,6 +157,7 @@ const USER_RESTRICTED_NAV_URLS = new Set<string>([
     ROUTER_MAP.WALLET_TYPES,
     ROUTER_MAP.PLATFORMS,
     ROUTER_MAP.BANKS,
+    ROUTER_MAP.ADMIN,
 ]);
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
