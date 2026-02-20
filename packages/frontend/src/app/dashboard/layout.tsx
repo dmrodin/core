@@ -38,11 +38,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const pathname = usePathname();
     const router = useRouter();
     const user = useAuthStore((state) => state.user);
+    const token = useAuthStore((state) => state.token);
+    const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
 
     const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
+    const isAuthResolving = !isAuthInitialized || (Boolean(token) && !user);
     const isRestrictedRole =
-        !hasAdminRole &&
-        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
+        isAuthResolving ||
+        (!hasAdminRole &&
+            (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false));
 
     useEffect(() => {
         if (!isRestrictedRole) return;

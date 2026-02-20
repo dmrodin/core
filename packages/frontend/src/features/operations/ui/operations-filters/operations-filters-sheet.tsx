@@ -51,7 +51,10 @@ export function OperationsFiltersSheet({
         (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
     const canLoadReferenceData = Boolean(user) && !isRestrictedRole;
 
-    const { data: operationTypes, isLoading: operationTypesLoading } = useOperationTypes();
+    const { data: operationTypes, isLoading: operationTypesLoading } = useOperationTypes(
+        undefined,
+        canLoadReferenceData,
+    );
     const { data: applications, isLoading: applicationsLoading } = useApplicationsList(canLoadReferenceData);
     const { data: users } = useUsers(canLoadReferenceData);
 

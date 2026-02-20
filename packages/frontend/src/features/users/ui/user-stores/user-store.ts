@@ -8,6 +8,7 @@ const AUTH_USER_STORAGE_KEY = `${env.NEXT_PUBLIC_AUTH_TOKEN_KEY}_user`;
 
 export interface AuthState {
     clearToken: () => Promise<void>;
+    isAuthInitialized: boolean;
     setToken: (token: string | null) => Promise<void>;
     setUser: (user: UserAuth | null) => void;
     initializeAuth: () => void;
@@ -16,6 +17,7 @@ export interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
+    isAuthInitialized: false,
     user: null,
     token: null,
     setUser: (user: UserAuth | null) => {
@@ -50,9 +52,12 @@ export const useAuthStore = create<AuthState>((set) => ({
             }
 
             if (storedToken) {
-                set({ token: storedToken, user: parsedUser });
+                set({ token: storedToken, user: parsedUser, isAuthInitialized: true });
             } else if (storedUser) {
                 localStorage.removeItem(AUTH_USER_STORAGE_KEY);
+                set({ isAuthInitialized: true });
+            } else {
+                set({ isAuthInitialized: true });
             }
         }
     },

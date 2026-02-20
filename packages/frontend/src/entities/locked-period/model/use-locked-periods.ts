@@ -4,9 +4,10 @@ import { lockedPeriodApi } from '../api/locked-period-api';
 
 export const LOCKED_PERIODS_QUERY_KEY = ['locked-periods'];
 
-export const useLockedPeriods = () => {
+export const useLockedPeriods = (enabled = true) => {
     return useQuery({
         queryKey: LOCKED_PERIODS_QUERY_KEY,
         queryFn: () => lockedPeriodApi.getLockedPeriods(),
+        enabled,
     });
 };

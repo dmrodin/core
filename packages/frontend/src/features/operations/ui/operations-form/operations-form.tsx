@@ -65,6 +65,7 @@ export function OperationForm({
     const isRestrictedRole =
         !hasAdminRole &&
         (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
+    const canLoadOperationsReferences = Boolean(user) && !isRestrictedRole;
     const canLoadApplications = Boolean(user) && !isRestrictedRole;
     const createMutation = useCreateOperation();
     const updateMutation = useUpdateOperation();
@@ -85,9 +86,12 @@ export function OperationForm({
 
     const { data: wallets } = useWallets();
     const { data: banks } = useBanks();
-    const { data: operationTypes, isLoading: isOperationTypesLoading } = useOperationTypes();
+    const { data: operationTypes, isLoading: isOperationTypesLoading } = useOperationTypes(
+        undefined,
+        canLoadOperationsReferences,
+    );
     const { data: applications, isLoading: isApplicationsLoading } = useApplicationsList(canLoadApplications);
-    const { data: lockedPeriodsData } = useLockedPeriods();
+    const { data: lockedPeriodsData } = useLockedPeriods(canLoadOperationsReferences);
 
     // Получаем текущую заявку операции, если она есть (даже если завершена)
     const currentApplicationId = initialData?.applicationId;

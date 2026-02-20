@@ -17,6 +17,8 @@ import {
     useOperationTypes,
 } from '@/entities/operations';
 import { useLockedPeriods } from '@/entities/locked-period';
+import { UserRole } from '@/entities/users/model/user-schemas';
+import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import {
     Button,
     Card,
@@ -46,6 +48,13 @@ import {
 import { OperationsFiltersSheet } from '@/features/operations/ui/operations-filters/operations-filters-sheet';
 
 export default function OperationsPage() {
+    const user = useAuthStore((state) => state.user);
+    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
+    const isRestrictedRole =
+        !hasAdminRole &&
+        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
+    const canLoadOperationsData = Boolean(user) && !isRestrictedRole;
+
     const form = useForm<GetOperationsParams>({
         resolver: zodResolver(GetOperationsParamsSchema),
         defaultValues: {
@@ -74,9 +83,9 @@ export default function OperationsPage() {
 
     const filters = form.watch();
 
-    const { data, error, hasNextPage, isFetching, isLoading } = useInfiniteOperations(filters);
-    const { data: operationTypes } = useOperationTypes();
-    const { data: lockedPeriodsData } = useLockedPeriods();
+    const { data, error, hasNextPage, isFetching, isLoading } = useInfiniteOperations(filters, 100, canLoadOperationsData);
+    const { data: operationTypes } = useOperationTypes(undefined, canLoadOperationsData);
+    const { data: lockedPeriodsData } = useLockedPeriods(canLoadOperationsData);
     const { copyOperation } = useCopyOperation();
     const { mutate: deleteOperation } = useDeleteOperation();
     const lastOperationRef = useRef<HTMLDivElement | null>(null);
