@@ -19,7 +19,9 @@ import {
     WalletSortField,
     useInfiniteWallets,
 } from '@/entities/wallet';
+import { UserRole } from '@/entities/users/model/user-schemas';
 import { useWalletTypes } from '@/entities/wallet-type';
+import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import {
     Button,
     Card,
@@ -65,6 +67,8 @@ const baseFilters: GetWalletsFilter = {
 export default function WalletsPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const user = useAuthStore((state) => state.user);
+    const isUserRole = user?.roles?.some((role) => role.code === UserRole.USER) ?? false;
     const { data: walletTypesData } = useWalletTypes();
     const walletTypes = walletTypesData?.walletTypes ?? [];
     const tabTypes = walletTypes.filter((type) => type.showInTabs).sort((a, b) => a.tabOrder - b.tabOrder);
@@ -267,6 +271,7 @@ export default function WalletsPage() {
             isSelected: selectedWallets.has(wallet.id),
             onSelect: handleToggleSelection,
             onEnterSelectionMode: handleEnterSelectionMode,
+            isUserRole,
         };
 
         const cardElement = (() => {
@@ -291,6 +296,22 @@ export default function WalletsPage() {
 
         return <div key={wallet.id}>{cardElement}</div>;
     };
+
+    const activeTabValue = isUserRole
+        ? formValues?.pinned
+            ? 'pinned'
+            : formValues?.walletTypeId
+              ? formValues.walletTypeId
+              : 'all'
+        : formValues?.deleted
+          ? 'deleted'
+          : !formValues?.visible
+            ? 'hidden'
+            : formValues?.pinned
+              ? 'pinned'
+              : formValues?.walletTypeId
+                ? formValues.walletTypeId
+                : 'all';
 
     return (
         <div className="max-w-5xl mx-auto space-y-6 pb-24">
@@ -318,17 +339,7 @@ export default function WalletsPage() {
             <WalletsAggregationSwiper filters={filteredValues} />
 
             <Tabs
-                value={
-                    formValues?.deleted
-                        ? 'deleted'
-                        : !formValues?.visible
-                          ? 'hidden'
-                          : formValues?.pinned
-                            ? 'pinned'
-                            : formValues?.walletTypeId
-                              ? formValues.walletTypeId
-                              : 'all'
-                }
+                value={activeTabValue}
                 onValueChange={(val) => {
                     if (val === 'all') {
                         form.setValue('walletTypeId', undefined);
@@ -358,7 +369,7 @@ export default function WalletsPage() {
                 <TabsList
                     className="grid w-full"
                     style={{
-                        gridTemplateColumns: `repeat(${4 + tabTypes.length}, minmax(0, 1fr))`,
+                        gridTemplateColumns: `repeat(${(isUserRole ? 2 : 4) + tabTypes.length}, minmax(0, 1fr))`,
                     }}
                 >
                     <TabsTrigger value="pinned" className="w-full">
@@ -372,10 +383,10 @@ export default function WalletsPage() {
                             {type.name}
                         </TabsTrigger>
                     ))}
-                    <TabsTrigger value="deleted" className="w-full">
+                    <TabsTrigger value="deleted" className={isUserRole ? 'hidden' : 'w-full'}>
                         Удалённые
                     </TabsTrigger>
-                    <TabsTrigger value="hidden" className="w-full">
+                    <TabsTrigger value="hidden" className={isUserRole ? 'hidden' : 'w-full'}>
                         Скрытые
                     </TabsTrigger>
                 </TabsList>
@@ -412,6 +423,7 @@ export default function WalletsPage() {
                 totalCount={totalCount}
                 onSelectAll={handleSelectAll}
                 onCancelAll={handleCancelSelectionAll}
+                isUserRole={isUserRole}
             />
         </div>
     );

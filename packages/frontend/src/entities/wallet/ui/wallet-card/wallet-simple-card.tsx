@@ -31,6 +31,7 @@ interface SimpleWalletCardProps {
     isSelected?: boolean;
     onSelect?: (walletId: string) => void;
     onEnterSelectionMode?: () => void;
+    isUserRole?: boolean;
 }
 
 export const SimpleWalletCard = ({
@@ -39,6 +40,7 @@ export const SimpleWalletCard = ({
     isSelected = false,
     onSelect,
     onEnterSelectionMode,
+    isUserRole = false,
 }: SimpleWalletCardProps) => {
     const router = useRouter();
     const [menuOpen, setMenuOpen] = useState(false);
@@ -434,21 +436,38 @@ export const SimpleWalletCard = ({
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={handleEnterSelectionMode}>Выбрать</DropdownMenuItem>
                     <DropdownMenuItem onSelect={handleOperations}>Операции</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={handleEdit}>Изменить</DropdownMenuItem>
-                    <DropdownMenuItem onSelect={handleToggleVisible}>
+                    <DropdownMenuItem
+                        onSelect={isUserRole ? () => undefined : handleEdit}
+                        className={isUserRole ? 'hidden' : ''}
+                    >
+                        Изменить
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        onSelect={isUserRole ? () => undefined : handleToggleVisible}
+                        className={isUserRole ? 'hidden' : ''}
+                    >
                         {wallet.visible ? 'Скрыть' : 'Показать'}
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={handleTogglePinned}>
                         {wallet.pinned ? 'Открепить' : 'Быстрый доступ'}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={handleTogglePinOnMain}>
+                    <DropdownMenuItem
+                        onSelect={isUserRole ? () => undefined : handleTogglePinOnMain}
+                        className={isUserRole ? 'hidden' : ''}
+                    >
                         {wallet.pinOnMain ? 'Открепить с главной' : 'Закрепить на главной'}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={handleToggleActive}>
+                    <DropdownMenuItem
+                        onSelect={isUserRole ? () => undefined : handleToggleActive}
+                        className={isUserRole ? 'hidden' : ''}
+                    >
                         {wallet.active ? 'Деактивировать' : 'Активировать'}
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={handleChangeOwner}>Держатель</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive/60" onSelect={handleDelete}>
+                    <DropdownMenuItem
+                        className={isUserRole ? 'hidden' : 'text-destructive/60'}
+                        onSelect={isUserRole ? () => undefined : handleDelete}
+                    >
                         Удалить
                     </DropdownMenuItem>
                 </DropdownMenuContent>
