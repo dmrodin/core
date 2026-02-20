@@ -45,11 +45,12 @@ export const InfiniteApplicationsList = () => {
     const params = useApplicationsQueryParams();
     const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
 
-    const { data: infiniteData, isLoading, fetchNextPage, hasNextPage } = useInfiniteApplications(
-        params,
-        10,
-        canLoadApplications,
-    );
+    const {
+        data: infiniteData,
+        isLoading,
+        fetchNextPage,
+        hasNextPage,
+    } = useInfiniteApplications(params, 10, canLoadApplications);
 
     const { mutate: deleteApplicationMutation } = useDeleteApplication(params);
     const { mutate: updateStatuseApplicationMutation } = useUpdateStatusApplication();

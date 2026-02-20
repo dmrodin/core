@@ -83,7 +83,11 @@ export default function OperationsPage() {
 
     const filters = form.watch();
 
-    const { data, error, hasNextPage, isFetching, isLoading } = useInfiniteOperations(filters, 100, canLoadOperationsData);
+    const { data, error, hasNextPage, isFetching, isLoading } = useInfiniteOperations(
+        filters,
+        100,
+        canLoadOperationsData,
+    );
     const { data: operationTypes } = useOperationTypes(undefined, canLoadOperationsData);
     const { data: lockedPeriodsData } = useLockedPeriods(canLoadOperationsData);
     const { copyOperation } = useCopyOperation();

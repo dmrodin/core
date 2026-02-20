@@ -14,13 +14,9 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     const { pathname, search } = request.nextUrl;
     const isLoginRoute = pathname === ROUTER_MAP.LOGIN;
 
-    let hasValidToken = false;
-    let cookieToDelete: string | undefined;
-
     const refreshToken = request.cookies.get(env.NEXT_PUBLIC_AUTH_REFRESH_TOKEN_COOKIE_KEY)?.value;
-
-    hasValidToken = refreshToken ? (await verifyJwtToken(refreshToken)) !== null : false;
-    cookieToDelete = refreshToken ? env.NEXT_PUBLIC_AUTH_REFRESH_TOKEN_COOKIE_KEY : undefined;
+    const hasValidToken = refreshToken ? (await verifyJwtToken(refreshToken)) !== null : false;
+    const cookieToDelete = refreshToken ? env.NEXT_PUBLIC_AUTH_REFRESH_TOKEN_COOKIE_KEY : undefined;
 
     if (!hasValidToken && !isLoginRoute) {
         const loginUrl = new URL(ROUTER_MAP.LOGIN, request.url);
