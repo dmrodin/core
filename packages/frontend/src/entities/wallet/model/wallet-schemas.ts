@@ -306,6 +306,8 @@ export const GetWalletsFilterSchema = z.object({
 
     deleted: z.boolean().optional(),
 
+    includeTabWalletTypes: z.boolean().optional(),
+
     sortField: z.nativeEnum(WalletSortField).default(WalletSortField.CREATED_AT).optional(),
     sortOrder: z.nativeEnum(SortOrder).default(SortOrder.DESC).optional(),
 

@@ -53,6 +53,7 @@ export const useWallets = () => {
             return WalletService.getWallets({
                 page: 1,
                 limit: 100,
+                includeTabWalletTypes: true,
             });
         },
     });
