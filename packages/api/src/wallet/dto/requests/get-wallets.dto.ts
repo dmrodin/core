@@ -206,6 +206,25 @@ export class GetWalletsDto {
     public deleted?: boolean;
 
     @ApiProperty({
+        description: 'Включать в выборку типы кошельков, которые отображаются в отдельных вкладках',
+        example: true,
+        required: false,
+    })
+    @IsOptional()
+    @Transform(({ value }: { value: string }) => {
+        if (value === 'true') {
+            return true;
+        }
+        if (value === 'false') {
+            return false;
+        }
+
+        return value;
+    })
+    @IsBoolean({ message: 'Параметр includeTabWalletTypes должен быть булевым значением' })
+    public includeTabWalletTypes?: boolean;
+
+    @ApiProperty({
         description: 'Поле для сортировки',
         enum: WalletSortField,
         example: WalletSortField.CREATED_AT,

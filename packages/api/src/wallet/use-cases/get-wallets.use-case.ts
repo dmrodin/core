@@ -26,6 +26,7 @@ export class GetWalletsUseCase {
             pinned,
             visible,
             deleted,
+            includeTabWalletTypes,
             sortField = WalletSortField.CREATED_AT,
             sortOrder = 'desc',
             page = 1,
@@ -82,6 +83,7 @@ export class GetWalletsUseCase {
         }
 
         const isAllTabContext =
+            !includeTabWalletTypes &&
             walletTypeId === undefined &&
             (visible === true || visible === undefined) &&
             (deleted === false || deleted === undefined) &&
