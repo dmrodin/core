@@ -270,8 +270,6 @@ export const CryptoWalletCard = ({
                 return 'border-l-[18px] border-l-green-600';
             case 'negative':
                 return 'border-l-[18px] border-l-destructive/60';
-            case 'neutral':
-                return 'border-l-[18px] border-l-gray-700 dark:border-l-gray-600';
             default:
                 return '';
         }
@@ -509,16 +507,6 @@ export const CryptoWalletCard = ({
                                         : 'border-success/30 bg-success/60',
                                 )}
                                 title="Зеленый"
-                            />
-                            <button
-                                onClick={() => handleBalanceStatusChange('neutral')}
-                                className={cn(
-                                    'w-6 h-6 rounded-full border-2 transition-all hover:scale-110',
-                                    wallet.balanceStatus === 'neutral'
-                                        ? 'border-gray-700 dark:border-gray-600 bg-gray-700 dark:bg-gray-600'
-                                        : 'border-gray-700/30 dark:border-gray-600/30 bg-gray-700/60 dark:bg-gray-600/60',
-                                )}
-                                title="Темно-серый"
                             />
                         </div>
                     </div>
