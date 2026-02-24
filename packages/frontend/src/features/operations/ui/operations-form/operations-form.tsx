@@ -123,6 +123,7 @@ export function OperationForm({
                   conversionGroupId: initialData.conversionGroupId ?? null,
                   banksGroupId: initialData.banksGroupId ?? null,
                   entries: initialData.entries.map((e) => ({
+                      id: e.id,
                       wallet: e.wallet,
                       direction: e.direction,
                       amount: e.amount,
@@ -143,6 +144,7 @@ export function OperationForm({
     const { fields, append, remove } = useFieldArray({
         control: form.control,
         name: 'entries',
+        keyName: 'fieldId',
     });
 
     const entries = form.watch('entries');
@@ -285,26 +287,12 @@ export function OperationForm({
         };
 
         if (initialData) {
-            const mergedEntries = data.entries.map((entry) => {
-                const oldEntry = initialData.entries.find(
-                    (e) => e.wallet.id === entry.wallet.id && e.direction === entry.direction,
-                );
-
-                if (oldEntry) {
-                    return {
-                        id: oldEntry.id,
-                        walletId: entry.wallet.id,
-                        direction: entry.direction,
-                        amount: entry.amount,
-                    };
-                } else {
-                    return {
-                        walletId: entry.wallet.id,
-                        direction: entry.direction,
-                        amount: entry.amount,
-                    };
-                }
-            });
+            const updatedEntries = data.entries.map((entry) => ({
+                ...(entry.id && { id: entry.id }),
+                walletId: entry.wallet.id,
+                direction: entry.direction,
+                amount: entry.amount,
+            }));
 
             const updatePayload: { id: string } & UpdateOperationBackendDto = {
                 id: initialData.id,
@@ -315,7 +303,7 @@ export function OperationForm({
                 ...(data.conversionGroupId !== undefined && {
                     conversionGroupId: data.conversionGroupId,
                 }),
-                entries: mergedEntries,
+                entries: updatedEntries,
                 banksGroupId: isBankDisabled ? null : data.banksGroupId,
             };
 
@@ -567,7 +555,7 @@ export function OperationForm({
                     // Для корректировки - одна строка: кошелек + сумма корректировки
                     <div className="flex flex-col gap-3 mt-2">
                         {fields.map((item, realIndex) => (
-                            <div key={item.id} className="flex gap-3 items-end">
+                            <div key={item.fieldId} className="flex gap-3 items-end">
                                 <FormField
                                     control={form.control}
                                     name={`entries.${realIndex}.wallet.id`}
@@ -699,7 +687,7 @@ export function OperationForm({
                                     .map((item, realIndex) => ({ item, realIndex }))
                                     .filter(({ item }) => item.direction === dir)
                                     .map(({ item, realIndex }) => (
-                                        <div key={item.id} className="flex gap-3 items-end">
+                                        <div key={item.fieldId} className="flex gap-3 items-end">
                                             <FormField
                                                 control={form.control}
                                                 name={`entries.${realIndex}.wallet.id`}

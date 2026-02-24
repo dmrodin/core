@@ -47,6 +47,7 @@ export const OperationEntryDtoSchema = z.object({
 });
 
 export const OperationEntryCreateDtoSchema = z.object({
+    id: z.string().uuid().optional(),
     wallet: z.object({
         id: z.string().uuid('Выберите кошелек'),
         name: z.string(),
