@@ -381,23 +381,6 @@ export const BankWalletCard = ({
                                         </p>
                                     )}
                                 </div>
-                                {/* Кнопка копирования реквизитов */}
-                                {formatWalletRequisites(wallet) && (
-                                    <div className="mt-3">
-                                        <Button
-                                            variant="default"
-                                            size="sm"
-                                            onPointerDown={(e) => {
-                                                e.stopPropagation();
-                                                handleCopyRequisites();
-                                            }}
-                                            className="relative z-10 cursor-pointer"
-                                        >
-                                            <Copy className="h-4 w-4 mr-2" />
-                                            Копировать реквизиты
-                                        </Button>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </CardHeader>
