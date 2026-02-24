@@ -164,6 +164,18 @@ export class UpdateOperationUseCase {
 
             if (entries) {
                 const existingEntries = existingOperation.entries;
+                const incomingEntryIds = new Set(entries.map((entry) => entry.id).filter((id): id is string => !!id));
+                const entriesToDelete = existingEntries.filter((entry) => !incomingEntryIds.has(entry.id));
+
+                for (const entry of entriesToDelete) {
+                    await tx.operationEntry.update({
+                        where: { id: entry.id },
+                        data: {
+                            deleted: true,
+                            updatedById,
+                        },
+                    });
+                }
 
                 // Проверка месячных лимитов для всех изменяемых/новых записей
                 for (const entry of entries) {

@@ -48,6 +48,12 @@ export class UpdateWalletUseCase {
                         card: true,
                         ownerFullName: true,
                         bankId: true,
+                        bank: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
                     },
                 },
             },
@@ -197,12 +203,70 @@ export class UpdateWalletUseCase {
 
         if (isCryptoAddressChanged || isCardBankRequisitesChanged) {
             const changeLabels: string[] = [];
+            const changedRequisites: string[] = [];
+            const htmlEscape = (value: string) =>
+                value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const formatTextValue = (value: string | null | undefined) => {
+                if (value === null || value === undefined || value.trim() === '') {
+                    return '<i>не указано</i>';
+                }
+
+                return `<code>${htmlEscape(value)}</code>`;
+            };
+            const formatBankValue = (bankId: string | null | undefined, bankName?: string | null) => {
+                if (!bankId) {
+                    return '<i>не указано</i>';
+                }
+
+                const label = bankName ? `${bankName} (${bankId})` : bankId;
+
+                return `<code>${htmlEscape(label)}</code>`;
+            };
 
             if (isCryptoAddressChanged) {
                 changeLabels.push('изменен адрес криптокошелька');
+                changedRequisites.push(
+                    `<b>Адрес:</b> ${formatTextValue(existingWallet.details?.address)} → ${formatTextValue(wallet.details?.address)}`,
+                );
             }
             if (isCardBankRequisitesChanged) {
                 changeLabels.push('изменены реквизиты банка у карты');
+
+                if (
+                    incomingDetails?.card !== undefined &&
+                    (incomingDetails.card ?? null) !== (existingWallet.details?.card ?? null)
+                ) {
+                    changedRequisites.push(
+                        `<b>Карта:</b> ${formatTextValue(existingWallet.details?.card)} → ${formatTextValue(wallet.details?.card)}`,
+                    );
+                }
+
+                if (
+                    incomingDetails?.ownerFullName !== undefined &&
+                    (incomingDetails.ownerFullName ?? null) !== (existingWallet.details?.ownerFullName ?? null)
+                ) {
+                    changedRequisites.push(
+                        `<b>ФИО владельца:</b> ${formatTextValue(existingWallet.details?.ownerFullName)} → ${formatTextValue(wallet.details?.ownerFullName)}`,
+                    );
+                }
+
+                if (
+                    incomingDetails?.phone !== undefined &&
+                    (incomingDetails.phone ?? null) !== (existingWallet.details?.phone ?? null)
+                ) {
+                    changedRequisites.push(
+                        `<b>Телефон:</b> ${formatTextValue(existingWallet.details?.phone)} → ${formatTextValue(wallet.details?.phone)}`,
+                    );
+                }
+
+                if (
+                    incomingDetails?.bankId !== undefined &&
+                    (incomingDetails.bankId ?? null) !== (existingWallet.details?.bankId ?? null)
+                ) {
+                    changedRequisites.push(
+                        `<b>Банк:</b> ${formatBankValue(existingWallet.details?.bankId, existingWallet.details?.bank?.name)} → ${formatBankValue(wallet.details?.bank?.id, wallet.details?.bank?.name)}`,
+                    );
+                }
             }
 
             const message = [
@@ -212,6 +276,7 @@ export class UpdateWalletUseCase {
                 `<b>ID:</b> <code>${wallet.id}</code>`,
                 `<b>Тип:</b> ${wallet.walletKind}`,
                 `<b>Изменения:</b> ${changeLabels.join(', ')}`,
+                ...(changedRequisites.length > 0 ? ['', '<b>До → После:</b>', ...changedRequisites] : []),
                 `<b>Кем изменено:</b> ${wallet.updated_by?.username ?? updatedById}`,
                 `<b>Время:</b> ${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}`,
             ].join('\n');

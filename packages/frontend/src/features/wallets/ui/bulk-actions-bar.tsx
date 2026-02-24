@@ -102,14 +102,6 @@ export function BulkActionsBar({
                                     )}
                                     title="Зеленый"
                                 />
-                                <button
-                                    onClick={() => handleAction(() => onBalanceStatusChange('neutral'))}
-                                    className={cn(
-                                        'w-6 h-6 rounded-full border-2 transition-all hover:scale-110',
-                                        'border-gray-700/30 dark:border-gray-600/30 bg-gray-700/60 dark:bg-gray-600/60',
-                                    )}
-                                    title="Темно-серый"
-                                />
                             </div>
                         </div>
                         <DropdownMenuItem

@@ -9,6 +9,8 @@ import { CreateOperationResponse } from '../types';
 
 @Injectable()
 export class CreateOperationUseCase {
+    private static readonly INSKESH_WALLET_TYPE_CODE = 'inskech';
+
     constructor(
         private readonly prisma: PrismaService,
         private readonly walletRecalculationService: WalletRecalculationService,
@@ -63,7 +65,31 @@ export class CreateOperationUseCase {
             });
 
             if (operationType?.code === OPERATION_TYPE_CODES.CONVERSION) {
-                if (!conversionGroupId) {
+                const walletIds = Array.from(new Set(entries.map((entry) => entry.walletId)));
+                const walletsForConversionRule = await tx.wallet.findMany({
+                    where: { id: { in: walletIds } },
+                    select: {
+                        id: true,
+                        walletType: {
+                            select: {
+                                code: true,
+                            },
+                        },
+                    },
+                });
+
+                const walletTypeCodeByWalletId = new Map(
+                    walletsForConversionRule.map((wallet) => [wallet.id, wallet.walletType?.code ?? null]),
+                );
+
+                const areAllWalletsInskesh =
+                    walletIds.length > 0 &&
+                    walletIds.every(
+                        (walletId) =>
+                            walletTypeCodeByWalletId.get(walletId) === CreateOperationUseCase.INSKESH_WALLET_TYPE_CODE,
+                    );
+
+                if (areAllWalletsInskesh && !conversionGroupId) {
                     throw new BadRequestException(
                         'Для операции "Конвертация" необходимо указать номер конвертации (conversionGroupId)',
                     );

@@ -49,9 +49,13 @@ import {
 } from '@/shared';
 import { formatNumber, parseFormattedNumber } from '@/shared/lib/utils/format-number';
 import { useBanks } from '@/entities/bank';
+import type { Wallet as WalletEntity } from '@/entities/wallet';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 
 const SINGLE_SIDE_OPERATION_NAMES = new Set(['аванс', 'зачисление', 'расход', 'корректировка']);
+const INSKESH_WALLET_TYPE_ID = 'dbc78423-dfb0-4ba4-86f4-533bd9efd027';
+const INSKESH_WALLET_TYPE_CODES = new Set(['inskech', 'inscash']);
+const INSKESH_WALLET_TYPE_NAMES = new Set(['инскеш']);
 
 export function OperationForm({
     initialData,
@@ -123,6 +127,7 @@ export function OperationForm({
                   conversionGroupId: initialData.conversionGroupId ?? null,
                   banksGroupId: initialData.banksGroupId ?? null,
                   entries: initialData.entries.map((e) => ({
+                      id: e.id,
                       wallet: e.wallet,
                       direction: e.direction,
                       amount: e.amount,
@@ -143,6 +148,7 @@ export function OperationForm({
     const { fields, append, remove } = useFieldArray({
         control: form.control,
         name: 'entries',
+        keyName: 'fieldId',
     });
 
     const entries = form.watch('entries');
@@ -200,17 +206,40 @@ export function OperationForm({
         return `${fromLabel} - ${toLabel}`;
     };
 
-    const isBankDisabled =
-        !entries.length ||
-        !entries.every((entry) => {
-            const wallet = wallets?.wallets.find((w) => w.id === entry.wallet?.id);
-            return wallet?.walletTypeId === 'dbc78423-dfb0-4ba4-86f4-533bd9efd027';
-        });
+    const isInskeshWallet = (wallet: WalletEntity | undefined) => {
+        if (!wallet) {
+            return false;
+        }
+
+        if (wallet.walletTypeId === INSKESH_WALLET_TYPE_ID) {
+            return true;
+        }
+
+        const walletType = wallet.walletType;
+        if (!walletType || typeof walletType === 'string') {
+            return false;
+        }
+
+        const code = walletType.code?.trim().toLowerCase();
+        const name = walletType.name?.trim().toLowerCase();
+
+        return INSKESH_WALLET_TYPE_CODES.has(code) || INSKESH_WALLET_TYPE_NAMES.has(name);
+    };
+
+    const selectedWallets = entries
+        .map((entry) => wallets?.wallets.find((w) => w.id === entry.wallet?.id))
+        .filter((wallet): wallet is NonNullable<typeof wallet> => Boolean(wallet));
+
+    const areAllSelectedWalletsInskesh =
+        selectedWallets.length > 0 && selectedWallets.every((wallet) => isInskeshWallet(wallet));
+
+    const isBankDisabled = !areAllSelectedWalletsInskesh;
 
     const selectedTypeId = form.watch('typeId');
     const selectedOperationType = operationTypes?.find((type) => type.id === selectedTypeId);
     const isCorrection = selectedOperationType?.isCorrection ?? false;
     const isConversion = selectedOperationType?.isConversion ?? false;
+    const isConversionNumberRequired = isConversion && areAllSelectedWalletsInskesh;
     const isSingleSideOperation = selectedOperationType
         ? SINGLE_SIDE_OPERATION_NAMES.has(selectedOperationType.name.trim().toLocaleLowerCase('ru'))
         : false;
@@ -276,35 +305,19 @@ export function OperationForm({
             typeId: data.typeId,
             ...(data.applicationId && data.applicationId > 0 && { applicationId: data.applicationId }),
             description: data.description ?? null,
-            ...(data.conversionGroupId && {
-                conversionGroupId: data.conversionGroupId,
-            }),
+            conversionGroupId: isBankDisabled ? null : (data.conversionGroupId ?? null),
             entries: transformedEntries,
             creatureDate: data.creatureDate,
             banksGroupId: isBankDisabled ? null : data.banksGroupId,
         };
 
         if (initialData) {
-            const mergedEntries = data.entries.map((entry) => {
-                const oldEntry = initialData.entries.find(
-                    (e) => e.wallet.id === entry.wallet.id && e.direction === entry.direction,
-                );
-
-                if (oldEntry) {
-                    return {
-                        id: oldEntry.id,
-                        walletId: entry.wallet.id,
-                        direction: entry.direction,
-                        amount: entry.amount,
-                    };
-                } else {
-                    return {
-                        walletId: entry.wallet.id,
-                        direction: entry.direction,
-                        amount: entry.amount,
-                    };
-                }
-            });
+            const updatedEntries = data.entries.map((entry) => ({
+                ...(entry.id && { id: entry.id }),
+                walletId: entry.wallet.id,
+                direction: entry.direction,
+                amount: entry.amount,
+            }));
 
             const updatePayload: { id: string } & UpdateOperationBackendDto = {
                 id: initialData.id,
@@ -313,9 +326,9 @@ export function OperationForm({
                 creatureDate: data.creatureDate,
                 description: data.description ?? null,
                 ...(data.conversionGroupId !== undefined && {
-                    conversionGroupId: data.conversionGroupId,
+                    conversionGroupId: isBankDisabled ? null : (data.conversionGroupId ?? null),
                 }),
-                entries: mergedEntries,
+                entries: updatedEntries,
                 banksGroupId: isBankDisabled ? null : data.banksGroupId,
             };
 
@@ -435,13 +448,15 @@ export function OperationForm({
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>
-                                            Номер конвертации <span className="text-destructive">*</span>
+                                            Номер конвертации{' '}
+                                            {isConversionNumberRequired && <span className="text-destructive">*</span>}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="Введите номер"
-                                                required
+                                                required={isConversionNumberRequired}
+                                                disabled={!isConversionNumberRequired}
                                                 {...field}
                                                 value={field.value ?? ''}
                                                 onChange={(e) => {
@@ -567,7 +582,7 @@ export function OperationForm({
                     // Для корректировки - одна строка: кошелек + сумма корректировки
                     <div className="flex flex-col gap-3 mt-2">
                         {fields.map((item, realIndex) => (
-                            <div key={item.id} className="flex gap-3 items-end">
+                            <div key={item.fieldId} className="flex gap-3 items-end">
                                 <FormField
                                     control={form.control}
                                     name={`entries.${realIndex}.wallet.id`}
@@ -699,7 +714,7 @@ export function OperationForm({
                                     .map((item, realIndex) => ({ item, realIndex }))
                                     .filter(({ item }) => item.direction === dir)
                                     .map(({ item, realIndex }) => (
-                                        <div key={item.id} className="flex gap-3 items-end">
+                                        <div key={item.fieldId} className="flex gap-3 items-end">
                                             <FormField
                                                 control={form.control}
                                                 name={`entries.${realIndex}.wallet.id`}
