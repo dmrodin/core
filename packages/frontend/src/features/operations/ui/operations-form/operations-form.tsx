@@ -49,9 +49,13 @@ import {
 } from '@/shared';
 import { formatNumber, parseFormattedNumber } from '@/shared/lib/utils/format-number';
 import { useBanks } from '@/entities/bank';
+import type { Wallet as WalletEntity } from '@/entities/wallet';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 
 const SINGLE_SIDE_OPERATION_NAMES = new Set(['аванс', 'зачисление', 'расход', 'корректировка']);
+const INSKESH_WALLET_TYPE_ID = 'dbc78423-dfb0-4ba4-86f4-533bd9efd027';
+const INSKESH_WALLET_TYPE_CODES = new Set(['inskech', 'inscash']);
+const INSKESH_WALLET_TYPE_NAMES = new Set(['инскеш']);
 
 export function OperationForm({
     initialData,
@@ -202,17 +206,40 @@ export function OperationForm({
         return `${fromLabel} - ${toLabel}`;
     };
 
-    const isBankDisabled =
-        !entries.length ||
-        !entries.every((entry) => {
-            const wallet = wallets?.wallets.find((w) => w.id === entry.wallet?.id);
-            return wallet?.walletTypeId === 'dbc78423-dfb0-4ba4-86f4-533bd9efd027';
-        });
+    const isInskeshWallet = (wallet: WalletEntity | undefined) => {
+        if (!wallet) {
+            return false;
+        }
+
+        if (wallet.walletTypeId === INSKESH_WALLET_TYPE_ID) {
+            return true;
+        }
+
+        const walletType = wallet.walletType;
+        if (!walletType || typeof walletType === 'string') {
+            return false;
+        }
+
+        const code = walletType.code?.trim().toLowerCase();
+        const name = walletType.name?.trim().toLowerCase();
+
+        return INSKESH_WALLET_TYPE_CODES.has(code) || INSKESH_WALLET_TYPE_NAMES.has(name);
+    };
+
+    const selectedWallets = entries
+        .map((entry) => wallets?.wallets.find((w) => w.id === entry.wallet?.id))
+        .filter((wallet): wallet is NonNullable<typeof wallet> => Boolean(wallet));
+
+    const areAllSelectedWalletsInskesh =
+        selectedWallets.length > 0 && selectedWallets.every((wallet) => isInskeshWallet(wallet));
+
+    const isBankDisabled = !areAllSelectedWalletsInskesh;
 
     const selectedTypeId = form.watch('typeId');
     const selectedOperationType = operationTypes?.find((type) => type.id === selectedTypeId);
     const isCorrection = selectedOperationType?.isCorrection ?? false;
     const isConversion = selectedOperationType?.isConversion ?? false;
+    const isConversionNumberRequired = isConversion && areAllSelectedWalletsInskesh;
     const isSingleSideOperation = selectedOperationType
         ? SINGLE_SIDE_OPERATION_NAMES.has(selectedOperationType.name.trim().toLocaleLowerCase('ru'))
         : false;
@@ -278,9 +305,7 @@ export function OperationForm({
             typeId: data.typeId,
             ...(data.applicationId && data.applicationId > 0 && { applicationId: data.applicationId }),
             description: data.description ?? null,
-            ...(data.conversionGroupId && {
-                conversionGroupId: data.conversionGroupId,
-            }),
+            conversionGroupId: isBankDisabled ? null : (data.conversionGroupId ?? null),
             entries: transformedEntries,
             creatureDate: data.creatureDate,
             banksGroupId: isBankDisabled ? null : data.banksGroupId,
@@ -301,7 +326,7 @@ export function OperationForm({
                 creatureDate: data.creatureDate,
                 description: data.description ?? null,
                 ...(data.conversionGroupId !== undefined && {
-                    conversionGroupId: data.conversionGroupId,
+                    conversionGroupId: isBankDisabled ? null : (data.conversionGroupId ?? null),
                 }),
                 entries: updatedEntries,
                 banksGroupId: isBankDisabled ? null : data.banksGroupId,
@@ -423,13 +448,17 @@ export function OperationForm({
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>
-                                            Номер конвертации <span className="text-destructive">*</span>
+                                            Номер конвертации{' '}
+                                            {isConversionNumberRequired && (
+                                                <span className="text-destructive">*</span>
+                                            )}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="Введите номер"
-                                                required
+                                                required={isConversionNumberRequired}
+                                                disabled={!isConversionNumberRequired}
                                                 {...field}
                                                 value={field.value ?? ''}
                                                 onChange={(e) => {
