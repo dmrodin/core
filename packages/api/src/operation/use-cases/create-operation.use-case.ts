@@ -86,8 +86,7 @@ export class CreateOperationUseCase {
                     walletIds.length > 0 &&
                     walletIds.every(
                         (walletId) =>
-                            walletTypeCodeByWalletId.get(walletId) ===
-                            CreateOperationUseCase.INSKESH_WALLET_TYPE_CODE,
+                            walletTypeCodeByWalletId.get(walletId) === CreateOperationUseCase.INSKESH_WALLET_TYPE_CODE,
                     );
 
                 if (areAllWalletsInskesh && !conversionGroupId) {

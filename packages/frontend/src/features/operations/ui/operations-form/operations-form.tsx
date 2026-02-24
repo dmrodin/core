@@ -449,9 +449,7 @@ export function OperationForm({
                                     <FormItem>
                                         <FormLabel>
                                             Номер конвертации{' '}
-                                            {isConversionNumberRequired && (
-                                                <span className="text-destructive">*</span>
-                                            )}
+                                            {isConversionNumberRequired && <span className="text-destructive">*</span>}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
