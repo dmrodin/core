@@ -1,5 +1,6 @@
 export { AdjustmentOperationDto } from './adjustment-operation.dto';
 export { CreateOperationDto, OperationEntryDto } from './create-operation.dto';
+export { GetBalancesReportDto } from './get-balances-report.dto';
 export { GetClosingPeriodReportDto } from './get-closing-period-report.dto';
 export { GetConversionReportDto } from './get-conversion-report.dto';
 export { GetOperationsDto, OperationSortField } from './get-operations.dto';
