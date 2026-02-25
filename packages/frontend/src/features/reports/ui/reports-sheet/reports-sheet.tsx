@@ -1,16 +1,21 @@
 'use client';
 
+import { useState } from 'react';
+
 import { ReportGeneralForm } from '@/entities/reports';
 import { ReportsBalancesForm } from '@/entities/reports';
 import { ReportsConversionForm } from '@/entities/reports';
 import { ReportsPeriodForm } from '@/entities/reports';
 import { usePopapStore } from '@/entities/reports';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/shared/ui/shadcn/sheet';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/shadcn/tabs';
+
+type ReportType = 'general' | 'conversions' | 'period' | 'balances';
 
 export function ReportsSheet() {
     const active = usePopapStore((state) => state.active);
     const setActive = usePopapStore((state) => state.setActive);
+    const [reportType, setReportType] = useState<ReportType>('general');
 
     return (
         <div>
@@ -21,26 +26,27 @@ export function ReportsSheet() {
                             <SheetTitle>Формирование отчета</SheetTitle>
                             <SheetDescription>Заполните поля для формирования отчета</SheetDescription>
                         </SheetHeader>
-                        <Tabs defaultValue="general" className="w-[400px]">
-                            <TabsList className="ml-4 mb-6">
-                                <TabsTrigger value="general">Общий</TabsTrigger>
-                                <TabsTrigger value="conversions">По конвертациям</TabsTrigger>
-                                <TabsTrigger value="period">По остаткам</TabsTrigger>
-                                <TabsTrigger value="balances">По балансам</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="general" className="px-4">
-                                <ReportGeneralForm />
-                            </TabsContent>
-                            <TabsContent value="conversions" className="px-4">
-                                <ReportsConversionForm />
-                            </TabsContent>
-                            <TabsContent value="period" className="px-4">
-                                <ReportsPeriodForm />
-                            </TabsContent>
-                            <TabsContent value="balances" className="px-4">
-                                <ReportsBalancesForm />
-                            </TabsContent>
-                        </Tabs>
+
+                        <div className="px-4 mt-6">
+                            <div className="mb-6">
+                                <Select value={reportType} onValueChange={(value: ReportType) => setReportType(value)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Выберите тип отчета" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="general">Общий</SelectItem>
+                                        <SelectItem value="conversions">По конвертациям</SelectItem>
+                                        <SelectItem value="period">По остаткам</SelectItem>
+                                        <SelectItem value="balances">По балансам</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {reportType === 'general' && <ReportGeneralForm />}
+                            {reportType === 'conversions' && <ReportsConversionForm />}
+                            {reportType === 'period' && <ReportsPeriodForm />}
+                            {reportType === 'balances' && <ReportsBalancesForm />}
+                        </div>
                     </SheetContent>
                 )}
             </Sheet>
