@@ -1,4 +1,6 @@
 import {
+    ReportsBalances,
+    ReportsBalancesSchema,
     ReportsConversion,
     ReportsConversionSchema,
     ReportsGeneral,
@@ -28,6 +30,18 @@ export class ReportsService {
     public static async getPeriodReport(params: ReportsPeriod): Promise<Blob> {
         const response = await axiosInstance.get('/operations/reports/closing-period', {
             params: ReportsPeriodSchema.parse(params),
+            responseType: 'blob',
+        });
+        return response.data as Blob;
+    }
+
+    public static async getBalancesReport(params: ReportsBalances): Promise<Blob> {
+        const parsedParams = ReportsBalancesSchema.parse(params);
+        const response = await axiosInstance.get('/operations/reports/balances', {
+            params: {
+                snapshotAt: parsedParams.snapshotAt,
+                sections: parsedParams.sections.join(','),
+            },
             responseType: 'blob',
         });
         return response.data as Blob;

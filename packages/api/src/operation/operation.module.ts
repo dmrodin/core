@@ -9,6 +9,7 @@ import {
     AdjustmentOperationUseCase,
     CreateOperationUseCase,
     DeleteOperationUseCase,
+    GenerateBalancesReportUseCase,
     GenerateClosingPeriodReportUseCase,
     GenerateConversionReportUseCase,
     GenerateOperationsReportUseCase,
@@ -21,6 +22,7 @@ import {
     controllers: [OperationController],
     providers: [
         AdjustmentOperationUseCase,
+        GenerateBalancesReportUseCase,
         GenerateClosingPeriodReportUseCase,
         GenerateOperationsReportUseCase,
         GenerateConversionReportUseCase,
@@ -36,6 +38,7 @@ import {
     ],
     exports: [
         AdjustmentOperationUseCase,
+        GenerateBalancesReportUseCase,
         GenerateClosingPeriodReportUseCase,
         GenerateOperationsReportUseCase,
         GenerateConversionReportUseCase,

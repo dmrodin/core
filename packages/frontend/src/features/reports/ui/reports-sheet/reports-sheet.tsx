@@ -1,6 +1,7 @@
 'use client';
 
 import { ReportGeneralForm } from '@/entities/reports';
+import { ReportsBalancesForm } from '@/entities/reports';
 import { ReportsConversionForm } from '@/entities/reports';
 import { ReportsPeriodForm } from '@/entities/reports';
 import { usePopapStore } from '@/entities/reports';
@@ -10,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/shadcn/tab
 export function ReportsSheet() {
     const active = usePopapStore((state) => state.active);
     const setActive = usePopapStore((state) => state.setActive);
+
     return (
         <div>
             <Sheet open={active} onOpenChange={setActive}>
@@ -17,13 +19,14 @@ export function ReportsSheet() {
                     <SheetContent className="pt-9">
                         <SheetHeader>
                             <SheetTitle>Формирование отчета</SheetTitle>
-                            <SheetDescription>Заполните поля для формирования отчёта</SheetDescription>
+                            <SheetDescription>Заполните поля для формирования отчета</SheetDescription>
                         </SheetHeader>
                         <Tabs defaultValue="general" className="w-[400px]">
                             <TabsList className="ml-4 mb-6">
                                 <TabsTrigger value="general">Общий</TabsTrigger>
                                 <TabsTrigger value="conversions">По конвертациям</TabsTrigger>
                                 <TabsTrigger value="period">По остаткам</TabsTrigger>
+                                <TabsTrigger value="balances">По балансам</TabsTrigger>
                             </TabsList>
                             <TabsContent value="general" className="px-4">
                                 <ReportGeneralForm />
@@ -33,6 +36,9 @@ export function ReportsSheet() {
                             </TabsContent>
                             <TabsContent value="period" className="px-4">
                                 <ReportsPeriodForm />
+                            </TabsContent>
+                            <TabsContent value="balances" className="px-4">
+                                <ReportsBalancesForm />
                             </TabsContent>
                         </Tabs>
                     </SheetContent>

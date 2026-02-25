@@ -1,6 +1,7 @@
 export { AdjustmentOperationUseCase } from './adjustment-operation.use-case';
 export { CreateOperationUseCase } from './create-operation.use-case';
 export { DeleteOperationUseCase } from './delete-operation.use-case';
+export { GenerateBalancesReportUseCase } from './generate-balances-report.use-case';
 export { GenerateClosingPeriodReportUseCase } from './generate-closing-period-report.use-case';
 export { GenerateConversionReportUseCase } from './generate-conversion-report.use-case';
 export { GenerateOperationsReportUseCase } from './generate-operations-report.use-case';

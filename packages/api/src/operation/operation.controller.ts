@@ -26,6 +26,7 @@ import {
     CreateOperationDto,
     CreateOperationResponseDto,
     DeleteOperationResponseDto,
+    GetBalancesReportDto,
     GetClosingPeriodReportDto,
     GetConversionReportDto,
     GetOperationsDto,
@@ -39,6 +40,7 @@ import {
     AdjustmentOperationUseCase,
     CreateOperationUseCase,
     DeleteOperationUseCase,
+    GenerateBalancesReportUseCase,
     GenerateClosingPeriodReportUseCase,
     GenerateConversionReportUseCase,
     GenerateOperationsReportUseCase,
@@ -56,6 +58,7 @@ export class OperationController {
 
     constructor(
         private readonly adjustmentOperationUseCase: AdjustmentOperationUseCase,
+        private readonly generateBalancesReportUseCase: GenerateBalancesReportUseCase,
         private readonly generateClosingPeriodReportUseCase: GenerateClosingPeriodReportUseCase,
         private readonly generateOperationsReportUseCase: GenerateOperationsReportUseCase,
         private readonly generateConversionReportUseCase: GenerateConversionReportUseCase,
@@ -104,6 +107,20 @@ export class OperationController {
     @ApiResponse({ status: 200, description: 'Отчет сформирован' })
     public async downloadClosingPeriodReport(@Query() dto: GetClosingPeriodReportDto): Promise<StreamableFile> {
         const report = await this.generateClosingPeriodReportUseCase.execute(dto);
+
+        return this.buildStreamableFile(report.buffer, report.filename);
+    }
+
+    @Get('reports/balances')
+    @HttpCode(HttpStatus.OK)
+    @Roles(RoleCode.admin)
+    @ApiOperation({
+        summary: 'Выгрузить отчет по балансам кошельков',
+        description: 'Формирует Excel-отчет с балансами кошельков на выбранную дату и время с фильтрацией по разделам.',
+    })
+    @ApiResponse({ status: 200, description: 'Отчет сформирован' })
+    public async downloadBalancesReport(@Query() dto: GetBalancesReportDto): Promise<StreamableFile> {
+        const report = await this.generateBalancesReportUseCase.execute(dto);
 
         return this.buildStreamableFile(report.buffer, report.filename);
     }
