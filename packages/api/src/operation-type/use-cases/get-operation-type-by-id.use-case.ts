@@ -19,6 +19,8 @@ export class GetOperationTypeByIdUseCase {
                 name: true,
                 description: true,
                 isSeparateTab: true,
+                isDebit: true,
+                isCredit: true,
                 active: true,
                 createdAt: true,
                 updatedAt: true,

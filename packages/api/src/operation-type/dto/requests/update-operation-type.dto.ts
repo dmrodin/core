@@ -11,9 +11,7 @@ export class UpdateOperationTypeDto {
     })
     @IsOptional()
     @IsString({ message: 'Код типа операции должен быть строкой' })
-    @Length(2, 50, {
-        message: 'Код типа операции должен содержать от 2 до 50 символов',
-    })
+    @Length(2, 50, { message: 'Код типа операции должен содержать от 2 до 50 символов' })
     public code?: string;
 
     @ApiProperty({
@@ -25,9 +23,7 @@ export class UpdateOperationTypeDto {
     })
     @IsOptional()
     @IsString({ message: 'Название типа операции должно быть строкой' })
-    @Length(2, 100, {
-        message: 'Название типа операции должно содержать от 2 до 100 символов',
-    })
+    @Length(2, 100, { message: 'Название типа операции должно содержать от 2 до 100 символов' })
     public name?: string;
 
     @ApiProperty({
@@ -49,6 +45,22 @@ export class UpdateOperationTypeDto {
     @IsOptional()
     @IsBoolean({ message: 'isSeparateTab должно быть булевым значением' })
     public isSeparateTab?: boolean;
+
+    @ApiPropertyOptional({
+        description: 'Можно ли использовать тип операции как дебетовый',
+        example: true,
+    })
+    @IsOptional()
+    @IsBoolean({ message: 'isDebit должно быть булевым значением' })
+    public isDebit?: boolean;
+
+    @ApiPropertyOptional({
+        description: 'Можно ли использовать тип операции как кредитовый',
+        example: true,
+    })
+    @IsOptional()
+    @IsBoolean({ message: 'isCredit должно быть булевым значением' })
+    public isCredit?: boolean;
 
     @ApiPropertyOptional({
         description: 'Активность типа операции',

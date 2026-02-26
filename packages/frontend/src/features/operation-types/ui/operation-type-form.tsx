@@ -49,6 +49,8 @@ export function OperationTypeForm({ isEdit = false, initialData }: OperationType
                       name: initialData.name,
                       description: initialData.description || '',
                       isSeparateTab: initialData.isSeparateTab,
+                      isDebit: initialData.isDebit ?? true,
+                      isCredit: initialData.isCredit ?? true,
                       active: initialData.active,
                   }
                 : {
@@ -56,6 +58,8 @@ export function OperationTypeForm({ isEdit = false, initialData }: OperationType
                       name: '',
                       description: '',
                       isSeparateTab: false,
+                      isDebit: true,
+                      isCredit: true,
                       active: true,
                   },
     });
@@ -140,6 +144,42 @@ export function OperationTypeForm({ isEdit = false, initialData }: OperationType
                                 <FormDescription>
                                     Если включено, этот тип операции будет отображаться как отдельная вкладка на
                                     странице операций.
+                                </FormDescription>
+                            </div>
+                            <FormControl>
+                                <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            </FormControl>
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="isDebit"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel>Дебетовая операция</FormLabel>
+                                <FormDescription>
+                                    Если включено, для данного типа операции доступен дебет.
+                                </FormDescription>
+                            </div>
+                            <FormControl>
+                                <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            </FormControl>
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="isCredit"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel>Кредитовая операция</FormLabel>
+                                <FormDescription>
+                                    Если включено, для данного типа операции доступен кредит.
                                 </FormDescription>
                             </div>
                             <FormControl>
