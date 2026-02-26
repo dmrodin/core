@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { format } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { CalendarIcon, FilterIcon } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
@@ -166,6 +166,33 @@ export function OperationsFiltersSheet({
                                             }
 
                                             if (range.from && range.to) {
+                                                if (isSameDay(range.from, range.to)) {
+                                                    const utcFrom = new Date(
+                                                        Date.UTC(
+                                                            range.from.getFullYear(),
+                                                            range.from.getMonth(),
+                                                            range.from.getDate(),
+                                                        ),
+                                                    );
+                                                    const utcFromIso = utcFrom.toISOString();
+
+                                                    if (localFilters.dateFrom === utcFromIso && !localFilters.dateTo) {
+                                                        setLocalFilters((prev) => ({
+                                                            ...prev,
+                                                            dateFrom: utcFromIso,
+                                                            dateTo: utcFromIso,
+                                                        }));
+                                                        setCalendarOpen(false);
+                                                        return;
+                                                    }
+
+                                                    setLocalFilters((prev) => ({
+                                                        ...prev,
+                                                        dateFrom: utcFromIso,
+                                                        dateTo: undefined,
+                                                    }));
+                                                    return;
+                                                }
                                                 // Создаем даты в UTC
                                                 const utcFrom = new Date(
                                                     Date.UTC(
