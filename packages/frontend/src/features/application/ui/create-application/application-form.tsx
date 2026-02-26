@@ -162,13 +162,6 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                     <SelectValue placeholder="Выберите тип" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {operationTypes?.sort().map((operationType) => (
-                                                        <SelectItem key={operationType.id} value={operationType.id}>
-                                                            {operationType.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                                <SelectContent>
                                                     {(operationTypes ?? [])
                                                         .toSorted((a, b) => a.name.localeCompare(b.name))
                                                         .map((operationType) => (
