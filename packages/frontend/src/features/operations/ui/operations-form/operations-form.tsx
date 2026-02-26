@@ -231,14 +231,14 @@ export function OperationForm({
         .filter((wallet): wallet is NonNullable<typeof wallet> => Boolean(wallet));
 
     const areAllSelectedWalletsInskesh =
-        selectedWallets.length > 0 && selectedWallets.every((wallet) => isInskeshWallet(wallet));
-
-    const isBankDisabled = !areAllSelectedWalletsInskesh;
+        selectedWallets.length >= 2 && selectedWallets.every((wallet) => isInskeshWallet(wallet));
 
     const selectedTypeId = form.watch('typeId');
     const selectedOperationType = operationTypes?.find((type) => type.id === selectedTypeId);
     const isCorrection = selectedOperationType?.isCorrection ?? false;
     const isConversion = selectedOperationType?.isConversion ?? false;
+    const isBankRequired = isConversion && areAllSelectedWalletsInskesh;
+    const isBankDisabled = !isBankRequired;
     const isConversionNumberRequired = isConversion && areAllSelectedWalletsInskesh;
     const isSingleSideOperation = selectedOperationType
         ? SINGLE_SIDE_OPERATION_NAMES.has(selectedOperationType.name.trim().toLocaleLowerCase('ru'))
@@ -272,12 +272,29 @@ export function OperationForm({
         }
     }, [isCorrection, fields.length, remove, append]);
 
+    React.useEffect(() => {
+        if (isBankDisabled) {
+            form.setValue('banksGroupId', null);
+            form.clearErrors('banksGroupId');
+        }
+    }, [form, isBankDisabled]);
+
     const onSubmit = (data: CreateOperationDto) => {
         if (!isEditing && isCreateBlocked) {
             return;
         }
 
         form.clearErrors('entries');
+        form.clearErrors('banksGroupId');
+
+        if (isBankRequired && !data.banksGroupId) {
+            form.setError('banksGroupId', {
+                type: 'manual',
+                message: 'Выберите банк для конвертации между кошельками Инскеш.',
+            });
+            return;
+        }
+
         if (!isSingleSideOperation) {
             const hasDebitEntry = data.entries.some((entry) => entry.direction === 'debit');
             const hasCreditEntry = data.entries.some((entry) => entry.direction === 'credit');
@@ -475,7 +492,7 @@ export function OperationForm({
                                 render={({ field }) => (
                                     <FormItem className="flex-1">
                                         <FormLabel>
-                                            Банк <span className="text-destructive">*</span>
+                                            Банк {isBankRequired && <span className="text-destructive">*</span>}
                                         </FormLabel>
                                         <Select
                                             onValueChange={field.onChange}
