@@ -159,9 +159,9 @@ export function OperationTypeForm({ isEdit = false, initialData }: OperationType
                     render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
                             <div className="space-y-0.5">
-                                <FormLabel>Дебетовая операция</FormLabel>
+                                <FormLabel>Показывать поле «Вычесть из...»</FormLabel>
                                 <FormDescription>
-                                    Если включено, для данного типа операции доступен дебет.
+                                    Если включено, в форме операции отображается колонка «Вычесть из...».
                                 </FormDescription>
                             </div>
                             <FormControl>
@@ -177,9 +177,9 @@ export function OperationTypeForm({ isEdit = false, initialData }: OperationType
                     render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
                             <div className="space-y-0.5">
-                                <FormLabel>Кредитовая операция</FormLabel>
+                                <FormLabel>Показывать поле «Зачислить к...»</FormLabel>
                                 <FormDescription>
-                                    Если включено, для данного типа операции доступен кредит.
+                                    Если включено, в форме операции отображается колонка «Зачислить к...».
                                 </FormDescription>
                             </div>
                             <FormControl>
