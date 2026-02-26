@@ -620,6 +620,8 @@ export function OperationForm({
                                                             placeholder="Поиск кошелька..."
                                                             value={walletSearch}
                                                             onChange={(e) => setWalletSearch(e.target.value)}
+                                                            onKeyDown={(e) => e.stopPropagation()}
+                                                            onKeyUp={(e) => e.stopPropagation()}
                                                             className="h-8"
                                                         />
                                                     </div>
@@ -757,6 +759,8 @@ export function OperationForm({
                                                                         onChange={(e) =>
                                                                             setWalletSearch(e.target.value)
                                                                         }
+                                                                        onKeyDown={(e) => e.stopPropagation()}
+                                                                        onKeyUp={(e) => e.stopPropagation()}
                                                                         className="h-8"
                                                                     />
                                                                 </div>
