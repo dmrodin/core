@@ -70,7 +70,6 @@ export function OperationsFiltersSheet({
     const resetFilters = () => {
         setLocalFilters({});
         onReset();
-        setSheetOpen(false);
     };
 
     const activeFiltersCount = [

@@ -95,7 +95,6 @@ export function WalletsFiltersSheet({
             pinned: currentValues.pinned,
             walletTypeId: currentValues.walletTypeId,
         });
-        setSheetOpen(false);
     };
 
     const activeFiltersCount = [

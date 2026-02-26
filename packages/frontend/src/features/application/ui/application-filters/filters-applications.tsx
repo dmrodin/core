@@ -73,7 +73,6 @@ export function ApplicationsFilters() {
         const resetState = { page: 1, limit: 10 };
         setLocalFilters(resetState);
         setAllQueryParams(resetState);
-        setSheetOpen(false);
     };
 
     useEffect(() => {
