@@ -233,7 +233,7 @@ export const CryptoWalletCard = ({
             });
     };
 
-    const handleCopySpecificRequisite = (value: string | undefined, label: string) => {
+    const handleCopySpecificRequisite = (value: string | null | undefined, label: string) => {
         if (!value) {
             toast.error(`Нет данных для копирования (${label})`);
             return;
