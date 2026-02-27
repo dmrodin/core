@@ -163,21 +163,23 @@ export default function OperationsPage() {
                         form.setValue('typeId', val === 'all' ? null : val);
                     }}
                 >
+                    <div className="w-full overflow-x-auto">
                     <TabsList
-                        className="grid w-full"
+                        className="flex w-max min-w-full flex-nowrap md:grid"
                         style={{
                             gridTemplateColumns: `repeat(${1 + tabTypes.length}, minmax(0, 1fr))`,
                         }}
                     >
-                        <TabsTrigger value="all" className="w-full">
+                        <TabsTrigger value="all" className="w-auto shrink-0 md:w-full">
                             Все операции
                         </TabsTrigger>
                         {tabTypes.map((type) => (
-                            <TabsTrigger key={type.id} value={type.id} className="w-full">
+                            <TabsTrigger key={type.id} value={type.id} className="w-auto shrink-0 md:w-full">
                                 {type.name}
                             </TabsTrigger>
                         ))}
                     </TabsList>
+                    </div>
                 </Tabs>
 
                 <div className="space-y-2">
