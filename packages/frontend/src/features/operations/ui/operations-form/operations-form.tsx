@@ -10,7 +10,6 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 
 import { ApplicationService, useApplicationsList, useUpdateStatusApplication } from '@/entities/application';
-import { UserRole } from '@/entities/users/model/user-schemas';
 import { useLockedPeriods } from '@/entities/locked-period';
 import {
     CreateOperationBackendDto,
@@ -65,12 +64,8 @@ export function OperationForm({
     const router = useRouter();
     const searchParams = useSearchParams();
     const user = useAuthStore((state) => state.user);
-    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
-    const isRestrictedRole =
-        !hasAdminRole &&
-        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
-    const canLoadOperationsReferences = Boolean(user) && !isRestrictedRole;
-    const canLoadApplications = Boolean(user) && !isRestrictedRole;
+    const canLoadOperationsReferences = Boolean(user);
+    const canLoadApplications = Boolean(user);
     const createMutation = useCreateOperation();
     const updateMutation = useUpdateOperation();
     const updateStatusMutation = useUpdateStatusApplication();
@@ -231,14 +226,14 @@ export function OperationForm({
         .filter((wallet): wallet is NonNullable<typeof wallet> => Boolean(wallet));
 
     const areAllSelectedWalletsInskesh =
-        selectedWallets.length > 0 && selectedWallets.every((wallet) => isInskeshWallet(wallet));
-
-    const isBankDisabled = !areAllSelectedWalletsInskesh;
+        selectedWallets.length >= 2 && selectedWallets.every((wallet) => isInskeshWallet(wallet));
 
     const selectedTypeId = form.watch('typeId');
     const selectedOperationType = operationTypes?.find((type) => type.id === selectedTypeId);
     const isCorrection = selectedOperationType?.isCorrection ?? false;
     const isConversion = selectedOperationType?.isConversion ?? false;
+    const isBankRequired = isConversion && areAllSelectedWalletsInskesh;
+    const isBankDisabled = !isBankRequired;
     const isConversionNumberRequired = isConversion && areAllSelectedWalletsInskesh;
     const isSingleSideOperation = selectedOperationType
         ? SINGLE_SIDE_OPERATION_NAMES.has(selectedOperationType.name.trim().toLocaleLowerCase('ru'))
@@ -272,12 +267,29 @@ export function OperationForm({
         }
     }, [isCorrection, fields.length, remove, append]);
 
+    React.useEffect(() => {
+        if (isBankDisabled) {
+            form.setValue('banksGroupId', null);
+            form.clearErrors('banksGroupId');
+        }
+    }, [form, isBankDisabled]);
+
     const onSubmit = (data: CreateOperationDto) => {
         if (!isEditing && isCreateBlocked) {
             return;
         }
 
         form.clearErrors('entries');
+        form.clearErrors('banksGroupId');
+
+        if (isBankRequired && !data.banksGroupId) {
+            form.setError('banksGroupId', {
+                type: 'manual',
+                message: 'Выберите банк для конвертации между кошельками Инскеш.',
+            });
+            return;
+        }
+
         if (!isSingleSideOperation) {
             const hasDebitEntry = data.entries.some((entry) => entry.direction === 'debit');
             const hasCreditEntry = data.entries.some((entry) => entry.direction === 'credit');
@@ -475,7 +487,7 @@ export function OperationForm({
                                 render={({ field }) => (
                                     <FormItem className="flex-1">
                                         <FormLabel>
-                                            Банк <span className="text-destructive">*</span>
+                                            Банк {isBankRequired && <span className="text-destructive">*</span>}
                                         </FormLabel>
                                         <Select
                                             onValueChange={field.onChange}
@@ -603,6 +615,8 @@ export function OperationForm({
                                                             placeholder="Поиск кошелька..."
                                                             value={walletSearch}
                                                             onChange={(e) => setWalletSearch(e.target.value)}
+                                                            onKeyDown={(e) => e.stopPropagation()}
+                                                            onKeyUp={(e) => e.stopPropagation()}
                                                             className="h-8"
                                                         />
                                                     </div>
@@ -740,6 +754,8 @@ export function OperationForm({
                                                                         onChange={(e) =>
                                                                             setWalletSearch(e.target.value)
                                                                         }
+                                                                        onKeyDown={(e) => e.stopPropagation()}
+                                                                        onKeyUp={(e) => e.stopPropagation()}
                                                                         className="h-8"
                                                                     />
                                                                 </div>

@@ -55,7 +55,7 @@ export class ApplicationController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить список заявок',
         description:
@@ -79,7 +79,7 @@ export class ApplicationController {
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить заявку по ID',
         description: 'Возвращает информацию о конкретной заявке. Доступно только администраторам.',
@@ -99,7 +99,7 @@ export class ApplicationController {
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator)
     @ApiOperation({
         summary: 'Создать новую заявку',
         description: 'Создаёт новую заявку в системе. Доступно только администраторам.',

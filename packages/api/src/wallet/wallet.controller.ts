@@ -150,7 +150,7 @@ export class WalletController {
 
     @Get('pinned')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить закрепленные кошельки',
         description:
@@ -213,7 +213,7 @@ export class WalletController {
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator)
     @ApiOperation({
         summary: 'Создать новый кошелек',
         description: 'Создаёт новый кошелек в системе. Доступно только администраторам.',

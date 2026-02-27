@@ -4,29 +4,54 @@ import { CurrencyInfoSchema } from '../../currency/model/currency-schemas';
 import { OperationInfoSchema, OperationTypeInfoSchema } from '../../operations/model/operation-type-schemas';
 import { UserInfoSchema } from '../../users/model/user-schemas';
 
-export const CreateApplicationRequestSchema = z.object({
-    currencyId: z.string().uuid('ID валюты должен быть валидным UUID'),
-    operationTypeId: z.string().uuid('ID типа операции должен быть валидным UUID'),
-    assigneeUserId: z.string().uuid('ID исполнителя должен быть валидным UUID'),
-    description: z.string().max(2000, 'Описание не должно превышать 2000 символов').optional(),
-    amount: z.number().int().min(0, 'Сумма не может быть отрицательной'),
-    telegramUsername: z
-        .string()
-        .max(100, 'Telegram username не должен превышать 100 символов')
-        .regex(/^@?[a-zA-Z0-9_]*$/, 'Можно использовать только буквы, цифры и подчеркивания')
-        .transform((val) => val.replace(/^@/, ''))
-        .optional()
-        .or(z.literal('')),
-    phone: z.string().max(20, 'Телефон не должен превышать 20 символов').optional(),
-    meetingDate: z.string().datetime('Неверный формат даты'),
-    advance: z
-        .object({
-            amount: z.number().int().min(0, 'Аванс не может быть отрицательным'),
-            currencyId: z.string().uuid('ID валюты аванса должен быть валидным UUID'),
-        })
-        .nullable()
-        .optional(),
+const AdvanceEntrySchema = z.object({
+    walletId: z.string().uuid('Выберите кошелек'),
+    direction: z.enum(['credit', 'debit']),
+    amount: z.number().int().positive('Сумма должна быть больше 0'),
 });
+
+export const CreateApplicationRequestSchema = z
+    .object({
+        currencyId: z.string().uuid('ID валюты должен быть валидным UUID'),
+        operationTypeId: z.string().uuid('ID типа операции должен быть валидным UUID'),
+        assigneeUserId: z.string().uuid('ID исполнителя должен быть валидным UUID'),
+        description: z.string().max(2000, 'Описание не должно превышать 2000 символов').optional(),
+        amount: z.number().int().min(0, 'Сумма не может быть отрицательной'),
+        telegramUsername: z
+            .string()
+            .max(100, 'Telegram username не должен превышать 100 символов')
+            .regex(/^@?[a-zA-Z0-9_]*$/, 'Можно использовать только буквы, цифры и подчеркивания')
+            .transform((val) => val.replace(/^@/, ''))
+            .optional()
+            .or(z.literal('')),
+        phone: z.string().max(20, 'Телефон не должен превышать 20 символов').optional(),
+        meetingDate: z.string().datetime('Неверный формат даты'),
+        advance: z
+            .object({
+                // Legacy формат для обратной совместимости.
+                amount: z.number().int().min(0, 'Аванс не может быть отрицательным').optional(),
+                currencyId: z.string().uuid('ID валюты аванса должен быть валидным UUID').optional(),
+                entries: z.array(AdvanceEntrySchema).optional(),
+            })
+            .nullable()
+            .optional(),
+    })
+    .superRefine((data, ctx) => {
+        if (!data.advance?.entries?.length) {
+            return;
+        }
+
+        const hasDebit = data.advance.entries.some((entry) => entry.direction === 'debit');
+        const hasCredit = data.advance.entries.some((entry) => entry.direction === 'credit');
+
+        if (!hasDebit || !hasCredit) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['advance', 'entries'],
+                message: 'Для аванса заполните обе стороны: "Вычесть из..." и "Прибавить к...".',
+            });
+        }
+    });
 
 export type CreateApplicationRequest = z.infer<typeof CreateApplicationRequestSchema>;
 
@@ -134,8 +159,9 @@ export const UpdateApplicationSchema = z.object({
     meetingDate: z.string().datetime().optional(),
     advance: z
         .object({
-            amount: z.number().min(0),
-            currencyId: z.string().uuid(),
+            amount: z.number().min(0).optional(),
+            currencyId: z.string().uuid().optional(),
+            entries: z.array(AdvanceEntrySchema).optional(),
         })
         .optional()
         .nullable(),

@@ -14,7 +14,6 @@ import {
     useInfiniteApplications,
     useUpdateStatusApplication,
 } from '@/entities/application';
-import { UserRole } from '@/entities/users/model/user-schemas';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import { OperationViewDialog } from '@/features/operations';
 import {
@@ -36,11 +35,7 @@ import { useLastItemObserver } from '@/shared/lib/hooks/use-last-Item-observer';
 export const InfiniteApplicationsList = () => {
     const router = useRouter();
     const user = useAuthStore((state) => state.user);
-    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
-    const isRestrictedRole =
-        !hasAdminRole &&
-        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
-    const canLoadApplications = Boolean(user) && !isRestrictedRole;
+    const canLoadApplications = Boolean(user);
 
     const params = useApplicationsQueryParams();
     const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
@@ -53,7 +48,8 @@ export const InfiniteApplicationsList = () => {
     } = useInfiniteApplications(params, 10, canLoadApplications);
 
     const { mutate: deleteApplicationMutation } = useDeleteApplication(params);
-    const { mutate: updateStatuseApplicationMutation } = useUpdateStatusApplication();
+    const { mutate: updateStatuseApplicationMutation, mutateAsync: updateStatuseApplicationMutationAsync } =
+        useUpdateStatusApplication();
     const { copyApplication } = useCopyApplication();
 
     const applications = useMemo(
@@ -98,7 +94,7 @@ export const InfiniteApplicationsList = () => {
                             >
                                 <DropdownMenuItem
                                     className="hover:bg-primary/60 dark:hover:bg-primary/60"
-                                    onClick={() => {
+                                    onClick={async () => {
                                         if (app.status === 'done') {
                                             // Вернуть в работу
                                             updateStatuseApplicationMutation({
@@ -106,6 +102,16 @@ export const InfiniteApplicationsList = () => {
                                                 status: 'open',
                                             });
                                         } else {
+                                            // Для заявок с авансом операция создаётся заранее, поэтому открываем её редактирование.
+                                            if (app.operationId) {
+                                                await updateStatuseApplicationMutationAsync({
+                                                    id: app.id.toString(),
+                                                    status: 'done',
+                                                });
+                                                router.push(`${ROUTER_MAP.OPERATIONS_EDIT}/${app.operationId}`);
+                                                return;
+                                            }
+
                                             router.push(
                                                 `${ROUTER_MAP.OPERATIONS_CREATE}?applicationId=${app.id}&completeOnCreate=1`,
                                             );

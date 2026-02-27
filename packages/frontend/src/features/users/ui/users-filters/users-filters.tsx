@@ -59,7 +59,6 @@ export const UsersFilters = () => {
         const resetState = { page: 1, limit: 100 };
         setLocalFilters(resetState);
         setAllQueryParams(resetState);
-        setSheetOpen(false);
     };
 
     useEffect(() => {

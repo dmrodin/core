@@ -58,6 +58,7 @@ const baseFilters: GetWalletsFilter = {
     pinned: undefined,
     visible: true,
     deleted: false,
+    includeTabWalletTypes: undefined,
     sortField: WalletSortField.CREATED_AT,
     sortOrder: SortOrder.DESC,
     page: 1,
@@ -346,23 +347,28 @@ export default function WalletsPage() {
                         form.setValue('pinned', undefined);
                         form.setValue('visible', true);
                         form.setValue('deleted', false);
+                        form.setValue('includeTabWalletTypes', true);
                     } else if (val === 'deleted') {
                         form.setValue('deleted', true);
                         form.setValue('visible', true);
                         form.setValue('pinned', undefined);
+                        form.setValue('includeTabWalletTypes', undefined);
                     } else if (val === 'hidden') {
                         form.setValue('visible', false);
                         form.setValue('deleted', false);
                         form.setValue('pinned', false);
+                        form.setValue('includeTabWalletTypes', undefined);
                     } else if (val === 'pinned') {
                         form.setValue('pinned', true);
                         form.setValue('visible', true);
                         form.setValue('deleted', false);
+                        form.setValue('includeTabWalletTypes', undefined);
                     } else {
                         form.setValue('walletTypeId', val);
                         form.setValue('pinned', false);
                         form.setValue('visible', true);
                         form.setValue('deleted', false);
+                        form.setValue('includeTabWalletTypes', undefined);
                     }
                 }}
             >

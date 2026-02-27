@@ -51,6 +51,12 @@ export class UpdateOperationTypeUseCase {
                 ...(updateOperationTypeDto.isSeparateTab !== undefined && {
                     isSeparateTab: updateOperationTypeDto.isSeparateTab,
                 }),
+                ...(updateOperationTypeDto.isDebit !== undefined && {
+                    isDebit: updateOperationTypeDto.isDebit,
+                }),
+                ...(updateOperationTypeDto.isCredit !== undefined && {
+                    isCredit: updateOperationTypeDto.isCredit,
+                }),
                 ...(updateOperationTypeDto.active !== undefined && {
                     active: updateOperationTypeDto.active,
                 }),
@@ -63,6 +69,8 @@ export class UpdateOperationTypeUseCase {
                 name: true,
                 description: true,
                 isSeparateTab: true,
+                isDebit: true,
+                isCredit: true,
                 active: true,
                 createdAt: true,
                 updatedAt: true,

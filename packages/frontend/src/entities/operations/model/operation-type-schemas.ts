@@ -49,6 +49,8 @@ export const CreateOperationTypeSchema = z.object({
         .max(100, 'Название не должно превышать 100 символов'),
     description: z.string().max(1000, 'Описание не должно превышать 1000 символов').optional().nullable(),
     isSeparateTab: z.boolean(),
+    isDebit: z.boolean().default(true),
+    isCredit: z.boolean().default(true),
     active: z.boolean().default(true),
 });
 
@@ -65,6 +67,8 @@ export const UpdateOperationTypeSchema = z.object({
         .optional(),
     description: z.string().max(1000, 'Описание не должно превышать 1000 символов').optional().nullable(),
     isSeparateTab: z.boolean().optional(),
+    isDebit: z.boolean().optional(),
+    isCredit: z.boolean().optional(),
     active: z.boolean().optional(),
 });
 

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { FilterIcon } from 'lucide-react';
 import { z } from 'zod';
-import { format } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
 import { getApplicationsFiltersSchema, useSetApplicationQueryParam } from '@/entities/application';
@@ -73,7 +73,6 @@ export function ApplicationsFilters() {
         const resetState = { page: 1, limit: 10 };
         setLocalFilters(resetState);
         setAllQueryParams(resetState);
-        setSheetOpen(false);
     };
 
     useEffect(() => {
@@ -205,6 +204,37 @@ export function ApplicationsFilters() {
                                             }
 
                                             if (range.from && range.to) {
+                                                if (isSameDay(range.from, range.to)) {
+                                                    const utcFrom = new Date(
+                                                        Date.UTC(
+                                                            range.from.getFullYear(),
+                                                            range.from.getMonth(),
+                                                            range.from.getDate(),
+                                                        ),
+                                                    );
+                                                    const utcFromIso = utcFrom.toISOString();
+
+                                                    if (
+                                                        localFilters.createdFrom === utcFromIso &&
+                                                        !localFilters.createdTo
+                                                    ) {
+                                                        setLocalFilters((prev) => ({
+                                                            ...prev,
+                                                            createdFrom: utcFromIso,
+                                                            createdTo: utcFromIso,
+                                                        }));
+                                                        setCalendarOpen(false);
+                                                        return;
+                                                    }
+
+                                                    setLocalFilters((prev) => ({
+                                                        ...prev,
+                                                        createdFrom: utcFromIso,
+                                                        createdTo: undefined,
+                                                    }));
+                                                    return;
+                                                }
+
                                                 /* const fromDate = new Date(range.from);
                         fromDate.setUTCHours(0, 0, 0, 0);
                         const toDate = new Date(range.to);
