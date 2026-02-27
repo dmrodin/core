@@ -90,10 +90,20 @@ export class CreateApplicationUseCase {
             }
 
             if (hasAdvanceEntries && advanceType?.id) {
+                const operationDescriptionLines = [`Аванс по заявке №${app.id}`];
+
+                if (app.telegramUsername) {
+                    operationDescriptionLines.push(`Telegram: ${app.telegramUsername}`);
+                }
+
+                if (app.phone) {
+                    operationDescriptionLines.push(`Телефон: ${app.phone}`);
+                }
+
                 const createdOperation = await tx.operation.create({
                     data: {
                         applicationId: app.id,
-                        description: `Аванс по заявке №${app.id}`,
+                        description: operationDescriptionLines.join('\n'),
                         userId,
                         updatedById: userId,
                         typeId: advanceType.id,
