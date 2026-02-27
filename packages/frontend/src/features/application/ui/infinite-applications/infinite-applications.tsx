@@ -14,7 +14,6 @@ import {
     useInfiniteApplications,
     useUpdateStatusApplication,
 } from '@/entities/application';
-import { UserRole } from '@/entities/users/model/user-schemas';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import { OperationViewDialog } from '@/features/operations';
 import {
@@ -36,11 +35,7 @@ import { useLastItemObserver } from '@/shared/lib/hooks/use-last-Item-observer';
 export const InfiniteApplicationsList = () => {
     const router = useRouter();
     const user = useAuthStore((state) => state.user);
-    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
-    const isRestrictedRole =
-        !hasAdminRole &&
-        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
-    const canLoadApplications = Boolean(user) && !isRestrictedRole;
+    const canLoadApplications = Boolean(user);
 
     const params = useApplicationsQueryParams();
     const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
