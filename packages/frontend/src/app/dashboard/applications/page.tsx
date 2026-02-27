@@ -19,14 +19,14 @@ export default function ApplicationsPage() {
     return (
         <div className="space-y-6">
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between space-y-0">
                     <CardTitle className="text-2xl">Заявки</CardTitle>
-                    <div className="flex gap-2 items-center">
+                    <div className="flex w-full flex-wrap gap-2 items-center md:w-auto">
                         <Input
                             placeholder="Поиск..."
                             value={search}
                             onChange={(e) => setQueryParam('search', e.target.value || undefined)}
-                            className="w-64"
+                            className="w-full md:w-64"
                         />
                         <ApplicationsFilters />
                         <Button asChild>
