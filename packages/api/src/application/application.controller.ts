@@ -99,7 +99,7 @@ export class ApplicationController {
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator)
     @ApiOperation({
         summary: 'Создать новую заявку',
         description: 'Создаёт новую заявку в системе. Доступно только администраторам.',

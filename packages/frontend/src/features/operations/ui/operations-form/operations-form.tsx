@@ -10,7 +10,6 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 
 import { ApplicationService, useApplicationsList, useUpdateStatusApplication } from '@/entities/application';
-import { UserRole } from '@/entities/users/model/user-schemas';
 import { useLockedPeriods } from '@/entities/locked-period';
 import {
     CreateOperationBackendDto,
@@ -65,12 +64,8 @@ export function OperationForm({
     const router = useRouter();
     const searchParams = useSearchParams();
     const user = useAuthStore((state) => state.user);
-    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
-    const isRestrictedRole =
-        !hasAdminRole &&
-        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
-    const canLoadOperationsReferences = Boolean(user) && !isRestrictedRole;
-    const canLoadApplications = Boolean(user) && !isRestrictedRole;
+    const canLoadOperationsReferences = Boolean(user);
+    const canLoadApplications = Boolean(user);
     const createMutation = useCreateOperation();
     const updateMutation = useUpdateOperation();
     const updateStatusMutation = useUpdateStatusApplication();
