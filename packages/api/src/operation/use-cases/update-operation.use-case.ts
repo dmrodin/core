@@ -209,6 +209,7 @@ export class UpdateOperationUseCase {
                             where: {
                                 walletId: entry.walletId,
                                 deleted: false,
+                                direction: 'credit',
                                 createdAt: {
                                     gte: startOfMonth,
                                     lt: endOfMonth,
