@@ -150,7 +150,7 @@ export class WalletController {
 
     @Get('pinned')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить закрепленные кошельки',
         description:
