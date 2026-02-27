@@ -213,7 +213,7 @@ export class WalletController {
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator)
     @ApiOperation({
         summary: 'Создать новый кошелек',
         description: 'Создаёт новый кошелек в системе. Доступно только администраторам.',
