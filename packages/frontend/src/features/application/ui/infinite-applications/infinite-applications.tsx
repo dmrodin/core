@@ -4,7 +4,7 @@ import React, { Fragment, useMemo, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { CheckCircle, Copy, FileText, Info, Pencil, RotateCcw, Trash } from 'lucide-react';
+import { CheckCircle, Copy, FileText, Info, MoreHorizontal, Pencil, RotateCcw, Trash } from 'lucide-react';
 
 import {
     CardApplication,
@@ -17,6 +17,7 @@ import {
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import { OperationViewDialog } from '@/features/operations';
 import {
+    Button,
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -82,11 +83,21 @@ export const InfiniteApplicationsList = () => {
                     const isLast = index === applications.length - 1;
                     return (
                         <DropdownMenu key={app.id}>
-                            <DropdownMenuTrigger asChild>
-                                <div ref={isLast ? lastApplicationRef : null}>
-                                    <CardApplication application={app} />
-                                </div>
-                            </DropdownMenuTrigger>
+                            <div ref={isLast ? lastApplicationRef : null} className="relative">
+                                <CardApplication application={app} />
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="absolute top-2 right-2 h-8 w-8 z-10"
+                                        aria-label="Открыть меню заявки"
+                                        onPointerDown={(event) => event.stopPropagation()}
+                                    >
+                                        <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                            </div>
 
                             <DropdownMenuContent
                                 align="center"

@@ -5,7 +5,7 @@ import { Fragment, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarIcon, Copy, FileText, Pencil, Trash } from 'lucide-react';
+import { CalendarIcon, Copy, FileText, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -223,31 +223,10 @@ export default function OperationsPage() {
 
                                                 return (
                                                     <DropdownMenu key={operation.id}>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Card
-                                                                ref={isLast ? lastOperationRef : null}
-                                                                className="relative cursor-pointer hover:bg-accent/50 transition-colors mb-2"
-                                                                onTouchStart={(e) => {
-                                                                    const timer = setTimeout(() => {
-                                                                        e.currentTarget.click();
-                                                                    }, 600);
-                                                                    const cancel = () => clearTimeout(timer);
-                                                                    e.currentTarget.addEventListener(
-                                                                        'touchend',
-                                                                        cancel,
-                                                                        {
-                                                                            once: true,
-                                                                        },
-                                                                    );
-                                                                    e.currentTarget.addEventListener(
-                                                                        'touchmove',
-                                                                        cancel,
-                                                                        {
-                                                                            once: true,
-                                                                        },
-                                                                    );
-                                                                }}
-                                                            >
+                                                        <Card
+                                                            ref={isLast ? lastOperationRef : null}
+                                                            className="relative hover:bg-accent/50 transition-colors mb-2"
+                                                        >
                                                                 <CardContent className="py-0 relative">
                                                                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                                                         <div className="space-y-2 flex-1">
@@ -381,6 +360,20 @@ export default function OperationsPage() {
                                                                         </div>
 
                                                                         <div className="text-left sm:text-right">
+                                                                            <DropdownMenuTrigger asChild>
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="ghost"
+                                                                                    size="icon"
+                                                                                    className="mb-2 ml-auto h-8 w-8"
+                                                                                    aria-label="Открыть меню операции"
+                                                                                    onPointerDown={(event) =>
+                                                                                        event.stopPropagation()
+                                                                                    }
+                                                                                >
+                                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                                </Button>
+                                                                            </DropdownMenuTrigger>
                                                                             <p className="text-sm text-muted-foreground">
                                                                                 {formatDateTime(operation.createdAt)}
                                                                             </p>
@@ -388,7 +381,6 @@ export default function OperationsPage() {
                                                                     </div>
                                                                 </CardContent>
                                                             </Card>
-                                                        </DropdownMenuTrigger>
 
                                                         <DropdownMenuContent
                                                             align="center"
