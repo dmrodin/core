@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
+import { Trash2 } from 'lucide-react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, useWatch } from 'react-hook-form';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 
 import {
     ApplicationResponse,
@@ -12,13 +13,14 @@ import {
 } from '@/entities/application';
 import { useCurrency } from '@/entities/currency';
 import { useOperationTypes } from '@/entities/operations';
+import { useWallets } from '@/entities/wallet';
 import { useCouriers } from '@/entities/users';
 import { useCreateApplication } from '@/features/application';
 import { cn, findPhoneRule, formatByRule, formatNumber, normalizeDigits, RequiredLabel, Skeleton } from '@/shared';
 import { Button } from '@/shared';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared';
+import { Checkbox, Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared';
 import { Input } from '@/shared';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Checkbox } from '@/shared';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared';
 import { Separator } from '@/shared';
 import { Textarea } from '@/shared';
 
@@ -30,11 +32,15 @@ const formatTelegramUsername = (value: string): string => {
 };
 
 export function ApplicationForm({ initialData }: { initialData?: ApplicationResponse } & React.ComponentProps<'form'>) {
+    const isCreateMode = !initialData;
     const { data: operationTypes, isLoading: operationTypesLoading } = useOperationTypes();
     const { data: couriers, isLoading: couriersLoading } = useCouriers();
     const { data: currency, isLoading: currencyLoading } = useCurrency();
+    const { data: wallets } = useWallets();
     const createMutation = useCreateApplication();
     const updateMutation = useUpdateApplication();
+    const [walletSearch, setWalletSearch] = React.useState('');
+    const [isAdvanceEnabled, setIsAdvanceEnabled] = React.useState(Boolean(initialData?.advance));
 
     const form = useForm<CreateApplicationRequest>({
         resolver: zodResolver(CreateApplicationRequestSchema),
@@ -73,18 +79,40 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
         name: 'advance',
     });
 
+    const {
+        fields: advanceFields,
+        append: appendAdvanceEntry,
+        remove: removeAdvanceEntry,
+    } = useFieldArray({
+        control: form.control,
+        name: 'advance.entries',
+        keyName: 'fieldId',
+    });
+
     const onSubmit = (data: CreateApplicationRequest) => {
+        const filteredAdvanceEntries =
+            data.advance?.entries
+                ?.filter((entry) => entry.walletId && entry.amount > 0)
+                .map((entry) => ({
+                    walletId: entry.walletId,
+                    direction: entry.direction,
+                    amount: entry.amount,
+                })) ?? [];
+
         const formData = {
             ...data,
             telegramUsername: data.telegramUsername ? `@${data.telegramUsername}` : '',
-            advance: data.advance && data.advance.amount > 0 ? data.advance : null,
+            advance:
+                filteredAdvanceEntries.length > 0
+                    ? { entries: filteredAdvanceEntries }
+                    : data.advance && typeof data.advance.amount === 'number' && data.advance.amount > 0
+                      ? data.advance
+                      : null,
         };
 
         if (initialData) {
-            // Режим редактирования
             updateMutation.mutate({ id: initialData.id.toString(), ...formData });
         } else {
-            // Режим создания
             createMutation.mutate(formData);
         }
     };
@@ -92,15 +120,14 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="flex flex-col ">
+                <div className="flex flex-col">
                     <div className="grid lg:grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
                             name="assigneeUserId"
                             render={({ field }) => (
-                                <FormItem className="">
+                                <FormItem>
                                     <RequiredLabel required>Исполнитель</RequiredLabel>
-
                                     {couriersLoading ? (
                                         <Skeleton className="h-8" />
                                     ) : (
@@ -111,15 +138,14 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {couriers?.map((couriers) => (
-                                                    <SelectItem key={couriers.id} value={couriers.id}>
-                                                        {couriers.username}
+                                                {couriers?.map((courier) => (
+                                                    <SelectItem key={courier.id} value={courier.id}>
+                                                        {courier.username}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
                                     )}
-
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -128,7 +154,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                             control={form.control}
                             name="meetingDate"
                             render={({ field, fieldState }) => (
-                                <FormItem className="flex flex-col  w-full">
+                                <FormItem className="flex flex-col w-full">
                                     <RequiredLabel required>Дата и время встречи</RequiredLabel>
                                     <DateTimePicker
                                         value={field.value}
@@ -145,7 +171,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                     </div>
                     <Separator className="my-6" />
                     <div className="flex flex-col gap-2">
-                        <div className="grid  min-[450px]:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid min-[450px]:grid-cols-2 lg:grid-cols-3 gap-4">
                             <FormField
                                 control={form.control}
                                 name="operationTypeId"
@@ -215,10 +241,9 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    {currency?.currencies.map((currency) => (
-                                                        <SelectItem key={currency.id} value={currency.id}>
-                                                            {/* {currency.name} */}
-                                                            {currency.code}
+                                                    {currency?.currencies.map((item) => (
+                                                        <SelectItem key={item.id} value={item.id}>
+                                                            {item.code}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
@@ -229,6 +254,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                 )}
                             />
                         </div>
+
                         <div className="mt-2">
                             <FormField
                                 control={form.control}
@@ -237,9 +263,24 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                     <FormItem className="flex items-center gap-2">
                                         <FormControl>
                                             <Checkbox
-                                                checked={!!field.value}
+                                                checked={isAdvanceEnabled}
                                                 onCheckedChange={(checked) => {
-                                                    field.onChange(checked ? { amount: 0, currencyId: '' } : null);
+                                                    const enabled = checked === true;
+                                                    setIsAdvanceEnabled(enabled);
+
+                                                    if (!enabled) {
+                                                        field.onChange(null);
+                                                        return;
+                                                    }
+
+                                                    field.onChange(
+                                                        isCreateMode
+                                                            ? { entries: [] }
+                                                            : {
+                                                                  amount: 0,
+                                                                  currencyId: '',
+                                                              },
+                                                    );
                                                 }}
                                             />
                                         </FormControl>
@@ -247,61 +288,219 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                     </FormItem>
                                 )}
                             />
-                            {advance && (
-                                <div className="grid grid-cols-1 min-[450px]:grid-cols-2 gap-4 mt-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="advance.amount"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <RequiredLabel required>Сумма аванса</RequiredLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        type="text"
-                                                        placeholder="100 000"
-                                                        value={field.value ? formatNumber(field.value) : ''}
-                                                        onChange={(e) => {
-                                                            const digits = e.target.value.replace(/\D/g, '');
-                                                            field.onChange(digits ? Number(digits) : 0);
-                                                        }}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="advance.currencyId"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <RequiredLabel required>Валюта аванса</RequiredLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Выберите валюту" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        {currency?.currencies.map((currency) => (
-                                                            <SelectItem key={currency.id} value={currency.id}>
-                                                                {currency.name} ({currency.code})
-                                                            </SelectItem>
+
+                            {isAdvanceEnabled && (
+                                <>
+                                    {isCreateMode ? (
+                                        <div className="mt-4 lg:grid lg:grid-cols-2 gap-4">
+                                            {(['debit', 'credit'] as const).map((dir) => (
+                                                <div key={dir} className="flex flex-col gap-3">
+                                                    <div className="lg:flex justify-between items-center">
+                                                        <p className="font-medium">
+                                                            {dir === 'debit' ? 'Вычесть из...' : 'Прибавить к...'}
+                                                        </p>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            type="button"
+                                                            onClick={() =>
+                                                                appendAdvanceEntry({
+                                                                    walletId: '',
+                                                                    direction: dir,
+                                                                    amount: 0,
+                                                                })
+                                                            }
+                                                        >
+                                                            + Добавить строку
+                                                        </Button>
+                                                    </div>
+
+                                                    {advanceFields
+                                                        .map((item, realIndex) => ({ item, realIndex }))
+                                                        .filter(({ item }) => item.direction === dir)
+                                                        .map(({ item, realIndex }) => (
+                                                            <div key={item.fieldId} className="flex gap-3 items-end">
+                                                                <FormField
+                                                                    control={form.control}
+                                                                    name={`advance.entries.${realIndex}.walletId`}
+                                                                    render={({ field }) => (
+                                                                        <FormItem className="flex-1">
+                                                                            <FormLabel>Кошелек</FormLabel>
+                                                                            <Select
+                                                                                onValueChange={field.onChange}
+                                                                                value={field.value || ''}
+                                                                            >
+                                                                                <FormControl>
+                                                                                    <SelectTrigger className="w-full">
+                                                                                        <SelectValue placeholder="Выберите кошелек" />
+                                                                                    </SelectTrigger>
+                                                                                </FormControl>
+                                                                                <SelectContent>
+                                                                                    <div className="px-2 pb-2">
+                                                                                        <Input
+                                                                                            placeholder="Поиск кошелька..."
+                                                                                            value={walletSearch}
+                                                                                            onChange={(e) =>
+                                                                                                setWalletSearch(
+                                                                                                    e.target.value,
+                                                                                                )
+                                                                                            }
+                                                                                            onKeyDown={(e) =>
+                                                                                                e.stopPropagation()
+                                                                                            }
+                                                                                            onKeyUp={(e) =>
+                                                                                                e.stopPropagation()
+                                                                                            }
+                                                                                            className="h-8"
+                                                                                        />
+                                                                                    </div>
+                                                                                    {wallets?.wallets
+                                                                                        ?.filter((wallet) => {
+                                                                                            const matchesSearch =
+                                                                                                wallet.name
+                                                                                                    .toLowerCase()
+                                                                                                    .includes(
+                                                                                                        walletSearch.toLowerCase(),
+                                                                                                    );
+                                                                                            return (
+                                                                                                matchesSearch &&
+                                                                                                wallet.active &&
+                                                                                                wallet.visible &&
+                                                                                                !wallet.deleted
+                                                                                            );
+                                                                                        })
+                                                                                        .map((wallet) => (
+                                                                                            <SelectItem
+                                                                                                key={wallet.id}
+                                                                                                value={wallet.id}
+                                                                                            >
+                                                                                                {wallet.name} -{' '}
+                                                                                                {wallet.amount}{' '}
+                                                                                                {wallet.currency.code}
+                                                                                            </SelectItem>
+                                                                                        ))}
+                                                                                </SelectContent>
+                                                                            </Select>
+                                                                            <FormMessage />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+
+                                                                <FormField
+                                                                    control={form.control}
+                                                                    name={`advance.entries.${realIndex}.amount`}
+                                                                    render={({ field }) => (
+                                                                        <FormItem>
+                                                                            <FormLabel>Сумма</FormLabel>
+                                                                            <FormControl>
+                                                                                <Input
+                                                                                    type="number"
+                                                                                    value={field.value ?? ''}
+                                                                                    onChange={(e) => {
+                                                                                        const value = e.target.value;
+                                                                                        if (!value) {
+                                                                                            field.onChange(0);
+                                                                                            return;
+                                                                                        }
+                                                                                        const numValue = Number(value);
+                                                                                        field.onChange(
+                                                                                            Number.isNaN(numValue)
+                                                                                                ? 0
+                                                                                                : numValue,
+                                                                                        );
+                                                                                    }}
+                                                                                    onFocus={() => {
+                                                                                        if (field.value === 0) {
+                                                                                            field.onChange('');
+                                                                                        }
+                                                                                    }}
+                                                                                    onBlur={(e) => {
+                                                                                        if (!e.currentTarget.value) {
+                                                                                            field.onChange(0);
+                                                                                        }
+                                                                                    }}
+                                                                                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                                                />
+                                                                            </FormControl>
+                                                                            <FormMessage />
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="icon"
+                                                                    onClick={() => removeAdvanceEntry(realIndex)}
+                                                                    className="text-destructive hover:bg-destructive/10"
+                                                                >
+                                                                    <Trash2 className="size-4" />
+                                                                </Button>
+                                                            </div>
                                                         ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 min-[450px]:grid-cols-2 gap-4 mt-4">
+                                            <FormField
+                                                control={form.control}
+                                                name="advance.amount"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <RequiredLabel required>Сумма аванса</RequiredLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                type="text"
+                                                                placeholder="100 000"
+                                                                value={field.value ? formatNumber(field.value) : ''}
+                                                                onChange={(e) => {
+                                                                    const digits = e.target.value.replace(/\D/g, '');
+                                                                    field.onChange(digits ? Number(digits) : 0);
+                                                                }}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="advance.currencyId"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <RequiredLabel required>Валюта аванса</RequiredLabel>
+                                                        <Select
+                                                            onValueChange={field.onChange}
+                                                            defaultValue={field.value}
+                                                        >
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Выберите валюту" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                {currency?.currencies.map((item) => (
+                                                                    <SelectItem key={item.id} value={item.id}>
+                                                                        {item.name} ({item.code})
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>
 
                     <Separator className="my-6" />
 
-                    <div className="grid grid-cols-1  min-[450px]:grid-cols-2 gap-4 ">
+                    <div className="grid grid-cols-1 min-[450px]:grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
                             name="telegramUsername"
@@ -392,3 +591,5 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
         </Form>
     );
 }
+
+

@@ -1,13 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../../common/services/prisma.service';
 import { addOperationTypeFlags, OPERATION_TYPE_CODES } from '../../operation-type/constants/operation-type.constants';
+import { WalletRecalculationService } from '../../wallet/services/wallet-recalculation.service';
 import { CreateApplicationDto } from '../dto';
 import { CreateApplicationOutput } from '../types';
 
 @Injectable()
 export class CreateApplicationUseCase {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly walletRecalculationService: WalletRecalculationService,
+    ) {}
 
     public async execute(createApplicationDto: CreateApplicationDto, userId: string): Promise<CreateApplicationOutput> {
         const {
@@ -22,20 +26,31 @@ export class CreateApplicationUseCase {
             advance,
         } = createApplicationDto;
 
-        // Определяем, является ли это авансом по типу операции
         const operationType = await this.prisma.operationType.findUnique({
             where: { id: operationTypeId },
-            select: { name: true },
+            select: { code: true },
         });
 
-        const operationAdvance = advance
+        const advanceType = advance
             ? await this.prisma.operationType.findFirst({
                   where: { code: OPERATION_TYPE_CODES.AVANS },
                   select: { id: true },
               })
             : null;
 
-        const hasAdvance = operationType?.name === OPERATION_TYPE_CODES.AVANS;
+        const hasAdvance = operationType?.code === OPERATION_TYPE_CODES.AVANS;
+        const advanceEntries = advance?.entries ?? [];
+        const hasAdvanceEntries = advanceEntries.length > 0;
+        const hasLegacyAdvance = typeof advance?.amount === 'number' && !!advance?.currencyId;
+
+        if (hasAdvanceEntries) {
+            const hasDebit = advanceEntries.some((entry) => entry.direction === 'debit');
+            const hasCredit = advanceEntries.some((entry) => entry.direction === 'credit');
+
+            if (!hasDebit || !hasCredit) {
+                throw new BadRequestException('Для аванса заполните обе стороны: "Вычесть из..." и "Прибавить к...".');
+            }
+        }
 
         const application = await this.prisma.$transaction(async (tx) => {
             const app = await tx.application.create({
@@ -64,33 +79,50 @@ export class CreateApplicationUseCase {
                 },
             });
 
-            if (advance) {
+            if (hasLegacyAdvance) {
                 await tx.applicationAdvance.create({
                     data: {
                         applicationId: app.id,
-                        amount: advance.amount,
-                        currencyId: advance.currencyId,
+                        amount: advance.amount!,
+                        currencyId: advance.currencyId!,
+                    },
+                });
+            }
+
+            if (hasAdvanceEntries && advanceType?.id) {
+                const createdOperation = await tx.operation.create({
+                    data: {
+                        applicationId: app.id,
+                        description: `Аванс по заявке №${app.id}`,
+                        userId,
+                        updatedById: userId,
+                        typeId: advanceType.id,
+                        createdAt: new Date().toISOString(),
                     },
                 });
 
-                console.warn(operationAdvance);
-
-                if (operationAdvance?.id) {
-                    const op = await tx.operation.create({
+                for (const entry of advanceEntries) {
+                    await tx.operationEntry.create({
                         data: {
-                            applicationId: app.id,
-                            description: `Аванс по заявке №${app.id}`,
+                            operationId: createdOperation.id,
+                            walletId: entry.walletId,
+                            direction: entry.direction,
+                            amount: entry.amount,
                             userId,
                             updatedById: userId,
-                            typeId: operationAdvance.id,
-                            createdAt: new Date().toISOString(),
                         },
                     });
-
-                    console.warn(`Created advance operation: ${op.id}`);
-                } else {
-                    console.warn('advance error');
                 }
+
+                await tx.application.update({
+                    where: { id: app.id },
+                    data: {
+                        operationId: createdOperation.id,
+                        updatedById: userId,
+                    },
+                });
+
+                await this.walletRecalculationService.recalculateForOperation(tx, createdOperation.id, userId);
             }
 
             return app;

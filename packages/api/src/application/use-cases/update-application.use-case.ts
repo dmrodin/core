@@ -67,8 +67,8 @@ export class UpdateApplicationUseCase {
                 ...(advance !== undefined && {
                     advance: {
                         update: {
-                            amount: advance.amount,
-                            currencyId: advance.currencyId,
+                            amount: advance.amount ?? 0,
+                            currencyId: advance.currencyId ?? existingApplication.currencyId,
                         },
                     },
                 }),
