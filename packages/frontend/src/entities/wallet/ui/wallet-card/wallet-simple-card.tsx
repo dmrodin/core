@@ -364,41 +364,6 @@ export const SimpleWalletCard = ({
                     </CardContent>
                 </Card>
                 <DropdownMenuContent align="center" className="z-50 w-56">
-                    <div className="px-2 py-1.5">
-                        <div className="text-xs text-muted-foreground mb-2">Статус баланса:</div>
-                        <div className="flex gap-2 justify-center">
-                            <button
-                                onClick={() => handleBalanceStatusChange('unknown')}
-                                className={cn(
-                                    'w-6 h-6 rounded-full border-2 transition-all hover:scale-110',
-                                    wallet.balanceStatus === 'unknown'
-                                        ? 'border-muted-foreground bg-background'
-                                        : 'border-muted-foreground/30 bg-background',
-                                )}
-                                title="Без цвета"
-                            />
-                            <button
-                                onClick={() => handleBalanceStatusChange('negative')}
-                                className={cn(
-                                    'w-6 h-6 rounded-full border-2 transition-all hover:scale-110',
-                                    wallet.balanceStatus === 'negative'
-                                        ? 'border-destructive bg-destructive/60'
-                                        : 'border-destructive/30 bg-destructive/60',
-                                )}
-                                title="Красный"
-                            />
-                            <button
-                                onClick={() => handleBalanceStatusChange('positive')}
-                                className={cn(
-                                    'w-6 h-6 rounded-full border-2 transition-all hover:scale-110',
-                                    wallet.balanceStatus === 'positive'
-                                        ? 'border-success bg-success'
-                                        : 'border-success/30 bg-success/60',
-                                )}
-                                title="Зеленый"
-                            />
-                        </div>
-                    </div>
                     <DropdownMenuItem onSelect={() => handleBalanceStatusChange('positive')}>
                         Баланс верный
                     </DropdownMenuItem>
