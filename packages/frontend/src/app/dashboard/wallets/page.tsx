@@ -372,30 +372,32 @@ export default function WalletsPage() {
                     }
                 }}
             >
-                <TabsList
-                    className="grid w-full"
-                    style={{
-                        gridTemplateColumns: `repeat(${(isUserRole ? 2 : 4) + tabTypes.length}, minmax(0, 1fr))`,
-                    }}
-                >
-                    <TabsTrigger value="pinned" className="w-full">
-                        Быстрый доступ
-                    </TabsTrigger>
-                    <TabsTrigger value="all" className="w-full">
-                        Все
-                    </TabsTrigger>
-                    {tabTypes.map((type) => (
-                        <TabsTrigger key={type.id} value={type.id} className="w-full">
-                            {type.name}
+                <div className="w-full overflow-x-auto">
+                    <TabsList
+                        className="flex w-max min-w-full flex-nowrap md:grid"
+                        style={{
+                            gridTemplateColumns: `repeat(${(isUserRole ? 2 : 4) + tabTypes.length}, minmax(0, 1fr))`,
+                        }}
+                    >
+                        <TabsTrigger value="pinned" className="w-auto shrink-0 md:w-full">
+                            Быстрый доступ
                         </TabsTrigger>
-                    ))}
-                    <TabsTrigger value="deleted" className={isUserRole ? 'hidden' : 'w-full'}>
-                        Удалённые
-                    </TabsTrigger>
-                    <TabsTrigger value="hidden" className={isUserRole ? 'hidden' : 'w-full'}>
-                        Скрытые
-                    </TabsTrigger>
-                </TabsList>
+                        <TabsTrigger value="all" className="w-auto shrink-0 md:w-full">
+                            Все
+                        </TabsTrigger>
+                        {tabTypes.map((type) => (
+                            <TabsTrigger key={type.id} value={type.id} className="w-auto shrink-0 md:w-full">
+                                {type.name}
+                            </TabsTrigger>
+                        ))}
+                        <TabsTrigger value="deleted" className={isUserRole ? 'hidden' : 'w-auto shrink-0 md:w-full'}>
+                            Удалённые
+                        </TabsTrigger>
+                        <TabsTrigger value="hidden" className={isUserRole ? 'hidden' : 'w-auto shrink-0 md:w-full'}>
+                            Скрытые
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
             </Tabs>
 
             <div className="space-y-4">

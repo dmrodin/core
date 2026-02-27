@@ -5,7 +5,7 @@ import { Fragment, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarIcon, Copy, FileText, Pencil, Trash } from 'lucide-react';
+import { CalendarIcon, Copy, FileText, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -163,21 +163,23 @@ export default function OperationsPage() {
                         form.setValue('typeId', val === 'all' ? null : val);
                     }}
                 >
-                    <TabsList
-                        className="grid w-full"
-                        style={{
-                            gridTemplateColumns: `repeat(${1 + tabTypes.length}, minmax(0, 1fr))`,
-                        }}
-                    >
-                        <TabsTrigger value="all" className="w-full">
-                            Все операции
-                        </TabsTrigger>
-                        {tabTypes.map((type) => (
-                            <TabsTrigger key={type.id} value={type.id} className="w-full">
-                                {type.name}
+                    <div className="w-full overflow-x-auto">
+                        <TabsList
+                            className="flex w-max min-w-full flex-nowrap md:grid"
+                            style={{
+                                gridTemplateColumns: `repeat(${1 + tabTypes.length}, minmax(0, 1fr))`,
+                            }}
+                        >
+                            <TabsTrigger value="all" className="w-auto shrink-0 md:w-full">
+                                Все операции
                             </TabsTrigger>
-                        ))}
-                    </TabsList>
+                            {tabTypes.map((type) => (
+                                <TabsTrigger key={type.id} value={type.id} className="w-auto shrink-0 md:w-full">
+                                    {type.name}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    </div>
                 </Tabs>
 
                 <div className="space-y-2">
@@ -223,172 +225,155 @@ export default function OperationsPage() {
 
                                                 return (
                                                     <DropdownMenu key={operation.id}>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Card
-                                                                ref={isLast ? lastOperationRef : null}
-                                                                className="relative cursor-pointer hover:bg-accent/50 transition-colors mb-2"
-                                                                onTouchStart={(e) => {
-                                                                    const timer = setTimeout(() => {
-                                                                        e.currentTarget.click();
-                                                                    }, 600);
-                                                                    const cancel = () => clearTimeout(timer);
-                                                                    e.currentTarget.addEventListener(
-                                                                        'touchend',
-                                                                        cancel,
-                                                                        {
-                                                                            once: true,
-                                                                        },
-                                                                    );
-                                                                    e.currentTarget.addEventListener(
-                                                                        'touchmove',
-                                                                        cancel,
-                                                                        {
-                                                                            once: true,
-                                                                        },
-                                                                    );
-                                                                }}
-                                                            >
-                                                                <CardContent className="py-0 relative">
-                                                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                                                        <div className="space-y-2 flex-1">
-                                                                            <div className="flex items-center gap-2 flex-wrap">
-                                                                                <p className="font-semibold">
-                                                                                    {operation.type.name}
-                                                                                </p>
-                                                                                {operation.applicationId && (
-                                                                                    <span className="text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">
-                                                                                        Заявка #
-                                                                                        {operation.applicationId}
-                                                                                    </span>
-                                                                                )}
-                                                                                {operation.conversionGroupId && (
-                                                                                    <span className="text-xs bg-purple-500/10 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-md">
-                                                                                        Конвертация #
-                                                                                        {operation.conversionGroupId}
-                                                                                    </span>
-                                                                                )}
-                                                                            </div>
-                                                                            <p className="text-sm text-muted-foreground">
-                                                                                {operation.created_by?.username}
+                                                        <Card
+                                                            ref={isLast ? lastOperationRef : null}
+                                                            className="relative hover:bg-accent/50 transition-colors mb-2"
+                                                        >
+                                                            <CardContent className="py-0 relative">
+                                                                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                                                    <div className="space-y-2 flex-1">
+                                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                                            <p className="font-semibold">
+                                                                                {operation.type.name}
                                                                             </p>
-
-                                                                            <div className="space-y-1.5">
-                                                                                {operation.entries.map((entry) => (
-                                                                                    <div
-                                                                                        key={entry.id}
-                                                                                        className="p-2 rounded-md bg-muted/50"
-                                                                                    >
-                                                                                        {showDetails ? (
-                                                                                            <p className="text-sm">
-                                                                                                <Button
-                                                                                                    variant="link"
-                                                                                                    className="p-0 h-auto font-medium relative z-10 no-underline hover:no-underline cursor-pointer"
-                                                                                                    data-wallet-link
-                                                                                                    onPointerDown={(
-                                                                                                        e,
-                                                                                                    ) => {
-                                                                                                        e.stopPropagation();
-                                                                                                        router.push(
-                                                                                                            ROUTER_MAP.WALLET_OPERATIONS(
-                                                                                                                entry.walletId,
-                                                                                                            ),
-                                                                                                        );
-                                                                                                    }}
-                                                                                                >
-                                                                                                    {entry.wallet.name}:
-                                                                                                </Button>{' '}
-                                                                                                {entry.direction ===
-                                                                                                'credit' ? (
-                                                                                                    <>
-                                                                                                        <span className="text-muted-foreground">
-                                                                                                            {entry.before ??
-                                                                                                                0}{' '}
-                                                                                                            +{' '}
-                                                                                                        </span>
-                                                                                                        <span className="text-success/80 font-semibold">
-                                                                                                            {
-                                                                                                                entry.amount
-                                                                                                            }
-                                                                                                        </span>
-                                                                                                        <span className="text-muted-foreground">
-                                                                                                            {' '}
-                                                                                                            ={' '}
-                                                                                                            {entry.after ??
-                                                                                                                0}
-                                                                                                        </span>
-                                                                                                    </>
-                                                                                                ) : (
-                                                                                                    <>
-                                                                                                        <span className="text-muted-foreground">
-                                                                                                            {entry.before ??
-                                                                                                                0}{' '}
-                                                                                                            -{' '}
-                                                                                                        </span>
-                                                                                                        <span className="text-destructive/80 font-semibold">
-                                                                                                            {
-                                                                                                                entry.amount
-                                                                                                            }
-                                                                                                        </span>
-                                                                                                        <span className="text-muted-foreground">
-                                                                                                            {' '}
-                                                                                                            ={' '}
-                                                                                                            {entry.after ??
-                                                                                                                0}
-                                                                                                        </span>
-                                                                                                    </>
-                                                                                                )}
-                                                                                            </p>
-                                                                                        ) : (
-                                                                                            <p className="text-sm">
-                                                                                                <Button
-                                                                                                    variant="link"
-                                                                                                    className="p-0 h-auto font-medium relative z-10 no-underline hover:no-underline cursor-pointer"
-                                                                                                    data-wallet-link
-                                                                                                    onPointerDown={(
-                                                                                                        e,
-                                                                                                    ) => {
-                                                                                                        e.stopPropagation();
-                                                                                                        router.push(
-                                                                                                            ROUTER_MAP.WALLET_OPERATIONS(
-                                                                                                                entry.walletId,
-                                                                                                            ),
-                                                                                                        );
-                                                                                                    }}
-                                                                                                >
-                                                                                                    {entry.wallet.name}:
-                                                                                                </Button>{' '}
-                                                                                                <span
-                                                                                                    className={
-                                                                                                        entry.direction ===
-                                                                                                        'credit'
-                                                                                                            ? 'text-success/80 font-semibold'
-                                                                                                            : 'text-destructive/80 font-semibold'
-                                                                                                    }
-                                                                                                >
-                                                                                                    {entry.after ?? 0}
-                                                                                                </span>
-                                                                                            </p>
-                                                                                        )}
-                                                                                    </div>
-                                                                                ))}
-                                                                            </div>
-
-                                                                            {operation.description && (
-                                                                                <p className="text-sm text-muted-foreground">
-                                                                                    {operation.description}
-                                                                                </p>
+                                                                            {operation.applicationId && (
+                                                                                <span className="text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">
+                                                                                    Заявка #{operation.applicationId}
+                                                                                </span>
+                                                                            )}
+                                                                            {operation.conversionGroupId && (
+                                                                                <span className="text-xs bg-purple-500/10 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-md">
+                                                                                    Конвертация #
+                                                                                    {operation.conversionGroupId}
+                                                                                </span>
                                                                             )}
                                                                         </div>
+                                                                        <p className="text-sm text-muted-foreground">
+                                                                            {operation.created_by?.username}
+                                                                        </p>
 
-                                                                        <div className="text-left sm:text-right">
-                                                                            <p className="text-sm text-muted-foreground">
-                                                                                {formatDateTime(operation.createdAt)}
-                                                                            </p>
+                                                                        <div className="space-y-1.5">
+                                                                            {operation.entries.map((entry) => (
+                                                                                <div
+                                                                                    key={entry.id}
+                                                                                    className="p-2 rounded-md bg-muted/50"
+                                                                                >
+                                                                                    {showDetails ? (
+                                                                                        <p className="text-sm">
+                                                                                            <Button
+                                                                                                variant="link"
+                                                                                                className="p-0 h-auto font-medium relative z-10 no-underline hover:no-underline cursor-pointer"
+                                                                                                data-wallet-link
+                                                                                                onPointerDown={(e) => {
+                                                                                                    e.stopPropagation();
+                                                                                                    router.push(
+                                                                                                        ROUTER_MAP.WALLET_OPERATIONS(
+                                                                                                            entry.walletId,
+                                                                                                        ),
+                                                                                                    );
+                                                                                                }}
+                                                                                            >
+                                                                                                {entry.wallet.name}:
+                                                                                            </Button>{' '}
+                                                                                            {entry.direction ===
+                                                                                            'credit' ? (
+                                                                                                <>
+                                                                                                    <span className="text-muted-foreground">
+                                                                                                        {entry.before ??
+                                                                                                            0}{' '}
+                                                                                                        +{' '}
+                                                                                                    </span>
+                                                                                                    <span className="text-success/80 font-semibold">
+                                                                                                        {entry.amount}
+                                                                                                    </span>
+                                                                                                    <span className="text-muted-foreground">
+                                                                                                        {' '}
+                                                                                                        ={' '}
+                                                                                                        {entry.after ??
+                                                                                                            0}
+                                                                                                    </span>
+                                                                                                </>
+                                                                                            ) : (
+                                                                                                <>
+                                                                                                    <span className="text-muted-foreground">
+                                                                                                        {entry.before ??
+                                                                                                            0}{' '}
+                                                                                                        -{' '}
+                                                                                                    </span>
+                                                                                                    <span className="text-destructive/80 font-semibold">
+                                                                                                        {entry.amount}
+                                                                                                    </span>
+                                                                                                    <span className="text-muted-foreground">
+                                                                                                        {' '}
+                                                                                                        ={' '}
+                                                                                                        {entry.after ??
+                                                                                                            0}
+                                                                                                    </span>
+                                                                                                </>
+                                                                                            )}
+                                                                                        </p>
+                                                                                    ) : (
+                                                                                        <p className="text-sm">
+                                                                                            <Button
+                                                                                                variant="link"
+                                                                                                className="p-0 h-auto font-medium relative z-10 no-underline hover:no-underline cursor-pointer"
+                                                                                                data-wallet-link
+                                                                                                onPointerDown={(e) => {
+                                                                                                    e.stopPropagation();
+                                                                                                    router.push(
+                                                                                                        ROUTER_MAP.WALLET_OPERATIONS(
+                                                                                                            entry.walletId,
+                                                                                                        ),
+                                                                                                    );
+                                                                                                }}
+                                                                                            >
+                                                                                                {entry.wallet.name}:
+                                                                                            </Button>{' '}
+                                                                                            <span
+                                                                                                className={
+                                                                                                    entry.direction ===
+                                                                                                    'credit'
+                                                                                                        ? 'text-success/80 font-semibold'
+                                                                                                        : 'text-destructive/80 font-semibold'
+                                                                                                }
+                                                                                            >
+                                                                                                {entry.after ?? 0}
+                                                                                            </span>
+                                                                                        </p>
+                                                                                    )}
+                                                                                </div>
+                                                                            ))}
                                                                         </div>
+
+                                                                        {operation.description && (
+                                                                            <p className="text-sm text-muted-foreground">
+                                                                                {operation.description}
+                                                                            </p>
+                                                                        )}
                                                                     </div>
-                                                                </CardContent>
-                                                            </Card>
-                                                        </DropdownMenuTrigger>
+
+                                                                    <div className="text-left sm:text-right">
+                                                                        <DropdownMenuTrigger asChild>
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="mb-2 ml-auto h-8 w-8"
+                                                                                aria-label="Открыть меню операции"
+                                                                                onPointerDown={(event) =>
+                                                                                    event.stopPropagation()
+                                                                                }
+                                                                            >
+                                                                                <MoreHorizontal className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </DropdownMenuTrigger>
+                                                                        <p className="text-sm text-muted-foreground">
+                                                                            {formatDateTime(operation.createdAt)}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </CardContent>
+                                                        </Card>
 
                                                         <DropdownMenuContent
                                                             align="center"

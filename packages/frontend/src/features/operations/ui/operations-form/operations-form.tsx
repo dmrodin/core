@@ -594,7 +594,7 @@ export function OperationForm({
                     // Для корректировки - одна строка: кошелек + сумма корректировки
                     <div className="flex flex-col gap-3 mt-2">
                         {fields.map((item, realIndex) => (
-                            <div key={item.fieldId} className="flex gap-3 items-end">
+                            <div key={item.fieldId} className="flex flex-col gap-3 sm:flex-row sm:items-end">
                                 <FormField
                                     control={form.control}
                                     name={`entries.${realIndex}.wallet.id`}
@@ -656,7 +656,7 @@ export function OperationForm({
                                     control={form.control}
                                     name={`entries.${realIndex}.amount`}
                                     render={({ field }) => (
-                                        <FormItem className="w-[280px]">
+                                        <FormItem className="w-full sm:w-[280px]">
                                             <FormLabel>
                                                 Сумма <span className="text-destructive">*</span>
                                             </FormLabel>
@@ -728,7 +728,10 @@ export function OperationForm({
                                     .map((item, realIndex) => ({ item, realIndex }))
                                     .filter(({ item }) => item.direction === dir)
                                     .map(({ item, realIndex }) => (
-                                        <div key={item.fieldId} className="flex gap-3 items-end">
+                                        <div
+                                            key={item.fieldId}
+                                            className="flex flex-col gap-3 sm:flex-row sm:items-end"
+                                        >
                                             <FormField
                                                 control={form.control}
                                                 name={`entries.${realIndex}.wallet.id`}
@@ -792,7 +795,7 @@ export function OperationForm({
                                                 control={form.control}
                                                 name={`entries.${realIndex}.amount`}
                                                 render={({ field }) => (
-                                                    <FormItem>
+                                                    <FormItem className="w-full sm:w-auto">
                                                         <FormLabel>
                                                             Сумма <span className="text-destructive">*</span>
                                                         </FormLabel>
@@ -820,7 +823,7 @@ export function OperationForm({
                                                                         field.onChange(0);
                                                                     }
                                                                 }}
-                                                                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                                className="w-full [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                                             />
                                                         </FormControl>
                                                         <FormMessage />
@@ -833,7 +836,7 @@ export function OperationForm({
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={() => remove(realIndex)}
-                                                className="text-destructive hover:bg-destructive/10"
+                                                className="self-start text-destructive hover:bg-destructive/10 sm:self-auto"
                                             >
                                                 <Trash2 className="size-4" />
                                             </Button>
