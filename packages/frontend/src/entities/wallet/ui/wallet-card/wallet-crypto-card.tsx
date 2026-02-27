@@ -233,6 +233,22 @@ export const CryptoWalletCard = ({
             });
     };
 
+    const handleCopySpecificRequisite = (value: string | undefined, label: string) => {
+        if (!value) {
+            toast.error(`Нет данных для копирования (${label})`);
+            return;
+        }
+
+        navigator.clipboard
+            .writeText(value)
+            .then(() => {
+                toast.success(`${label} скопирован`);
+            })
+            .catch((err) => {
+                toast.error(`Не удалось скопировать: ${err}`);
+            });
+    };
+
     const getFullDescription = () => {
         const parts = [];
 
@@ -429,8 +445,9 @@ export const CryptoWalletCard = ({
                                                             size="sm"
                                                             onPointerDown={(e) => {
                                                                 e.stopPropagation();
-                                                                handleCopySpecialTemplate(
-                                                                    `<${wallet.currency.code}>, TRON (TRC-20):`,
+                                                                handleCopySpecificRequisite(
+                                                                    wallet.details?.address,
+                                                                    'Адрес кошелька',
                                                                 );
                                                             }}
                                                             className="relative z-10 cursor-pointer"
@@ -442,8 +459,10 @@ export const CryptoWalletCard = ({
                                                             size="sm"
                                                             onPointerDown={(e) => {
                                                                 e.stopPropagation();
-                                                                const template = getSpecialWalletTemplate(wallet);
-                                                                if (template) handleCopySpecialTemplate(template);
+                                                                handleCopySpecificRequisite(
+                                                                    wallet.details?.exchangeUid,
+                                                                    'UID',
+                                                                );
                                                             }}
                                                             className="relative z-10 cursor-pointer"
                                                         >
