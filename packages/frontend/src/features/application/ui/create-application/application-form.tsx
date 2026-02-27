@@ -2,7 +2,7 @@
 import { Trash2 } from 'lucide-react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 
 import {
     ApplicationResponse,
@@ -72,11 +72,6 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                   meetingDate: undefined,
                   advance: null,
               },
-    });
-
-    const advance = useWatch({
-        control: form.control,
-        name: 'advance',
     });
 
     const {
@@ -591,5 +586,3 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
         </Form>
     );
 }
-
-

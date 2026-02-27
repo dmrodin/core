@@ -53,7 +53,8 @@ export const InfiniteApplicationsList = () => {
     } = useInfiniteApplications(params, 10, canLoadApplications);
 
     const { mutate: deleteApplicationMutation } = useDeleteApplication(params);
-    const { mutate: updateStatuseApplicationMutation } = useUpdateStatusApplication();
+    const { mutate: updateStatuseApplicationMutation, mutateAsync: updateStatuseApplicationMutationAsync } =
+        useUpdateStatusApplication();
     const { copyApplication } = useCopyApplication();
 
     const applications = useMemo(
@@ -98,7 +99,7 @@ export const InfiniteApplicationsList = () => {
                             >
                                 <DropdownMenuItem
                                     className="hover:bg-primary/60 dark:hover:bg-primary/60"
-                                    onClick={() => {
+                                    onClick={async () => {
                                         if (app.status === 'done') {
                                             // Вернуть в работу
                                             updateStatuseApplicationMutation({
@@ -106,6 +107,16 @@ export const InfiniteApplicationsList = () => {
                                                 status: 'open',
                                             });
                                         } else {
+                                            // Для заявок с авансом операция создаётся заранее, поэтому открываем её редактирование.
+                                            if (app.operationId) {
+                                                await updateStatuseApplicationMutationAsync({
+                                                    id: app.id.toString(),
+                                                    status: 'done',
+                                                });
+                                                router.push(`${ROUTER_MAP.OPERATIONS_EDIT}/${app.operationId}`);
+                                                return;
+                                            }
+
                                             router.push(
                                                 `${ROUTER_MAP.OPERATIONS_CREATE}?applicationId=${app.id}&completeOnCreate=1`,
                                             );
