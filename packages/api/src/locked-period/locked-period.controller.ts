@@ -28,7 +28,7 @@ export class LockedPeriodController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin, RoleCode.moderator)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить список периодов блокировки',
         description: 'Возвращает список периодов, в которых запрещено создание операций.',

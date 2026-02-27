@@ -81,7 +81,7 @@ export class OperationTypeController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin, RoleCode.moderator)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить список типов операций',
         description: 'Возвращает список типов операций с поддержкой фильтрации, поиска и пагинации.',

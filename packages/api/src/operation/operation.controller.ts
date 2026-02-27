@@ -127,7 +127,7 @@ export class OperationController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin, RoleCode.moderator)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить список операций',
         description: 'Возвращает список операций с поддержкой фильтрации, поиска и пагинации.',
@@ -150,7 +150,7 @@ export class OperationController {
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin, RoleCode.moderator)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить операцию по ID',
         description: 'Возвращает подробную информацию о конкретной операции.',
