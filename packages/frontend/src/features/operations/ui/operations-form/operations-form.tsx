@@ -52,6 +52,8 @@ import type { Wallet as WalletEntity } from '@/entities/wallet';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 
 const SINGLE_SIDE_OPERATION_NAMES = new Set(['аванс', 'зачисление', 'расход', 'корректировка']);
+const EXPENSE_OPERATION_TYPE_CODE = 'expense';
+const EXPENSE_CATEGORY_OPTIONS = [{ value: 'salary', label: 'Заработная плата' }] as const;
 const INSKESH_WALLET_TYPE_ID = 'dbc78423-dfb0-4ba4-86f4-533bd9efd027';
 const INSKESH_WALLET_TYPE_CODES = new Set(['inskech', 'inscash']);
 const INSKESH_WALLET_TYPE_NAMES = new Set(['инскеш']);
@@ -119,6 +121,7 @@ export function OperationForm({
                   typeId: initialData.typeId,
                   applicationId: initialData.applicationId || undefined,
                   description: initialData.description ?? '',
+                  expenseCategory: initialData.expenseCategory ?? null,
                   conversionGroupId: initialData.conversionGroupId ?? null,
                   banksGroupId: initialData.banksGroupId ?? null,
                   entries: initialData.entries.map((e) => ({
@@ -133,6 +136,7 @@ export function OperationForm({
                   typeId: '',
                   applicationId: prefilledApplicationId,
                   description: '',
+                  expenseCategory: null,
                   conversionGroupId: null,
                   banksGroupId: null,
                   entries: [],
@@ -230,6 +234,7 @@ export function OperationForm({
 
     const selectedTypeId = form.watch('typeId');
     const selectedOperationType = operationTypes?.find((type) => type.id === selectedTypeId);
+    const isExpenseType = selectedOperationType?.code === EXPENSE_OPERATION_TYPE_CODE;
     const isCorrection = selectedOperationType?.isCorrection ?? false;
     const isConversion = selectedOperationType?.isConversion ?? false;
     const isBankRequired = isConversion && areAllSelectedWalletsInskesh;
@@ -274,6 +279,13 @@ export function OperationForm({
         }
     }, [form, isBankDisabled]);
 
+    React.useEffect(() => {
+        if (!isExpenseType) {
+            form.setValue('expenseCategory', null);
+            form.clearErrors('expenseCategory');
+        }
+    }, [form, isExpenseType]);
+
     const onSubmit = (data: CreateOperationDto) => {
         if (!isEditing && isCreateBlocked) {
             return;
@@ -281,6 +293,15 @@ export function OperationForm({
 
         form.clearErrors('entries');
         form.clearErrors('banksGroupId');
+        form.clearErrors('expenseCategory');
+
+        if (isExpenseType && !data.expenseCategory) {
+            form.setError('expenseCategory', {
+                type: 'manual',
+                message: 'Выберите статью расхода',
+            });
+            return;
+        }
 
         if (isBankRequired && !data.banksGroupId) {
             form.setError('banksGroupId', {
@@ -317,6 +338,7 @@ export function OperationForm({
             typeId: data.typeId,
             ...(data.applicationId && data.applicationId > 0 && { applicationId: data.applicationId }),
             description: data.description ?? null,
+            expenseCategory: isExpenseType ? (data.expenseCategory ?? null) : null,
             conversionGroupId: isBankDisabled ? null : (data.conversionGroupId ?? null),
             entries: transformedEntries,
             creatureDate: data.creatureDate,
@@ -337,6 +359,7 @@ export function OperationForm({
                 ...(data.applicationId && data.applicationId > 0 && { applicationId: data.applicationId }),
                 creatureDate: data.creatureDate,
                 description: data.description ?? null,
+                expenseCategory: isExpenseType ? (data.expenseCategory ?? null) : null,
                 ...(data.conversionGroupId !== undefined && {
                     conversionGroupId: isBankDisabled ? null : (data.conversionGroupId ?? null),
                 }),
@@ -850,6 +873,34 @@ export function OperationForm({
                 {/* Описание */}
                 {typeof form.formState.errors.entries?.message === 'string' && (
                     <p className="text-sm text-destructive">{form.formState.errors.entries.message}</p>
+                )}
+                {isExpenseType && (
+                    <FormField
+                        control={form.control}
+                        name="expenseCategory"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Статья расхода <span className="text-destructive">*</span>
+                                </FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                                    <FormControl>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Выберите статью" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {EXPENSE_CATEGORY_OPTIONS.map((option) => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                 )}
                 <FormField
                     control={form.control}

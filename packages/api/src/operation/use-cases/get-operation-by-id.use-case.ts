@@ -1,14 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { RoleCode } from '../../../prisma/generated/prisma';
 import { PrismaService } from '../../common/services/prisma.service';
 import { addOperationTypeFlags } from '../../operation-type/constants/operation-type.constants';
+import { canViewRestrictedExpenseOperations, isRestrictedExpenseOperation } from '../constants/expense.constants';
 import { OperationResponse } from '../types';
 
 @Injectable()
 export class GetOperationByIdUseCase {
     constructor(private readonly prisma: PrismaService) {}
 
-    public async execute(operationId: string): Promise<OperationResponse> {
+    public async execute(operationId: string, currentUserRoles: RoleCode[] = []): Promise<OperationResponse> {
         const operation = await this.prisma.operation.findUnique({
             where: { id: operationId },
             include: {
@@ -56,6 +58,13 @@ export class GetOperationByIdUseCase {
         });
 
         if (!operation || operation.deleted) {
+            throw new NotFoundException('Операция не найдена');
+        }
+
+        if (
+            !canViewRestrictedExpenseOperations(currentUserRoles) &&
+            isRestrictedExpenseOperation(operation.type?.code, operation.expenseCategory)
+        ) {
             throw new NotFoundException('Операция не найдена');
         }
 

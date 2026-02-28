@@ -5,6 +5,8 @@ import { PaginationSchema } from '@/shared/utils/schemas/common-schemas';
 
 import { OperationTypeInfoSchema } from './operation-type-schemas';
 
+export const ExpenseCategorySchema = z.enum(['salary']);
+
 export const OperationSchema = z.object({
     id: z.string().uuid(),
     description: z.string().nullable(),
@@ -59,6 +61,7 @@ export const OperationEntryCreateDtoSchema = z.object({
 export const CreateOperationDtoSchema = z.object({
     typeId: z.string().uuid('Выберите тип операции'),
     applicationId: z.number().optional(),
+    expenseCategory: ExpenseCategorySchema.optional().nullable(),
     description: z.string().max(2000, 'Максимум 2000 символов').optional().nullable(),
     conversionGroupId: z.number().int().positive().optional().nullable(),
     banksGroupId: z.string().optional().nullable(),
@@ -69,6 +72,7 @@ export const CreateOperationDtoSchema = z.object({
 export const CreateOperationBackendDtoSchema = z.object({
     typeId: z.string().uuid(),
     applicationId: z.number().optional(),
+    expenseCategory: ExpenseCategorySchema.optional().nullable(),
     description: z.string().max(2000).optional().nullable(),
     conversionGroupId: z.number().int().positive().optional().nullable(),
     entries: z
@@ -111,6 +115,7 @@ export const UpdateOperationEntryBackendSchema = z.object({
 export const UpdateOperationDtoSchema = z.object({
     typeId: z.string().uuid().optional(),
     applicationId: z.number().optional(),
+    expenseCategory: ExpenseCategorySchema.optional().nullable(),
     description: z.string().max(2000, 'Максимум 2000 символов').optional().nullable(),
     conversionGroupId: z.number().int().positive().optional().nullable(),
     entries: z.array(OperationEntryDtoSchema).optional(),
@@ -120,6 +125,7 @@ export const UpdateOperationDtoSchema = z.object({
 export const UpdateOperationBackendDtoSchema = z.object({
     typeId: z.string().uuid().optional(),
     applicationId: z.number().optional(),
+    expenseCategory: ExpenseCategorySchema.optional().nullable(),
     description: z.string().max(2000, 'Максимум 2000 символов').optional().nullable(),
     conversionGroupId: z.number().int().positive().optional().nullable(),
     entries: z.array(UpdateOperationEntryBackendSchema).optional(),
@@ -133,6 +139,7 @@ export const OperationResponseDtoSchema = z.object({
     updatedById: z.string().uuid(),
     typeId: z.string().uuid(),
     applicationId: z.number().optional().nullable(),
+    expenseCategory: ExpenseCategorySchema.optional().nullable(),
     description: z.string().max(2000, 'Максиммум 2000 символов').optional().nullable(),
     conversionGroupId: z.number().int().positive().nullable(),
     banksGroupId: z.string().nullable().optional(),

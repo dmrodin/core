@@ -4,6 +4,11 @@ import { BalanceStatus } from '../../../prisma/generated/prisma';
 import { PrismaService } from '../../common';
 import { addOperationTypeFlags, OPERATION_TYPE_CODES } from '../../operation-type/constants/operation-type.constants';
 import { WalletRecalculationService } from '../../wallet/services';
+import {
+    AVAILABLE_EXPENSE_CATEGORIES,
+    EXPENSE_OPERATION_TYPE_CODE,
+    ExpenseCategory,
+} from '../constants/expense.constants';
 import { CreateOperationDto } from '../dto';
 import { CreateOperationResponse } from '../types';
 
@@ -17,8 +22,16 @@ export class CreateOperationUseCase {
     ) {}
 
     public async execute(createOperationDto: CreateOperationDto, userId: string): Promise<CreateOperationResponse> {
-        const { typeId, description, conversionGroupId, entries, applicationId, creatureDate, banksGroupId } =
-            createOperationDto;
+        const {
+            typeId,
+            description,
+            expenseCategory,
+            conversionGroupId,
+            entries,
+            applicationId,
+            creatureDate,
+            banksGroupId,
+        } = createOperationDto;
 
         return this.prisma.$transaction(async (tx) => {
             const operationDate = new Date(creatureDate);
@@ -63,6 +76,22 @@ export class CreateOperationUseCase {
                 where: { id: typeId },
                 select: { code: true },
             });
+
+            const normalizedExpenseCategory = expenseCategory ?? null;
+
+            if (operationType?.code === EXPENSE_OPERATION_TYPE_CODE) {
+                if (!normalizedExpenseCategory) {
+                    throw new BadRequestException('Для операции типа "expense" необходимо выбрать статью расхода');
+                }
+
+                if (!AVAILABLE_EXPENSE_CATEGORIES.includes(normalizedExpenseCategory as ExpenseCategory)) {
+                    throw new BadRequestException(
+                        `Некорректная статья расхода. Доступные значения: ${AVAILABLE_EXPENSE_CATEGORIES.join(', ')}`,
+                    );
+                }
+            } else if (normalizedExpenseCategory) {
+                throw new BadRequestException('Статья расхода доступна только для операции типа "expense"');
+            }
 
             if (operationType?.code === OPERATION_TYPE_CODES.CONVERSION) {
                 const walletIds = Array.from(new Set(entries.map((entry) => entry.walletId)));
@@ -196,6 +225,7 @@ export class CreateOperationUseCase {
                     typeId,
                     ...(applicationId && { applicationId }),
                     description,
+                    expenseCategory: normalizedExpenseCategory,
                     conversionGroupId,
                     createdAt: creatureDate,
                     banksGroupId,

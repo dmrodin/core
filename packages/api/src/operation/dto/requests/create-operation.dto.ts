@@ -5,6 +5,7 @@ import {
     IsArray,
     IsDateString,
     IsEnum,
+    IsIn,
     IsInt,
     IsNumber,
     IsOptional,
@@ -16,6 +17,7 @@ import {
 } from 'class-validator';
 
 import { OperationDirection } from '../../../../prisma/generated/prisma';
+import { AVAILABLE_EXPENSE_CATEGORIES } from '../../constants/expense.constants';
 
 export class OperationEntryDto {
     @ApiProperty({
@@ -66,6 +68,19 @@ export class CreateOperationDto {
     @IsString({ message: 'Описание должно быть строкой' })
     @MaxLength(2000, { message: 'Описание не должно превышать 2000 символов' })
     public description?: string;
+
+    @ApiProperty({
+        description: 'Expense category for operation type "expense"',
+        example: 'salary',
+        required: false,
+        nullable: true,
+        enum: AVAILABLE_EXPENSE_CATEGORIES,
+    })
+    @IsOptional()
+    @IsIn(AVAILABLE_EXPENSE_CATEGORIES, {
+        message: `Invalid expense category: ${AVAILABLE_EXPENSE_CATEGORIES.join(', ')}`,
+    })
+    public expenseCategory?: string | null;
 
     @ApiProperty({
         description: 'ID группы конверсии',

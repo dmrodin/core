@@ -9,6 +9,7 @@ import {
     Post,
     Put,
     Query,
+    Req,
     StreamableFile,
     UseGuards,
 } from '@nestjs/common';
@@ -139,8 +140,11 @@ export class OperationController {
         type: GetOperationsResponseDto,
     })
     @ApiReadResponses()
-    public async getOperations(@Query() getOperationsDto: GetOperationsDto): Promise<GetOperationsResponseDto> {
-        const result = await this.getOperationsUseCase.execute(getOperationsDto);
+    public async getOperations(
+        @Query() getOperationsDto: GetOperationsDto,
+        @Req() request: { user?: { roles?: RoleCode[] } },
+    ): Promise<GetOperationsResponseDto> {
+        const result = await this.getOperationsUseCase.execute(getOperationsDto, request.user?.roles ?? []);
 
         return {
             operations: result.operations,
@@ -162,8 +166,11 @@ export class OperationController {
         type: OperationResponseDto,
     })
     @ApiReadResponses()
-    public async getOperationById(@Param('id') operationId: string): Promise<OperationResponseDto> {
-        return await this.getOperationByIdUseCase.execute(operationId);
+    public async getOperationById(
+        @Param('id') operationId: string,
+        @Req() request: { user?: { roles?: RoleCode[] } },
+    ): Promise<OperationResponseDto> {
+        return await this.getOperationByIdUseCase.execute(operationId, request.user?.roles ?? []);
     }
 
     @Post()
