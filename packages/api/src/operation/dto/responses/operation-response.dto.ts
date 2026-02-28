@@ -137,6 +137,13 @@ export class OperationResponseDto {
     public description: string | null;
 
     @ApiProperty({
+        description: 'Expense category for operation type "expense"',
+        example: 'salary',
+        nullable: true,
+    })
+    public expenseCategory: string | null;
+
+    @ApiProperty({
         description: 'ID группы конверсии',
         example: 5,
         nullable: true,

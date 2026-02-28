@@ -3,6 +3,11 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../common/services/prisma.service';
 import { addOperationTypeFlags, OPERATION_TYPE_CODES } from '../../operation-type/constants/operation-type.constants';
 import { WalletRecalculationService } from '../../wallet/services/wallet-recalculation.service';
+import {
+    AVAILABLE_EXPENSE_CATEGORIES,
+    EXPENSE_OPERATION_TYPE_CODE,
+    ExpenseCategory,
+} from '../constants/expense.constants';
 import { UpdateOperationDto } from '../dto';
 import { UpdateOperationResponse } from '../types';
 
@@ -24,6 +29,7 @@ export class UpdateOperationUseCase {
                 id: true,
                 typeId: true,
                 applicationId: true,
+                expenseCategory: true,
                 deleted: true,
                 entries: {
                     where: { deleted: false },
@@ -48,7 +54,8 @@ export class UpdateOperationUseCase {
         }
 
         return await this.prisma.$transaction(async (tx) => {
-            const { typeId, description, conversionGroupId, entries, creatureDate, applicationId } = updateOperationDto;
+            const { typeId, description, expenseCategory, conversionGroupId, entries, creatureDate, applicationId } =
+                updateOperationDto;
 
             // Получаем тип операции для проверки специальной логики
             let operationType: { code: string } | null = null;
@@ -58,6 +65,23 @@ export class UpdateOperationUseCase {
                     where: { id: typeId },
                     select: { code: true },
                 });
+            }
+
+            const effectiveTypeCode = operationType?.code ?? existingOperation.type.code;
+            const nextExpenseCategory = expenseCategory ?? existingOperation.expenseCategory ?? null;
+
+            if (effectiveTypeCode === EXPENSE_OPERATION_TYPE_CODE) {
+                if (!nextExpenseCategory) {
+                    throw new BadRequestException('Для операции типа "expense" необходимо выбрать статью расхода');
+                }
+
+                if (!AVAILABLE_EXPENSE_CATEGORIES.includes(nextExpenseCategory as ExpenseCategory)) {
+                    throw new BadRequestException(
+                        `Некорректная статья расхода. Доступные значения: ${AVAILABLE_EXPENSE_CATEGORIES.join(', ')}`,
+                    );
+                }
+            } else if (expenseCategory !== undefined && expenseCategory !== null) {
+                throw new BadRequestException('Статья расхода доступна только для операции типа "expense"');
             }
 
             // Валидация и обработка для типа "Корректировка"
@@ -116,6 +140,13 @@ export class UpdateOperationUseCase {
                     updatedById,
                     ...(typeId !== undefined && { typeId }),
                     ...(description !== undefined && { description }),
+                    ...(effectiveTypeCode === EXPENSE_OPERATION_TYPE_CODE
+                        ? {
+                              expenseCategory: expenseCategory ?? existingOperation.expenseCategory ?? null,
+                          }
+                        : {
+                              expenseCategory: null,
+                          }),
                     ...(conversionGroupId !== undefined && { conversionGroupId }),
                     ...(creatureDate !== undefined && { createdAt: creatureDate }),
                     ...(applicationId !== undefined && { applicationId }),

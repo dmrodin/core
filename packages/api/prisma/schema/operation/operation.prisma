@@ -4,6 +4,7 @@ model Operation {
   updatedById       String       @map("updated_by_id") @db.Uuid
   typeId            String       @map("type_id") @db.Uuid
   description       String?
+  expenseCategory   String?      @map("expense_category")
   conversionGroupId Int?         @map("conversion_group_id")
   applicationId     Int?         @unique
   application       Application? @relation(fields: [applicationId], references: [id])

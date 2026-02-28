@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
-import { Prisma } from '../../../prisma/generated/prisma';
+import { Prisma, RoleCode } from '../../../prisma/generated/prisma';
 import { PrismaService } from '../../common/services/prisma.service';
 import { calculatePagination, createAllDataPaginationResponse, createPaginationResponse } from '../../common/utils';
 import { addOperationTypeFlags } from '../../operation-type/constants/operation-type.constants';
+import {
+    canViewRestrictedExpenseOperations,
+    EXPENSE_CATEGORIES,
+    EXPENSE_OPERATION_TYPE_CODE,
+} from '../constants/expense.constants';
 import { GetOperationsDto } from '../dto';
 import { GetOperationsResponse } from '../types';
 
@@ -11,7 +16,10 @@ import { GetOperationsResponse } from '../types';
 export class GetOperationsUseCase {
     constructor(private readonly prisma: PrismaService) {}
 
-    public async execute(getOperationsDto: GetOperationsDto): Promise<GetOperationsResponse> {
+    public async execute(
+        getOperationsDto: GetOperationsDto,
+        currentUserRoles: RoleCode[] = [],
+    ): Promise<GetOperationsResponse> {
         const {
             search,
             typeId,
@@ -36,6 +44,12 @@ export class GetOperationsUseCase {
         const where: Prisma.OperationWhereInput = {
             deleted: false,
         };
+
+        if (!canViewRestrictedExpenseOperations(currentUserRoles)) {
+            where.NOT = {
+                AND: [{ type: { code: EXPENSE_OPERATION_TYPE_CODE } }, { expenseCategory: EXPENSE_CATEGORIES.SALARY }],
+            };
+        }
 
         if (search) {
             where.description = {
