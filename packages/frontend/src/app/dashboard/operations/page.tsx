@@ -337,7 +337,7 @@ export default function OperationsPage() {
                                                                                                         : 'text-destructive/80 font-semibold'
                                                                                                 }
                                                                                             >
-                                                                                                {entry.after ?? 0}
+                                                                                                {entry.amount}
                                                                                             </span>
                                                                                         </p>
                                                                                     )}
