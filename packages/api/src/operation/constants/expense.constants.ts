@@ -4,6 +4,7 @@ export const EXPENSE_OPERATION_TYPE_CODE = 'expense';
 
 export const EXPENSE_CATEGORIES = {
     SALARY: 'salary',
+    OTHER: 'other',
 } as const;
 
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[keyof typeof EXPENSE_CATEGORIES];

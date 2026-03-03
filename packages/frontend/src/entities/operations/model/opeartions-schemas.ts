@@ -5,7 +5,7 @@ import { PaginationSchema } from '@/shared/utils/schemas/common-schemas';
 
 import { OperationTypeInfoSchema } from './operation-type-schemas';
 
-export const ExpenseCategorySchema = z.enum(['salary']);
+export const ExpenseCategorySchema = z.enum(['salary', 'other']);
 
 export const OperationSchema = z.object({
     id: z.string().uuid(),

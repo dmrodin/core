@@ -53,7 +53,10 @@ import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 
 const SINGLE_SIDE_OPERATION_NAMES = new Set(['аванс', 'зачисление', 'расход', 'корректировка']);
 const EXPENSE_OPERATION_TYPE_CODE = 'expense';
-const EXPENSE_CATEGORY_OPTIONS = [{ value: 'salary', label: 'Заработная плата' }] as const;
+const EXPENSE_CATEGORY_OPTIONS = [
+    { value: 'salary', label: 'Заработная плата' },
+    { value: 'other', label: 'Иные расходы' },
+] as const;
 const INSKESH_WALLET_TYPE_ID = 'dbc78423-dfb0-4ba4-86f4-533bd9efd027';
 const INSKESH_WALLET_TYPE_CODES = new Set(['inskech', 'inscash']);
 const INSKESH_WALLET_TYPE_NAMES = new Set(['инскеш']);
