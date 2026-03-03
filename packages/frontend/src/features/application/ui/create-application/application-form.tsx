@@ -44,6 +44,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
 
     const form = useForm<CreateApplicationRequest>({
         resolver: zodResolver(CreateApplicationRequestSchema),
+        shouldUnregister: true,
         defaultValues: initialData
             ? {
                   currencyId: initialData.currencyId ?? '',
@@ -78,6 +79,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
         fields: advanceFields,
         append: appendAdvanceEntry,
         remove: removeAdvanceEntry,
+        replace: replaceAdvanceEntry,
     } = useFieldArray({
         control: form.control,
         name: 'advance.entries',
@@ -264,6 +266,9 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                     setIsAdvanceEnabled(enabled);
 
                                                     if (!enabled) {
+                                                        replaceAdvanceEntry([]);
+                                                        form.unregister('advance.entries');
+                                                        form.clearErrors('advance');
                                                         field.onChange(null);
                                                         return;
                                                     }
