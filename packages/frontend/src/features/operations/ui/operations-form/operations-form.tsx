@@ -629,7 +629,15 @@ export function OperationForm({
                                             <FormLabel>
                                                 Кошелек <span className="text-destructive">*</span>
                                             </FormLabel>
-                                            <Select onValueChange={field.onChange} value={field.value || ''}>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                onOpenChange={(isOpen) => {
+                                                    if (!isOpen) {
+                                                        setWalletSearch('');
+                                                    }
+                                                }}
+                                                value={field.value || ''}
+                                            >
                                                 <FormControl>
                                                     <SelectTrigger className="w-full">
                                                         <SelectValue placeholder="Выберите кошелек" />
@@ -769,6 +777,11 @@ export function OperationForm({
                                                         </FormLabel>
                                                         <Select
                                                             onValueChange={field.onChange}
+                                                            onOpenChange={(isOpen) => {
+                                                                if (!isOpen) {
+                                                                    setWalletSearch('');
+                                                                }
+                                                            }}
                                                             value={field.value || ''}
                                                         >
                                                             <FormControl>
