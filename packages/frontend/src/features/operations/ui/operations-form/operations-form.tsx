@@ -654,10 +654,11 @@ export function OperationForm({
                                                             const isSelectable =
                                                                 wallet.active && wallet.visible && !wallet.deleted;
                                                             const isSelected = wallet.id === field.value;
-                                                            return (
-                                                                matchesSearch &&
-                                                                (isEditing ? isSelectable || isSelected : isSelectable)
-                                                            );
+                                                            if (isEditing && isSelected) {
+                                                                return true;
+                                                            }
+
+                                                            return matchesSearch && isSelectable;
                                                         })
                                                         .map((wallet) => (
                                                             <SelectItem key={wallet.id} value={wallet.id}>
@@ -798,12 +799,11 @@ export function OperationForm({
                                                                             wallet.visible &&
                                                                             !wallet.deleted;
                                                                         const isSelected = wallet.id === field.value;
-                                                                        return (
-                                                                            matchesSearch &&
-                                                                            (isEditing
-                                                                                ? isSelectable || isSelected
-                                                                                : isSelectable)
-                                                                        );
+                                                                        if (isEditing && isSelected) {
+                                                                            return true;
+                                                                        }
+
+                                                                        return matchesSearch && isSelectable;
                                                                     })
                                                                     .map((wallet) => (
                                                                         <SelectItem key={wallet.id} value={wallet.id}>
