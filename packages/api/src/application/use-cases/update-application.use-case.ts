@@ -1,4 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+
+import { RoleCode } from '../../../prisma/generated/prisma';
 
 import { PrismaService } from '../../common/services/prisma.service';
 import { addOperationTypeFlags, OPERATION_TYPE_CODES } from '../../operation-type/constants/operation-type.constants';
@@ -13,6 +15,7 @@ export class UpdateApplicationUseCase {
         applicationId: number,
         updateApplicationDto: UpdateApplicationDto,
         updatedById: string,
+        currentUserRoles: RoleCode[] = [],
     ): Promise<UpdateApplicationOutput> {
         const {
             description,
@@ -27,6 +30,28 @@ export class UpdateApplicationUseCase {
             meetingDate,
             advance,
         } = updateApplicationDto;
+
+        const canEditApplicationFully =
+            currentUserRoles.includes(RoleCode.admin) || currentUserRoles.includes(RoleCode.moderator);
+
+        if (!canEditApplicationFully) {
+            const hasNonStatusChanges = [
+                description,
+                amount,
+                currencyId,
+                operationTypeId,
+                assigneeUserId,
+                operationId,
+                telegramUsername,
+                phone,
+                meetingDate,
+                advance,
+            ].some((value) => value !== undefined);
+
+            if (hasNonStatusChanges) {
+                throw new ForbiddenException('Пользователь может изменять только статус заявки');
+            }
+        }
 
         const existingApplication = await this.prisma.application.findUnique({
             where: { id: applicationId },

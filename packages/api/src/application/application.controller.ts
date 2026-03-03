@@ -10,6 +10,7 @@ import {
     Post,
     Put,
     Query,
+    Req,
     UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -143,7 +144,7 @@ export class ApplicationController {
 
     @Put(':id')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Обновить заявку',
         description: 'Обновляет данные существующей заявки. Доступно только администраторам.',
@@ -160,8 +161,14 @@ export class ApplicationController {
         @Param('id', ParseIntPipe) applicationId: number,
         @Body() updateApplicationDto: UpdateApplicationDto,
         @CurrentUserId() userId: string,
+        @Req() request: { user?: { roles?: RoleCode[] } },
     ): Promise<UpdateApplicationResponseDto> {
-        const result = await this.updateApplicationUseCase.execute(applicationId, updateApplicationDto, userId);
+        const result = await this.updateApplicationUseCase.execute(
+            applicationId,
+            updateApplicationDto,
+            userId,
+            request.user?.roles ?? [],
+        );
 
         return {
             message: result.message,
