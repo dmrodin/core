@@ -175,7 +175,7 @@ export class OperationController {
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    @Roles(RoleCode.admin, RoleCode.moderator)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Создать операцию',
         description: 'Создаёт новую операцию. Доступно администраторам и модераторам.',
