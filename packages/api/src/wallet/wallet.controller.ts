@@ -239,7 +239,7 @@ export class WalletController {
 
     @Put(':id')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator)
     @ApiOperation({
         summary: 'Обновить кошелек',
         description: 'Обновляет данные существующего кошелька. Доступно только администраторам.',
