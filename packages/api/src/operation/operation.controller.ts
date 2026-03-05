@@ -201,7 +201,7 @@ export class OperationController {
 
     @Put(':id')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin, RoleCode.moderator)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Обновить операцию',
         description: 'Обновляет данные существующей операции. Доступно администраторам и модераторам.',
