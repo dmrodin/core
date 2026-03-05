@@ -529,7 +529,10 @@ export const CryptoWalletCard = ({
                     >
                         {wallet.active ? 'Деактивировать' : 'Активировать'}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={handleChangeOwner}>Держатель</DropdownMenuItem>
+                    <DropdownMenuItem
+                        onSelect={isUserRole ? () => undefined : handleChangeOwner}
+                        className={isUserRole ? 'hidden' : ''}
+                    >Держатель</DropdownMenuItem>
                     <DropdownMenuItem
                         className={isUserRole ? 'hidden' : 'text-destructive/60'}
                         onSelect={isUserRole ? () => undefined : handleDelete}
@@ -549,3 +552,4 @@ export const CryptoWalletCard = ({
         </>
     );
 };
+
