@@ -323,7 +323,7 @@ export class WalletController {
 
     @Put(':id/owner')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator)
     @ApiOperation({
         summary: 'Изменить держателя кошелька',
         description:
