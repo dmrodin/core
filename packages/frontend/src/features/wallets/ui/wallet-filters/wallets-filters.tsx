@@ -72,11 +72,13 @@ export function WalletsFilters({ form }: { form: UseFormReturn<GetWalletsFilter>
                                     </FormControl>
                                     <SelectContent>
                                         <SelectItem value="all">Все</SelectItem>
-                                        {Object.values(BalanceStatus).map((s) => (
-                                            <SelectItem key={s} value={s}>
-                                                {balanceStatusLabels[s]}
-                                            </SelectItem>
-                                        ))}
+                                        {Object.values(BalanceStatus)
+                                            .filter((s) => s !== BalanceStatus.neutral)
+                                            .map((s) => (
+                                                <SelectItem key={s} value={s}>
+                                                    {balanceStatusLabels[s]}
+                                                </SelectItem>
+                                            ))}
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />

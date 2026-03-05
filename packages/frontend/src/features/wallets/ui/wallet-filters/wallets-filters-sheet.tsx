@@ -143,11 +143,13 @@ export function WalletsFiltersSheet({
                                 <SelectValue placeholder="Все" />
                             </SelectTrigger>
                             <SelectContent>
-                                {Object.values(BalanceStatus).map((s) => (
-                                    <SelectItem key={s} value={s}>
-                                        {balanceStatusLabels[s]}
-                                    </SelectItem>
-                                ))}
+                                {Object.values(BalanceStatus)
+                                    .filter((s) => s !== BalanceStatus.neutral)
+                                    .map((s) => (
+                                        <SelectItem key={s} value={s}>
+                                            {balanceStatusLabels[s]}
+                                        </SelectItem>
+                                    ))}
                             </SelectContent>
                         </Select>
                     </div>
