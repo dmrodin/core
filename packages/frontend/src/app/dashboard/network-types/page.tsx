@@ -50,7 +50,7 @@ export default function NetworkTypesPage() {
     const [networkTypeToDelete, setNetworkTypeToDelete] = useState<string | null>(null);
 
     const tab = searchParams.get('tab') || 'all';
-    const showDeleted = tab === 'deleted' ? true : undefined;
+    const showDeleted = tab === 'deleted' ? true : false;
 
     const { data, isLoading } = useNetworkTypesList(showDeleted);
     const deleteMutation = useDeleteNetworkType();
@@ -95,7 +95,7 @@ export default function NetworkTypesPage() {
                 <CardContent className="space-y-4">
                     <Tabs value={tab} onValueChange={handleTabChange}>
                         <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="all">Все</TabsTrigger>
+                            <TabsTrigger value="all">Активные</TabsTrigger>
                             <TabsTrigger value="deleted">Удалённые</TabsTrigger>
                         </TabsList>
                     </Tabs>

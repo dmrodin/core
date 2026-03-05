@@ -53,7 +53,10 @@ import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 
 const SINGLE_SIDE_OPERATION_NAMES = new Set(['аванс', 'зачисление', 'расход', 'корректировка']);
 const EXPENSE_OPERATION_TYPE_CODE = 'expense';
-const EXPENSE_CATEGORY_OPTIONS = [{ value: 'salary', label: 'Заработная плата' }] as const;
+const EXPENSE_CATEGORY_OPTIONS = [
+    { value: 'salary', label: 'Заработная плата' },
+    { value: 'other', label: 'Иные расходы' },
+] as const;
 const INSKESH_WALLET_TYPE_ID = 'dbc78423-dfb0-4ba4-86f4-533bd9efd027';
 const INSKESH_WALLET_TYPE_CODES = new Set(['inskech', 'inscash']);
 const INSKESH_WALLET_TYPE_NAMES = new Set(['инскеш']);
@@ -626,7 +629,15 @@ export function OperationForm({
                                             <FormLabel>
                                                 Кошелек <span className="text-destructive">*</span>
                                             </FormLabel>
-                                            <Select onValueChange={field.onChange} value={field.value || ''}>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                onOpenChange={(isOpen) => {
+                                                    if (!isOpen) {
+                                                        setWalletSearch('');
+                                                    }
+                                                }}
+                                                value={field.value || ''}
+                                            >
                                                 <FormControl>
                                                     <SelectTrigger className="w-full">
                                                         <SelectValue placeholder="Выберите кошелек" />
@@ -651,10 +662,11 @@ export function OperationForm({
                                                             const isSelectable =
                                                                 wallet.active && wallet.visible && !wallet.deleted;
                                                             const isSelected = wallet.id === field.value;
-                                                            return (
-                                                                matchesSearch &&
-                                                                (isEditing ? isSelectable || isSelected : isSelectable)
-                                                            );
+                                                            if (isEditing && isSelected) {
+                                                                return true;
+                                                            }
+
+                                                            return matchesSearch && isSelectable;
                                                         })
                                                         .map((wallet) => (
                                                             <SelectItem key={wallet.id} value={wallet.id}>
@@ -729,7 +741,7 @@ export function OperationForm({
                             <div key={dir} className="flex flex-col gap-3 mt-2">
                                 <div className="lg:flex justify-between items-center">
                                     <p className="font-medium">
-                                        {dir === 'debit' ? 'Вычесть из...' : 'Прибавить к...'}
+                                        {dir === 'credit' ? 'Прибавить к...' : 'Вычесть из...'}
                                     </p>
                                     <Button
                                         variant="outline"
@@ -765,6 +777,11 @@ export function OperationForm({
                                                         </FormLabel>
                                                         <Select
                                                             onValueChange={field.onChange}
+                                                            onOpenChange={(isOpen) => {
+                                                                if (!isOpen) {
+                                                                    setWalletSearch('');
+                                                                }
+                                                            }}
                                                             value={field.value || ''}
                                                         >
                                                             <FormControl>
@@ -795,12 +812,11 @@ export function OperationForm({
                                                                             wallet.visible &&
                                                                             !wallet.deleted;
                                                                         const isSelected = wallet.id === field.value;
-                                                                        return (
-                                                                            matchesSearch &&
-                                                                            (isEditing
-                                                                                ? isSelectable || isSelected
-                                                                                : isSelectable)
-                                                                        );
+                                                                        if (isEditing && isSelected) {
+                                                                            return true;
+                                                                        }
+
+                                                                        return matchesSearch && isSelectable;
                                                                     })
                                                                     .map((wallet) => (
                                                                         <SelectItem key={wallet.id} value={wallet.id}>

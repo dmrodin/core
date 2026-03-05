@@ -81,7 +81,7 @@ export class CurrencyController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin, RoleCode.moderator)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Получить список валют',
         description: 'Возвращает список валют с поддержкой фильтрации, поиска и пагинации.',

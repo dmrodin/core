@@ -44,6 +44,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
 
     const form = useForm<CreateApplicationRequest>({
         resolver: zodResolver(CreateApplicationRequestSchema),
+        shouldUnregister: true,
         defaultValues: initialData
             ? {
                   currencyId: initialData.currencyId ?? '',
@@ -78,6 +79,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
         fields: advanceFields,
         append: appendAdvanceEntry,
         remove: removeAdvanceEntry,
+        replace: replaceAdvanceEntry,
     } = useFieldArray({
         control: form.control,
         name: 'advance.entries',
@@ -264,6 +266,9 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                     setIsAdvanceEnabled(enabled);
 
                                                     if (!enabled) {
+                                                        replaceAdvanceEntry([]);
+                                                        form.unregister('advance.entries');
+                                                        form.clearErrors('advance');
                                                         field.onChange(null);
                                                         return;
                                                     }
@@ -292,7 +297,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                 <div key={dir} className="flex flex-col gap-3">
                                                     <div className="lg:flex justify-between items-center">
                                                         <p className="font-medium">
-                                                            {dir === 'debit' ? 'Вычесть из...' : 'Прибавить к...'}
+                                                            {dir === 'credit' ? 'Прибавить к...' : 'Вычесть из...'}
                                                         </p>
                                                         <Button
                                                             variant="outline"

@@ -9,7 +9,6 @@ import { UseFormReturn } from 'react-hook-form';
 
 import { useApplicationsList } from '@/entities/application';
 import { GetOperationsParams, useOperationTypes } from '@/entities/operations';
-import { UserRole } from '@/entities/users/model/user-schemas';
 import { useUsers } from '@/entities/users';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import {
@@ -45,11 +44,7 @@ export function OperationsFiltersSheet({
     const [sheetOpen, setSheetOpen] = useState(false);
     const [calendarOpen, setCalendarOpen] = useState(false);
     const user = useAuthStore((state) => state.user);
-    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
-    const isRestrictedRole =
-        !hasAdminRole &&
-        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
-    const canLoadReferenceData = Boolean(user) && !isRestrictedRole;
+    const canLoadReferenceData = Boolean(user);
 
     const { data: operationTypes, isLoading: operationTypesLoading } = useOperationTypes(
         undefined,

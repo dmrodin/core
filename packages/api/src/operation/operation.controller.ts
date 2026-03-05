@@ -175,7 +175,7 @@ export class OperationController {
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    @Roles(RoleCode.admin, RoleCode.moderator)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Создать операцию',
         description: 'Создаёт новую операцию. Доступно администраторам и модераторам.',
@@ -201,7 +201,7 @@ export class OperationController {
 
     @Put(':id')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin, RoleCode.moderator)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Обновить операцию',
         description: 'Обновляет данные существующей операции. Доступно администраторам и модераторам.',
@@ -258,7 +258,7 @@ export class OperationController {
 
     @Delete(':id')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Удалить операцию',
         description: 'Выполняет мягкое удаление операции.',

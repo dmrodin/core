@@ -33,10 +33,10 @@ export const GuidesPageContent = () => {
     return (
         <Fragment>
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardHeader className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                     <CardTitle className="text-2xl">Список справочников</CardTitle>
-                    <div className="flex gap-2 items-center">
-                        <GuidesFilters onFiltersChange={handleFiltersChange} />
+                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+                        <GuidesFilters className="w-full sm:w-64" onFiltersChange={handleFiltersChange} />
                         {!isUserRole && (
                             <Button asChild>
                                 <Link href={ROUTER_MAP.GUIDES_CREATE}>

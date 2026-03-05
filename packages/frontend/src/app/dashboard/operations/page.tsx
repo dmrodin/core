@@ -253,96 +253,114 @@ export default function OperationsPage() {
                                                                         </p>
 
                                                                         <div className="space-y-1.5">
-                                                                            {operation.entries.map((entry) => (
-                                                                                <div
-                                                                                    key={entry.id}
-                                                                                    className="p-2 rounded-md bg-muted/50"
-                                                                                >
-                                                                                    {showDetails ? (
-                                                                                        <p className="text-sm">
-                                                                                            <Button
-                                                                                                variant="link"
-                                                                                                className="p-0 h-auto font-medium relative z-10 no-underline hover:no-underline cursor-pointer"
-                                                                                                data-wallet-link
-                                                                                                onPointerDown={(e) => {
-                                                                                                    e.stopPropagation();
-                                                                                                    router.push(
-                                                                                                        ROUTER_MAP.WALLET_OPERATIONS(
-                                                                                                            entry.walletId,
-                                                                                                        ),
-                                                                                                    );
-                                                                                                }}
-                                                                                            >
-                                                                                                {entry.wallet.name}:
-                                                                                            </Button>{' '}
-                                                                                            {entry.direction ===
-                                                                                            'credit' ? (
-                                                                                                <>
-                                                                                                    <span className="text-muted-foreground">
-                                                                                                        {entry.before ??
-                                                                                                            0}{' '}
-                                                                                                        +{' '}
-                                                                                                    </span>
-                                                                                                    <span className="text-success/80 font-semibold">
-                                                                                                        {entry.amount}
-                                                                                                    </span>
-                                                                                                    <span className="text-muted-foreground">
-                                                                                                        {' '}
-                                                                                                        ={' '}
-                                                                                                        {entry.after ??
-                                                                                                            0}
-                                                                                                    </span>
-                                                                                                </>
-                                                                                            ) : (
-                                                                                                <>
-                                                                                                    <span className="text-muted-foreground">
-                                                                                                        {entry.before ??
-                                                                                                            0}{' '}
-                                                                                                        -{' '}
-                                                                                                    </span>
-                                                                                                    <span className="text-destructive/80 font-semibold">
-                                                                                                        {entry.amount}
-                                                                                                    </span>
-                                                                                                    <span className="text-muted-foreground">
-                                                                                                        {' '}
-                                                                                                        ={' '}
-                                                                                                        {entry.after ??
-                                                                                                            0}
-                                                                                                    </span>
-                                                                                                </>
-                                                                                            )}
-                                                                                        </p>
-                                                                                    ) : (
-                                                                                        <p className="text-sm">
-                                                                                            <Button
-                                                                                                variant="link"
-                                                                                                className="p-0 h-auto font-medium relative z-10 no-underline hover:no-underline cursor-pointer"
-                                                                                                data-wallet-link
-                                                                                                onPointerDown={(e) => {
-                                                                                                    e.stopPropagation();
-                                                                                                    router.push(
-                                                                                                        ROUTER_MAP.WALLET_OPERATIONS(
-                                                                                                            entry.walletId,
-                                                                                                        ),
-                                                                                                    );
-                                                                                                }}
-                                                                                            >
-                                                                                                {entry.wallet.name}:
-                                                                                            </Button>{' '}
-                                                                                            <span
-                                                                                                className={
-                                                                                                    entry.direction ===
-                                                                                                    'credit'
-                                                                                                        ? 'text-success/80 font-semibold'
-                                                                                                        : 'text-destructive/80 font-semibold'
-                                                                                                }
-                                                                                            >
-                                                                                                {entry.after ?? 0}
-                                                                                            </span>
-                                                                                        </p>
-                                                                                    )}
-                                                                                </div>
-                                                                            ))}
+                                                                            {[...operation.entries]
+                                                                                .sort(
+                                                                                    (a, b) =>
+                                                                                        (a.direction === 'debit'
+                                                                                            ? 0
+                                                                                            : 1) -
+                                                                                        (b.direction === 'debit'
+                                                                                            ? 0
+                                                                                            : 1),
+                                                                                )
+                                                                                .map((entry) => (
+                                                                                    <div
+                                                                                        key={entry.id}
+                                                                                        className="p-2 rounded-md bg-muted/50"
+                                                                                    >
+                                                                                        {showDetails ? (
+                                                                                            <p className="text-sm">
+                                                                                                <Button
+                                                                                                    variant="link"
+                                                                                                    className="p-0 h-auto font-medium relative z-10 no-underline hover:no-underline cursor-pointer"
+                                                                                                    data-wallet-link
+                                                                                                    onPointerDown={(
+                                                                                                        e,
+                                                                                                    ) => {
+                                                                                                        e.stopPropagation();
+                                                                                                        router.push(
+                                                                                                            ROUTER_MAP.WALLET_OPERATIONS(
+                                                                                                                entry.walletId,
+                                                                                                            ),
+                                                                                                        );
+                                                                                                    }}
+                                                                                                >
+                                                                                                    {entry.wallet.name}:
+                                                                                                </Button>{' '}
+                                                                                                {entry.direction ===
+                                                                                                'credit' ? (
+                                                                                                    <>
+                                                                                                        <span className="text-muted-foreground">
+                                                                                                            {entry.before ??
+                                                                                                                0}{' '}
+                                                                                                            +{' '}
+                                                                                                        </span>
+                                                                                                        <span className="text-success/80 font-semibold">
+                                                                                                            {
+                                                                                                                entry.amount
+                                                                                                            }
+                                                                                                        </span>
+                                                                                                        <span className="text-muted-foreground">
+                                                                                                            {' '}
+                                                                                                            ={' '}
+                                                                                                            {entry.after ??
+                                                                                                                0}
+                                                                                                        </span>
+                                                                                                    </>
+                                                                                                ) : (
+                                                                                                    <>
+                                                                                                        <span className="text-muted-foreground">
+                                                                                                            {entry.before ??
+                                                                                                                0}{' '}
+                                                                                                            -{' '}
+                                                                                                        </span>
+                                                                                                        <span className="text-destructive/80 font-semibold">
+                                                                                                            {
+                                                                                                                entry.amount
+                                                                                                            }
+                                                                                                        </span>
+                                                                                                        <span className="text-muted-foreground">
+                                                                                                            {' '}
+                                                                                                            ={' '}
+                                                                                                            {entry.after ??
+                                                                                                                0}
+                                                                                                        </span>
+                                                                                                    </>
+                                                                                                )}
+                                                                                            </p>
+                                                                                        ) : (
+                                                                                            <p className="text-sm">
+                                                                                                <Button
+                                                                                                    variant="link"
+                                                                                                    className="p-0 h-auto font-medium relative z-10 no-underline hover:no-underline cursor-pointer"
+                                                                                                    data-wallet-link
+                                                                                                    onPointerDown={(
+                                                                                                        e,
+                                                                                                    ) => {
+                                                                                                        e.stopPropagation();
+                                                                                                        router.push(
+                                                                                                            ROUTER_MAP.WALLET_OPERATIONS(
+                                                                                                                entry.walletId,
+                                                                                                            ),
+                                                                                                        );
+                                                                                                    }}
+                                                                                                >
+                                                                                                    {entry.wallet.name}:
+                                                                                                </Button>{' '}
+                                                                                                <span
+                                                                                                    className={
+                                                                                                        entry.direction ===
+                                                                                                        'credit'
+                                                                                                            ? 'text-success/80 font-semibold'
+                                                                                                            : 'text-destructive/80 font-semibold'
+                                                                                                    }
+                                                                                                >
+                                                                                                    {entry.amount}
+                                                                                                </span>
+                                                                                            </p>
+                                                                                        )}
+                                                                                    </div>
+                                                                                ))}
                                                                         </div>
 
                                                                         {operation.description && (

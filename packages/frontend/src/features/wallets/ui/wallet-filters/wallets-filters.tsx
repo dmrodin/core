@@ -3,7 +3,6 @@
 import { UseFormReturn } from 'react-hook-form';
 
 import { useCurrency } from '@/entities/currency';
-import { UserRole } from '@/entities/users/model/user-schemas';
 import { useUsers } from '@/entities/users';
 import { BalanceStatus, GetWalletsFilter, SortOrder, WalletKind } from '@/entities/wallet';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
@@ -28,11 +27,7 @@ const balanceStatusLabels: Record<BalanceStatus, string> = {
 
 export function WalletsFilters({ form }: { form: UseFormReturn<GetWalletsFilter> }) {
     const user = useAuthStore((state) => state.user);
-    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
-    const isRestrictedRole =
-        !hasAdminRole &&
-        (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false);
-    const canLoadReferenceFilters = Boolean(user) && !isRestrictedRole;
+    const canLoadReferenceFilters = Boolean(user);
 
     const { data: currencies } = useCurrency(canLoadReferenceFilters);
     const { data: users } = useUsers(canLoadReferenceFilters);
@@ -72,11 +67,13 @@ export function WalletsFilters({ form }: { form: UseFormReturn<GetWalletsFilter>
                                     </FormControl>
                                     <SelectContent>
                                         <SelectItem value="all">Все</SelectItem>
-                                        {Object.values(BalanceStatus).map((s) => (
-                                            <SelectItem key={s} value={s}>
-                                                {balanceStatusLabels[s]}
-                                            </SelectItem>
-                                        ))}
+                                        {Object.values(BalanceStatus)
+                                            .filter((s) => s !== BalanceStatus.neutral)
+                                            .map((s) => (
+                                                <SelectItem key={s} value={s}>
+                                                    {balanceStatusLabels[s]}
+                                                </SelectItem>
+                                            ))}
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
