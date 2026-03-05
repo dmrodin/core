@@ -79,12 +79,14 @@ export function DashboardCurrency({ isLoading, hasError, currencyGroups }: Dashb
     return (
         <div className="w-full">
             <div className="w-full max-w-7xl mx-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
-                <div className="flex gap-4 pb-2">
+                <div className="flex gap-3 pb-2 sm:gap-4">
                     {summaries.map((summary) => (
-                        <Card key={summary.key} className="min-w-[280px] flex-shrink-0 p-0">
-                            <CardContent className="flex flex-col p-4 gap-1">
-                                <p className="text-2xl font-semibold">{formatNumber(summary.totalAmount)}</p>
-                                <p className="text-sm font-medium text-muted-foreground uppercase">
+                        <Card key={summary.key} className="w-fit flex-shrink-0 !gap-0 !p-0 sm:min-w-[280px]">
+                            <CardContent className="flex flex-col gap-0.5 !p-2.5 sm:!p-4">
+                                <p className="text-xl leading-tight font-semibold sm:text-2xl">
+                                    {formatNumber(summary.totalAmount)}
+                                </p>
+                                <p className="text-xs leading-tight font-medium text-muted-foreground uppercase sm:text-sm">
                                     {summary.currencyCode}
                                 </p>
                             </CardContent>
