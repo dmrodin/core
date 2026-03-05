@@ -258,7 +258,7 @@ export class OperationController {
 
     @Delete(':id')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
     @ApiOperation({
         summary: 'Удалить операцию',
         description: 'Выполняет мягкое удаление операции.',
