@@ -42,6 +42,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
 
     const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
+    const isUserRole = user?.roles?.some((role) => role.code === UserRole.USER) ?? false;
     const isAuthResolving = !isAuthInitialized || (Boolean(token) && !user);
     const isRestrictedRole =
         isAuthResolving ||
@@ -87,15 +88,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                 <FileText className="h-4 w-4 mr-1" />
                                 <span className="hidden sm:inline">Заявка</span>
                             </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => router.push(ROUTER_MAP.WALLETS_CREATE)}
-                                title="Создать кошелек"
-                            >
-                                <Wallet className="h-4 w-4 mr-1" />
-                                <span className="hidden sm:inline">Кошелек</span>
-                            </Button>
+                            {!isUserRole && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => router.push(ROUTER_MAP.WALLETS_CREATE)}
+                                    title="Создать кошелек"
+                                >
+                                    <Wallet className="h-4 w-4 mr-1" />
+                                    <span className="hidden sm:inline">Кошелек</span>
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </header>
@@ -109,3 +112,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </SidebarProvider>
     );
 }
+
+
+
+

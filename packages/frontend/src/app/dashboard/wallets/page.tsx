@@ -328,12 +328,14 @@ export default function WalletsPage() {
                             className="w-full md:w-64"
                         />
                         <WalletsFiltersSheet form={form} baseFilters={baseFilters} />
-                        <Button asChild className="md:w-auto">
-                            <Link href={ROUTER_MAP.WALLETS_CREATE} className="inline-flex items-center gap-2">
-                                <Plus className="size-4" />
-                                <span>Создать кошелек</span>
-                            </Link>
-                        </Button>
+                        {!isUserRole && (
+                            <Button asChild className="md:w-auto">
+                                <Link href={ROUTER_MAP.WALLETS_CREATE} className="inline-flex items-center gap-2">
+                                    <Plus className="size-4" />
+                                    <span>Создать кошелек</span>
+                                </Link>
+                            </Button>
+                        )}
                     </div>
                 </CardHeader>
             </Card>
@@ -437,3 +439,7 @@ export default function WalletsPage() {
         </div>
     );
 }
+
+
+
+
