@@ -48,6 +48,13 @@ export class GetApplicationByIdUseCase {
                     select: {
                         id: true,
                         description: true,
+                        entries: {
+                            select: {
+                                walletId: true,
+                                direction: true,
+                                amount: true,
+                            },
+                        },
                     },
                 },
                 advance: {
@@ -64,16 +71,30 @@ export class GetApplicationByIdUseCase {
         }
 
         const { deleted: _, ...applicationResponse } = application;
+        const advanceEntries = applicationResponse.operation?.entries?.length
+            ? applicationResponse.operation.entries.map((entry) => ({
+                  walletId: entry.walletId,
+                  direction: entry.direction,
+                  amount: entry.amount,
+              }))
+            : null;
 
         return {
             application: {
                 ...applicationResponse,
+                operation: applicationResponse.operation
+                    ? {
+                          id: applicationResponse.operation.id,
+                          description: applicationResponse.operation.description,
+                      }
+                    : null,
                 advance: applicationResponse.advance
                     ? {
                           amount: applicationResponse.advance.amount,
                           currency: applicationResponse.advance.currencyId,
                       }
                     : null,
+                advanceEntries,
                 operation_type: addOperationTypeFlags(applicationResponse.operation_type),
             },
         };

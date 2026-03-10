@@ -114,6 +114,16 @@ export const ApplicationResponseSchema = z.object({
         })
         .nullable()
         .optional(),
+    advanceEntries: z
+        .array(
+            z.object({
+                walletId: z.string().uuid(),
+                direction: z.enum(['credit', 'debit']),
+                amount: z.number().int(),
+            }),
+        )
+        .nullable()
+        .optional(),
 });
 
 export const CreateApplicationResponseSchema = z.object({

@@ -130,6 +130,13 @@ export class CreateApplicationUseCase {
         });
 
         const { deleted: _, ...applicationResponse } = application;
+        const advanceEntriesResponse = hasAdvanceEntries
+            ? advanceEntries.map((entry) => ({
+                  walletId: entry.walletId,
+                  direction: entry.direction,
+                  amount: entry.amount,
+              }))
+            : null;
 
         return {
             message: 'Заявка успешно создана',
@@ -141,6 +148,7 @@ export class CreateApplicationUseCase {
                           currency: applicationResponse.advance.currencyId,
                       }
                     : null,
+                advanceEntries: advanceEntriesResponse,
                 operation_type: addOperationTypeFlags(applicationResponse.operation_type),
             },
         };

@@ -155,6 +155,13 @@ export class GetApplicationsUseCase {
                     select: {
                         id: true,
                         description: true,
+                        entries: {
+                            select: {
+                                walletId: true,
+                                direction: true,
+                                amount: true,
+                            },
+                        },
                     },
                 },
                 advance: {
@@ -179,16 +186,33 @@ export class GetApplicationsUseCase {
 
         const applications = await this.prisma.application.findMany(findManyOptions);
 
-        const applicationsResponse = applications.map(({ deleted: _, advance, ...application }) => ({
-            ...application,
-            operation_type: addOperationTypeFlags(application.operation_type),
-            advance: advance
-                ? {
-                      amount: advance.amount,
-                      currency: advance.currency?.code,
-                  }
-                : null,
-        }));
+        const applicationsResponse = applications.map(({ deleted: _, advance, ...application }) => {
+            const advanceEntries = application.operation?.entries?.length
+                ? application.operation.entries.map((entry) => ({
+                      walletId: entry.walletId,
+                      direction: entry.direction,
+                      amount: entry.amount,
+                  }))
+                : null;
+
+            return {
+                ...application,
+                operation: application.operation
+                    ? {
+                          id: application.operation.id,
+                          description: application.operation.description,
+                      }
+                    : null,
+                operation_type: addOperationTypeFlags(application.operation_type),
+                advance: advance
+                    ? {
+                          amount: advance.amount,
+                          currency: advance.currency?.code,
+                      }
+                    : null,
+                advanceEntries,
+            };
+        });
 
         const paginationResponse = pagination.shouldPaginate
             ? createPaginationResponse(total, page!, limit!)

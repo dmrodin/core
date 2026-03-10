@@ -32,7 +32,6 @@ const formatTelegramUsername = (value: string): string => {
 };
 
 export function ApplicationForm({ initialData }: { initialData?: ApplicationResponse } & React.ComponentProps<'form'>) {
-    const isCreateMode = !initialData;
     const { data: operationTypes, isLoading: operationTypesLoading } = useOperationTypes();
     const { data: couriers, isLoading: couriersLoading } = useCouriers();
     const { data: currency, isLoading: currencyLoading } = useCurrency();
@@ -47,39 +46,55 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
     const createMutation = useCreateApplication();
     const updateMutation = useUpdateApplication();
     const [walletSearch, setWalletSearch] = React.useState('');
-    const [isAdvanceEnabled, setIsAdvanceEnabled] = React.useState(Boolean(initialData?.advance));
+    const [isAdvanceEnabled, setIsAdvanceEnabled] = React.useState(
+        Boolean(initialData?.advanceEntries?.length || initialData?.advance || initialData?.hasAdvance),
+    );
+
+    const buildDefaultValues = React.useCallback(
+        (data?: ApplicationResponse): CreateApplicationRequest => {
+            if (!data) {
+                return {
+                    currencyId: '',
+                    operationTypeId: '',
+                    assigneeUserId: '',
+                    description: '',
+                    amount: 0,
+                    telegramUsername: '',
+                    phone: '',
+                    meetingDate: undefined,
+                    advance: null,
+                };
+            }
+
+            return {
+                currencyId: data.currencyId ?? '',
+                operationTypeId: data.operationTypeId ?? '',
+                assigneeUserId: data.assigneeUserId ?? '',
+                description: data.description ?? '',
+                amount: data.amount ?? 0,
+                telegramUsername: data.telegramUsername ? data.telegramUsername.replace('@', '') : '',
+                phone: data.phone ?? '',
+                meetingDate: data.meetingDate ?? '',
+                advance:
+                    data.advanceEntries?.length || data.advance || data.hasAdvance
+                        ? {
+                              entries:
+                                  data.advanceEntries?.map((entry) => ({
+                                      walletId: entry.walletId,
+                                      direction: entry.direction,
+                                      amount: entry.amount,
+                                  })) ?? [],
+                          }
+                        : null,
+            };
+        },
+        [],
+    );
 
     const form = useForm<CreateApplicationRequest>({
         resolver: zodResolver(CreateApplicationRequestSchema),
         shouldUnregister: true,
-        defaultValues: initialData
-            ? {
-                  currencyId: initialData.currencyId ?? '',
-                  operationTypeId: initialData.operationTypeId ?? '',
-                  assigneeUserId: initialData.assigneeUserId ?? '',
-                  description: initialData.description ?? '',
-                  amount: initialData.amount ?? 0,
-                  telegramUsername: initialData.telegramUsername ? initialData.telegramUsername.replace('@', '') : '',
-                  phone: initialData.phone ?? '',
-                  meetingDate: initialData.meetingDate ?? '',
-                  advance: initialData.advance
-                      ? {
-                            amount: initialData.advance.amount,
-                            currencyId: initialData.advance.currency,
-                        }
-                      : null,
-              }
-            : {
-                  currencyId: '',
-                  operationTypeId: '',
-                  assigneeUserId: '',
-                  description: '',
-                  amount: 0,
-                  telegramUsername: '',
-                  phone: '',
-                  meetingDate: undefined,
-                  advance: null,
-              },
+        defaultValues: buildDefaultValues(initialData),
     });
 
     const {
@@ -92,6 +107,14 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
         name: 'advance.entries',
         keyName: 'fieldId',
     });
+
+    React.useEffect(() => {
+        if (!initialData) return;
+        form.reset(buildDefaultValues(initialData));
+        setIsAdvanceEnabled(
+            Boolean(initialData.advanceEntries?.length || initialData.advance || initialData.hasAdvance),
+        );
+    }, [buildDefaultValues, form, initialData]);
 
     const onSubmit = (data: CreateApplicationRequest) => {
         const filteredAdvanceEntries =
@@ -107,11 +130,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
             ...data,
             telegramUsername: data.telegramUsername ? `@${data.telegramUsername}` : '',
             advance:
-                filteredAdvanceEntries.length > 0
-                    ? { entries: filteredAdvanceEntries }
-                    : data.advance && typeof data.advance.amount === 'number' && data.advance.amount > 0
-                      ? data.advance
-                      : null,
+                filteredAdvanceEntries.length > 0 ? { entries: filteredAdvanceEntries } : null,
         };
 
         if (initialData) {
@@ -280,14 +299,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                         return;
                                                     }
 
-                                                    field.onChange(
-                                                        isCreateMode
-                                                            ? { entries: [] }
-                                                            : {
-                                                                  amount: 0,
-                                                                  currencyId: '',
-                                                              },
-                                                    );
+                                                    field.onChange({ entries: [] });
                                                 }}
                                             />
                                         </FormControl>
@@ -297,210 +309,145 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                             />
 
                             {isAdvanceEnabled && (
-                                <>
-                                    {isCreateMode ? (
-                                        <div className="mt-4 lg:grid lg:grid-cols-2 gap-4">
-                                            {(['debit', 'credit'] as const).map((dir) => (
-                                                <div key={dir} className="flex flex-col gap-3">
-                                                    <div className="lg:flex justify-between items-center">
-                                                        <p className="font-medium">
-                                                            {dir === 'credit' ? 'Прибавить к...' : 'Вычесть из...'}
-                                                        </p>
+                                <div className="mt-4 lg:grid lg:grid-cols-2 gap-4">
+                                    {(['debit', 'credit'] as const).map((dir) => (
+                                        <div key={dir} className="flex flex-col gap-3">
+                                            <div className="lg:flex justify-between items-center">
+                                                <p className="font-medium">
+                                                    {dir === 'credit' ? 'Прибавить к...' : 'Вычесть из...'}
+                                                </p>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    type="button"
+                                                    onClick={() =>
+                                                        appendAdvanceEntry({
+                                                            walletId: '',
+                                                            direction: dir,
+                                                            amount: 0,
+                                                        })
+                                                    }
+                                                >
+                                                    + Добавить строку
+                                                </Button>
+                                            </div>
+
+                                            {advanceFields
+                                                .map((item, realIndex) => ({ item, realIndex }))
+                                                .filter(({ item }) => item.direction === dir)
+                                                .map(({ item, realIndex }) => (
+                                                    <div key={item.fieldId} className="flex gap-3 items-end">
+                                                        <FormField
+                                                            control={form.control}
+                                                            name={`advance.entries.${realIndex}.walletId`}
+                                                            render={({ field }) => (
+                                                                <FormItem className="flex-1">
+                                                                    <FormLabel>Кошелек</FormLabel>
+                                                                    <Select
+                                                                        onValueChange={field.onChange}
+                                                                        value={field.value || ''}
+                                                                    >
+                                                                        <FormControl>
+                                                                            <SelectTrigger className="w-full">
+                                                                                <SelectValue placeholder="Выберите кошелек" />
+                                                                            </SelectTrigger>
+                                                                        </FormControl>
+                                                                        <SelectContent>
+                                                                            <div className="px-2 pb-2">
+                                                                                <Input
+                                                                                    placeholder="Поиск кошелька..."
+                                                                                    value={walletSearch}
+                                                                                    onChange={(e) =>
+                                                                                        setWalletSearch(e.target.value)
+                                                                                    }
+                                                                                    onKeyDown={(e) => e.stopPropagation()}
+                                                                                    onKeyUp={(e) => e.stopPropagation()}
+                                                                                    className="h-8"
+                                                                                />
+                                                                            </div>
+                                                                            {wallets?.wallets
+                                                                                ?.filter((wallet) => {
+                                                                                    const matchesSearch = wallet.name
+                                                                                        .toLowerCase()
+                                                                                        .includes(
+                                                                                            walletSearch.toLowerCase(),
+                                                                                        );
+                                                                                    return (
+                                                                                        matchesSearch &&
+                                                                                        wallet.active &&
+                                                                                        wallet.visible &&
+                                                                                        !wallet.deleted
+                                                                                    );
+                                                                                })
+                                                                                .map((wallet) => (
+                                                                                    <SelectItem
+                                                                                        key={wallet.id}
+                                                                                        value={wallet.id}
+                                                                                    >
+                                                                                        {wallet.name} - {wallet.amount}{' '}
+                                                                                        {wallet.currency.code}
+                                                                                    </SelectItem>
+                                                                                ))}
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+
+                                                        <FormField
+                                                            control={form.control}
+                                                            name={`advance.entries.${realIndex}.amount`}
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>Сумма</FormLabel>
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            type="number"
+                                                                            value={field.value ?? ''}
+                                                                            onChange={(e) => {
+                                                                                const value = e.target.value;
+                                                                                if (!value) {
+                                                                                    field.onChange(0);
+                                                                                    return;
+                                                                                }
+                                                                                const numValue = Number(value);
+                                                                                field.onChange(
+                                                                                    Number.isNaN(numValue) ? 0 : numValue,
+                                                                                );
+                                                                            }}
+                                                                            onFocus={() => {
+                                                                                if (field.value === 0) {
+                                                                                    field.onChange('');
+                                                                                }
+                                                                            }}
+                                                                            onBlur={(e) => {
+                                                                                if (!e.currentTarget.value) {
+                                                                                    field.onChange(0);
+                                                                                }
+                                                                            }}
+                                                                            className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+
                                                         <Button
-                                                            variant="outline"
-                                                            size="sm"
                                                             type="button"
-                                                            onClick={() =>
-                                                                appendAdvanceEntry({
-                                                                    walletId: '',
-                                                                    direction: dir,
-                                                                    amount: 0,
-                                                                })
-                                                            }
+                                                            variant="outline"
+                                                            size="icon"
+                                                            onClick={() => removeAdvanceEntry(realIndex)}
+                                                            className="text-destructive hover:bg-destructive/10"
                                                         >
-                                                            + Добавить строку
+                                                            <Trash2 className="size-4" />
                                                         </Button>
                                                     </div>
-
-                                                    {advanceFields
-                                                        .map((item, realIndex) => ({ item, realIndex }))
-                                                        .filter(({ item }) => item.direction === dir)
-                                                        .map(({ item, realIndex }) => (
-                                                            <div key={item.fieldId} className="flex gap-3 items-end">
-                                                                <FormField
-                                                                    control={form.control}
-                                                                    name={`advance.entries.${realIndex}.walletId`}
-                                                                    render={({ field }) => (
-                                                                        <FormItem className="flex-1">
-                                                                            <FormLabel>Кошелек</FormLabel>
-                                                                            <Select
-                                                                                onValueChange={field.onChange}
-                                                                                value={field.value || ''}
-                                                                            >
-                                                                                <FormControl>
-                                                                                    <SelectTrigger className="w-full">
-                                                                                        <SelectValue placeholder="Выберите кошелек" />
-                                                                                    </SelectTrigger>
-                                                                                </FormControl>
-                                                                                <SelectContent>
-                                                                                    <div className="px-2 pb-2">
-                                                                                        <Input
-                                                                                            placeholder="Поиск кошелька..."
-                                                                                            value={walletSearch}
-                                                                                            onChange={(e) =>
-                                                                                                setWalletSearch(
-                                                                                                    e.target.value,
-                                                                                                )
-                                                                                            }
-                                                                                            onKeyDown={(e) =>
-                                                                                                e.stopPropagation()
-                                                                                            }
-                                                                                            onKeyUp={(e) =>
-                                                                                                e.stopPropagation()
-                                                                                            }
-                                                                                            className="h-8"
-                                                                                        />
-                                                                                    </div>
-                                                                                    {wallets?.wallets
-                                                                                        ?.filter((wallet) => {
-                                                                                            const matchesSearch =
-                                                                                                wallet.name
-                                                                                                    .toLowerCase()
-                                                                                                    .includes(
-                                                                                                        walletSearch.toLowerCase(),
-                                                                                                    );
-                                                                                            return (
-                                                                                                matchesSearch &&
-                                                                                                wallet.active &&
-                                                                                                wallet.visible &&
-                                                                                                !wallet.deleted
-                                                                                            );
-                                                                                        })
-                                                                                        .map((wallet) => (
-                                                                                            <SelectItem
-                                                                                                key={wallet.id}
-                                                                                                value={wallet.id}
-                                                                                            >
-                                                                                                {wallet.name} -{' '}
-                                                                                                {wallet.amount}{' '}
-                                                                                                {wallet.currency.code}
-                                                                                            </SelectItem>
-                                                                                        ))}
-                                                                                </SelectContent>
-                                                                            </Select>
-                                                                            <FormMessage />
-                                                                        </FormItem>
-                                                                    )}
-                                                                />
-
-                                                                <FormField
-                                                                    control={form.control}
-                                                                    name={`advance.entries.${realIndex}.amount`}
-                                                                    render={({ field }) => (
-                                                                        <FormItem>
-                                                                            <FormLabel>Сумма</FormLabel>
-                                                                            <FormControl>
-                                                                                <Input
-                                                                                    type="number"
-                                                                                    value={field.value ?? ''}
-                                                                                    onChange={(e) => {
-                                                                                        const value = e.target.value;
-                                                                                        if (!value) {
-                                                                                            field.onChange(0);
-                                                                                            return;
-                                                                                        }
-                                                                                        const numValue = Number(value);
-                                                                                        field.onChange(
-                                                                                            Number.isNaN(numValue)
-                                                                                                ? 0
-                                                                                                : numValue,
-                                                                                        );
-                                                                                    }}
-                                                                                    onFocus={() => {
-                                                                                        if (field.value === 0) {
-                                                                                            field.onChange('');
-                                                                                        }
-                                                                                    }}
-                                                                                    onBlur={(e) => {
-                                                                                        if (!e.currentTarget.value) {
-                                                                                            field.onChange(0);
-                                                                                        }
-                                                                                    }}
-                                                                                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                                                                />
-                                                                            </FormControl>
-                                                                            <FormMessage />
-                                                                        </FormItem>
-                                                                    )}
-                                                                />
-
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="outline"
-                                                                    size="icon"
-                                                                    onClick={() => removeAdvanceEntry(realIndex)}
-                                                                    className="text-destructive hover:bg-destructive/10"
-                                                                >
-                                                                    <Trash2 className="size-4" />
-                                                                </Button>
-                                                            </div>
-                                                        ))}
-                                                </div>
-                                            ))}
+                                                ))}
                                         </div>
-                                    ) : (
-                                        <div className="grid grid-cols-1 min-[450px]:grid-cols-2 gap-4 mt-4">
-                                            <FormField
-                                                control={form.control}
-                                                name="advance.amount"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <RequiredLabel required>Сумма аванса</RequiredLabel>
-                                                        <FormControl>
-                                                            <Input
-                                                                type="text"
-                                                                placeholder="100 000"
-                                                                value={field.value ? formatNumber(field.value) : ''}
-                                                                onChange={(e) => {
-                                                                    const digits = e.target.value.replace(/\D/g, '');
-                                                                    field.onChange(digits ? Number(digits) : 0);
-                                                                }}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="advance.currencyId"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <RequiredLabel required>Валюта аванса</RequiredLabel>
-                                                        <Select
-                                                            onValueChange={field.onChange}
-                                                            defaultValue={field.value}
-                                                        >
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Выберите валюту" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                {currency?.currencies.map((item) => (
-                                                                    <SelectItem key={item.id} value={item.id}>
-                                                                        {item.name} ({item.code})
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-                                    )}
-                                </>
+                                    ))}
+                                </div>
                             )}
                         </div>
                     </div>

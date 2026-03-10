@@ -32,9 +32,12 @@ import { ROUTER_MAP } from '@/shared/utils/constants/router-map';
 
 export const useUpdateApplication = () => {
     const router = useRouter();
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ id, ...data }: { id: string } & UpdateApplicationRequest) => ApplicationService.update(id, data),
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: APPLICATION_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: APPLICATIONS_WITH_FILTERS_KEY(undefined) });
             router.push(ROUTER_MAP.APPLICATIONS);
             toast.success('Заявка обновлена');
         },

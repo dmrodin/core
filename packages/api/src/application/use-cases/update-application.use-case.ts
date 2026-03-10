@@ -3,12 +3,16 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { RoleCode } from '../../../prisma/generated/prisma';
 import { PrismaService } from '../../common/services/prisma.service';
 import { addOperationTypeFlags, OPERATION_TYPE_CODES } from '../../operation-type/constants/operation-type.constants';
+import { WalletRecalculationService } from '../../wallet/services/wallet-recalculation.service';
 import { UpdateApplicationDto } from '../dto';
 import { UpdateApplicationOutput } from '../types';
 
 @Injectable()
 export class UpdateApplicationUseCase {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly walletRecalculationService: WalletRecalculationService,
+    ) {}
 
     public async execute(
         applicationId: number,
@@ -71,92 +75,210 @@ export class UpdateApplicationUseCase {
             hasAdvance = operationType?.name === OPERATION_TYPE_CODES.AVANS;
         }
 
-        const application = await this.prisma.application.update({
-            where: { id: applicationId },
-            data: {
-                updatedById,
-                ...(description !== undefined && { description }),
-                ...(status !== undefined && { status }),
-                ...(amount !== undefined && { amount }),
-                ...(currencyId !== undefined && { currencyId }),
-                ...(operationTypeId !== undefined && { operationTypeId }),
-                ...(assigneeUserId !== undefined && { assigneeUserId }),
-                ...(operationId !== undefined && { operationId }),
-                ...(telegramUsername !== undefined && { telegramUsername }),
-                ...(phone !== undefined && { phone }),
-                ...(meetingDate !== undefined && {
-                    meetingDate: new Date(meetingDate),
-                }),
-                ...(hasAdvance !== undefined && { hasAdvance }),
-                ...(advance !== undefined && {
-                    advance: {
-                        update: {
-                            amount: advance.amount ?? 0,
-                            currencyId: advance.currencyId ?? existingApplication.currencyId,
+        const advanceEntries = advance?.entries ?? [];
+        const hasAdvanceEntries = advanceEntries.length > 0;
+        const hasLegacyAdvanceUpdate = advance?.amount !== undefined || advance?.currencyId !== undefined;
+        const advanceType = hasAdvanceEntries
+            ? await this.prisma.operationType.findFirst({
+                  where: { code: OPERATION_TYPE_CODES.AVANS },
+                  select: { id: true },
+              })
+            : null;
+
+        let advanceOperationId: string | null = null;
+        let advanceOperationDescription: string | null = null;
+
+        const application = await this.prisma.$transaction(async (tx) => {
+            const updatedApplication = await tx.application.update({
+                where: { id: applicationId },
+                data: {
+                    updatedById,
+                    ...(description !== undefined && { description }),
+                    ...(status !== undefined && { status }),
+                    ...(amount !== undefined && { amount }),
+                    ...(currencyId !== undefined && { currencyId }),
+                    ...(operationTypeId !== undefined && { operationTypeId }),
+                    ...(assigneeUserId !== undefined && { assigneeUserId }),
+                    ...(operationId !== undefined && { operationId }),
+                    ...(telegramUsername !== undefined && { telegramUsername }),
+                    ...(phone !== undefined && { phone }),
+                    ...(meetingDate !== undefined && {
+                        meetingDate: new Date(meetingDate),
+                    }),
+                    ...((hasAdvanceEntries || hasAdvance !== undefined) && {
+                        hasAdvance: hasAdvanceEntries ? true : hasAdvance,
+                    }),
+                    ...(hasLegacyAdvanceUpdate && {
+                        advance: {
+                            upsert: {
+                                update: {
+                                    amount: advance?.amount ?? 0,
+                                    currencyId: advance?.currencyId ?? existingApplication.currencyId,
+                                },
+                                create: {
+                                    amount: advance?.amount ?? 0,
+                                    currencyId: advance?.currencyId ?? existingApplication.currencyId,
+                                },
+                            },
+                        },
+                    }),
+                },
+                include: {
+                    created_by: {
+                        select: {
+                            id: true,
+                            username: true,
                         },
                     },
-                }),
-            },
-            include: {
-                created_by: {
-                    select: {
-                        id: true,
-                        username: true,
+                    updated_by: {
+                        select: {
+                            id: true,
+                            username: true,
+                        },
+                    },
+                    assignee_user: {
+                        select: {
+                            id: true,
+                            username: true,
+                        },
+                    },
+                    currency: {
+                        select: {
+                            id: true,
+                            name: true,
+                            code: true,
+                        },
+                    },
+                    operation_type: {
+                        select: {
+                            id: true,
+                            name: true,
+                            code: true,
+                        },
+                    },
+                    operation: {
+                        select: {
+                            id: true,
+                            description: true,
+                            entries: {
+                                select: {
+                                    walletId: true,
+                                    direction: true,
+                                    amount: true,
+                                },
+                            },
+                        },
+                    },
+                    advance: {
+                        select: {
+                            amount: true,
+                            currencyId: true,
+                        },
                     },
                 },
-                updated_by: {
-                    select: {
-                        id: true,
-                        username: true,
-                    },
-                },
-                assignee_user: {
-                    select: {
-                        id: true,
-                        username: true,
-                    },
-                },
-                currency: {
-                    select: {
-                        id: true,
-                        name: true,
-                        code: true,
-                    },
-                },
-                operation_type: {
-                    select: {
-                        id: true,
-                        name: true,
-                        code: true,
-                    },
-                },
-                operation: {
-                    select: {
-                        id: true,
-                        description: true,
-                    },
-                },
-                advance: {
-                    select: {
-                        amount: true,
-                        currencyId: true,
-                    },
-                },
-            },
+            });
+
+            if (hasAdvanceEntries && advanceType?.id) {
+                advanceOperationId = updatedApplication.operation?.id ?? updatedApplication.operationId ?? null;
+
+                const operationDescriptionLines = [`Аванс по заявке №${updatedApplication.id}`];
+                if (updatedApplication.telegramUsername) {
+                    operationDescriptionLines.push(`Telegram: ${updatedApplication.telegramUsername}`);
+                }
+                if (updatedApplication.phone) {
+                    operationDescriptionLines.push(`Телефон: ${updatedApplication.phone}`);
+                }
+                advanceOperationDescription = operationDescriptionLines.join('\n');
+
+                if (!advanceOperationId) {
+                    const createdOperation = await tx.operation.create({
+                        data: {
+                            applicationId: updatedApplication.id,
+                            description: advanceOperationDescription,
+                            userId: updatedById,
+                            updatedById,
+                            typeId: advanceType.id,
+                            createdAt: new Date().toISOString(),
+                        },
+                    });
+                    advanceOperationId = createdOperation.id;
+
+                    await tx.application.update({
+                        where: { id: updatedApplication.id },
+                        data: {
+                            operationId: createdOperation.id,
+                            updatedById,
+                        },
+                    });
+                } else {
+                    await tx.operation.update({
+                        where: { id: advanceOperationId },
+                        data: {
+                            description: advanceOperationDescription,
+                            updatedById,
+                            typeId: advanceType.id,
+                        },
+                    });
+
+                    await tx.operationEntry.deleteMany({
+                        where: { operationId: advanceOperationId },
+                    });
+                }
+
+                await tx.operationEntry.createMany({
+                    data: advanceEntries.map((entry) => ({
+                        operationId: advanceOperationId!,
+                        walletId: entry.walletId,
+                        direction: entry.direction,
+                        amount: entry.amount,
+                        userId: updatedById,
+                        updatedById,
+                    })),
+                });
+
+                await this.walletRecalculationService.recalculateForOperation(tx, advanceOperationId!, updatedById);
+            }
+
+            return updatedApplication;
         });
 
         const { deleted: _, ...applicationResponse } = application;
+        const advanceEntriesResponse = hasAdvanceEntries
+            ? advanceEntries.map((entry) => ({
+                  walletId: entry.walletId,
+                  direction: entry.direction,
+                  amount: entry.amount,
+              }))
+            : applicationResponse.operation?.entries?.length
+              ? applicationResponse.operation.entries.map((entry) => ({
+                    walletId: entry.walletId,
+                    direction: entry.direction,
+                    amount: entry.amount,
+                }))
+              : null;
 
         return {
             message: 'Заявка успешно обновлена',
             application: {
                 ...applicationResponse,
+                operation: advanceOperationId
+                    ? {
+                          id: advanceOperationId,
+                          description: advanceOperationDescription ?? applicationResponse.operation?.description ?? null,
+                      }
+                    : applicationResponse.operation
+                      ? {
+                            id: applicationResponse.operation.id,
+                            description: applicationResponse.operation.description,
+                        }
+                      : null,
                 advance: applicationResponse.advance
                     ? {
                           amount: applicationResponse.advance.amount,
                           currency: applicationResponse.advance.currencyId,
                       }
                     : null,
+                advanceEntries: advanceEntriesResponse,
                 operation_type: addOperationTypeFlags(applicationResponse.operation_type),
             },
         };
