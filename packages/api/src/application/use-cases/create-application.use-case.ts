@@ -43,7 +43,6 @@ export class CreateApplicationUseCase {
         const hasAdvanceEntries = advanceEntries.length > 0;
         const hasLegacyAdvance = typeof advance?.amount === 'number' && !!advance?.currencyId;
 
-
         const application = await this.prisma.$transaction(async (tx) => {
             const app = await tx.application.create({
                 data: {

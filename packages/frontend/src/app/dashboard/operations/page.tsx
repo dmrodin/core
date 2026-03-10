@@ -394,11 +394,15 @@ export default function OperationsPage() {
                                                                         {isUpdated && (
                                                                             <div className="mt-2 text-[11px] text-muted-foreground leading-tight text-left sm:text-right">
                                                                                 <p className="whitespace-nowrap">
-                                                                                    Изменено: {formatDateTime(operation.updatedAt)}
+                                                                                    Изменено:{' '}
+                                                                                    {formatDateTime(
+                                                                                        operation.updatedAt,
+                                                                                    )}
                                                                                 </p>
                                                                                 {operation.updated_by?.username && (
                                                                                     <p className="whitespace-nowrap">
-                                                                                        Исполнитель: {operation.updated_by.username}
+                                                                                        Исполнитель:{' '}
+                                                                                        {operation.updated_by.username}
                                                                                     </p>
                                                                                 )}
                                                                             </div>

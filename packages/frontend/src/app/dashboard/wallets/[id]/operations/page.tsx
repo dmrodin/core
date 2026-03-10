@@ -143,7 +143,8 @@ export default function WalletOperationsPage() {
 
         const referrer = document.referrer;
         const hasSameOriginReferrer =
-            referrer && (() => {
+            referrer &&
+            (() => {
                 try {
                     return new URL(referrer).origin === window.location.origin;
                 } catch {

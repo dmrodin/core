@@ -4,19 +4,19 @@ import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min 
 import { BalanceStatus, WalletKind } from '../../../../prisma/generated/prisma';
 
 export class UpdateWalletDetailsDto {
-    @ApiProperty({ description: 'Телефон', example: '+79991234567', required: false })
+    @ApiProperty({ description: 'пїЅпїЅпїЅпїЅпїЅпїЅпїЅ', example: '+79991234567', required: false })
     @IsOptional()
     @IsString()
     @MaxLength(64)
     public phone?: string;
 
-    @ApiProperty({ description: 'Номер карты', example: '1234 5678 9012 3456', required: false })
+    @ApiProperty({ description: 'пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ', example: '1234 5678 9012 3456', required: false })
     @IsOptional()
     @IsString()
     @MaxLength(64)
     public card?: string;
 
-    @ApiProperty({ description: 'ФИО владельца', example: 'Иван Иванов', required: false })
+    @ApiProperty({ description: 'пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ', example: 'пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ', required: false })
     @IsOptional()
     @IsString()
     @MaxLength(255)
@@ -27,7 +27,7 @@ export class UpdateWalletDetailsDto {
     @IsString()
     public address?: string;
 
-    @ApiProperty({ description: 'ID банка', example: 'uuid', required: false })
+    @ApiProperty({ description: 'ID пїЅпїЅпїЅпїЅпїЅ', example: 'uuid', required: false })
     @IsOptional()
     @IsUUID('4')
     public bankId?: string;
@@ -42,7 +42,7 @@ export class UpdateWalletDetailsDto {
     @IsUUID('4')
     public networkTypeId?: string;
 
-    @ApiProperty({ description: 'ID платформы', example: 'uuid', required: false })
+    @ApiProperty({ description: 'ID пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ', example: 'uuid', required: false })
     @IsOptional()
     @IsUUID('4')
     public platformId?: string;

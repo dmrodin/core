@@ -3,8 +3,8 @@ import { WalletKind } from 'prisma/generated/prisma';
 
 import { PrismaService } from '../../common/services/prisma.service';
 import { OPERATION_TYPE_CODES } from '../../operation-type/constants/operation-type.constants';
-import { WalletRecalculationService } from '../services';
 import { CreateWalletDto } from '../dto';
+import { WalletRecalculationService } from '../services';
 import { CreateWalletOutput } from '../types';
 
 @Injectable()
