@@ -36,7 +36,14 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
     const { data: operationTypes, isLoading: operationTypesLoading } = useOperationTypes();
     const { data: couriers, isLoading: couriersLoading } = useCouriers();
     const { data: currency, isLoading: currencyLoading } = useCurrency();
-    const { data: wallets } = useWallets();
+    const { data: wallets } = useWallets({
+        page: 1,
+        limit: 100,
+        includeTabWalletTypes: true,
+        active: true,
+        visible: true,
+        deleted: false,
+    });
     const createMutation = useCreateApplication();
     const updateMutation = useUpdateApplication();
     const [walletSearch, setWalletSearch] = React.useState('');
