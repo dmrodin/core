@@ -182,6 +182,7 @@ export class UpdateApplicationUseCase {
                 advanceOperationId = updatedApplication.operation?.id ?? updatedApplication.operationId ?? null;
 
                 const operationDescriptionLines = [`Аванс по заявке №${updatedApplication.id}`];
+
                 if (updatedApplication.telegramUsername) {
                     operationDescriptionLines.push(`Telegram: ${updatedApplication.telegramUsername}`);
                 }
@@ -201,6 +202,7 @@ export class UpdateApplicationUseCase {
                             createdAt: new Date().toISOString(),
                         },
                     });
+
                     advanceOperationId = createdOperation.id;
 
                     await tx.application.update({
@@ -236,7 +238,7 @@ export class UpdateApplicationUseCase {
                     })),
                 });
 
-                await this.walletRecalculationService.recalculateForOperation(tx, advanceOperationId!, updatedById);
+                await this.walletRecalculationService.recalculateForOperation(tx, advanceOperationId, updatedById);
             }
 
             return updatedApplication;
@@ -264,7 +266,8 @@ export class UpdateApplicationUseCase {
                 operation: advanceOperationId
                     ? {
                           id: advanceOperationId,
-                          description: advanceOperationDescription ?? applicationResponse.operation?.description ?? null,
+                          description:
+                              advanceOperationDescription ?? applicationResponse.operation?.description ?? null,
                       }
                     : applicationResponse.operation
                       ? {

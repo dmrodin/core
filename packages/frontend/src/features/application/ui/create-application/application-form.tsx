@@ -50,46 +50,43 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
         Boolean(initialData?.advanceEntries?.length || initialData?.advance || initialData?.hasAdvance),
     );
 
-    const buildDefaultValues = React.useCallback(
-        (data?: ApplicationResponse): CreateApplicationRequest => {
-            if (!data) {
-                return {
-                    currencyId: '',
-                    operationTypeId: '',
-                    assigneeUserId: '',
-                    description: '',
-                    amount: 0,
-                    telegramUsername: '',
-                    phone: '',
-                    meetingDate: undefined,
-                    advance: null,
-                };
-            }
-
+    const buildDefaultValues = React.useCallback((data?: ApplicationResponse): CreateApplicationRequest => {
+        if (!data) {
             return {
-                currencyId: data.currencyId ?? '',
-                operationTypeId: data.operationTypeId ?? '',
-                assigneeUserId: data.assigneeUserId ?? '',
-                description: data.description ?? '',
-                amount: data.amount ?? 0,
-                telegramUsername: data.telegramUsername ? data.telegramUsername.replace('@', '') : '',
-                phone: data.phone ?? '',
-                meetingDate: data.meetingDate ?? '',
-                advance:
-                    data.advanceEntries?.length || data.advance || data.hasAdvance
-                        ? {
-                              entries:
-                                  data.advanceEntries?.map((entry) => ({
-                                      walletId: entry.walletId,
-                                      direction: entry.direction,
-                                      amount: entry.amount,
-                                  })) ?? [],
-                          }
-                        : null,
+                currencyId: '',
+                operationTypeId: '',
+                assigneeUserId: '',
+                description: '',
+                amount: 0,
+                telegramUsername: '',
+                phone: '',
+                meetingDate: undefined,
+                advance: null,
             };
-        },
-        [],
-    );
+        }
+
+        return {
+            currencyId: data.currencyId ?? '',
+            operationTypeId: data.operationTypeId ?? '',
+            assigneeUserId: data.assigneeUserId ?? '',
+            description: data.description ?? '',
+            amount: data.amount ?? 0,
+            telegramUsername: data.telegramUsername ? data.telegramUsername.replace('@', '') : '',
+            phone: data.phone ?? '',
+            meetingDate: data.meetingDate ?? '',
+            advance:
+                data.advanceEntries?.length || data.advance || data.hasAdvance
+                    ? {
+                          entries:
+                              data.advanceEntries?.map((entry) => ({
+                                  walletId: entry.walletId,
+                                  direction: entry.direction,
+                                  amount: entry.amount,
+                              })) ?? [],
+                      }
+                    : null,
+        };
+    }, []);
 
     const form = useForm<CreateApplicationRequest>({
         resolver: zodResolver(CreateApplicationRequestSchema),
@@ -129,8 +126,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
         const formData = {
             ...data,
             telegramUsername: data.telegramUsername ? `@${data.telegramUsername}` : '',
-            advance:
-                filteredAdvanceEntries.length > 0 ? { entries: filteredAdvanceEntries } : null,
+            advance: filteredAdvanceEntries.length > 0 ? { entries: filteredAdvanceEntries } : null,
         };
 
         if (initialData) {
@@ -363,7 +359,9 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                                                     onChange={(e) =>
                                                                                         setWalletSearch(e.target.value)
                                                                                     }
-                                                                                    onKeyDown={(e) => e.stopPropagation()}
+                                                                                    onKeyDown={(e) =>
+                                                                                        e.stopPropagation()
+                                                                                    }
                                                                                     onKeyUp={(e) => e.stopPropagation()}
                                                                                     className="h-8"
                                                                                 />
@@ -416,7 +414,9 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                                                 }
                                                                                 const numValue = Number(value);
                                                                                 field.onChange(
-                                                                                    Number.isNaN(numValue) ? 0 : numValue,
+                                                                                    Number.isNaN(numValue)
+                                                                                        ? 0
+                                                                                        : numValue,
                                                                                 );
                                                                             }}
                                                                             onFocus={() => {
