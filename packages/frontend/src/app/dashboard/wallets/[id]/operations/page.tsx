@@ -135,6 +135,30 @@ export default function WalletOperationsPage() {
     // Сортируем дни по убыванию (новые сверху)
     const sortedDays = daysWithBalance.sort((a, b) => b.date.localeCompare(a.date));
 
+    const handleBack = () => {
+        if (typeof window === 'undefined') {
+            router.push(ROUTER_MAP.WALLETS);
+            return;
+        }
+
+        const referrer = document.referrer;
+        const hasSameOriginReferrer =
+            referrer && (() => {
+                try {
+                    return new URL(referrer).origin === window.location.origin;
+                } catch {
+                    return false;
+                }
+            })();
+
+        if (window.history.length > 1 && hasSameOriginReferrer) {
+            router.back();
+            return;
+        }
+
+        router.push(ROUTER_MAP.WALLETS);
+    };
+
     return (
         <Form {...form}>
             <form className="container mx-auto py-6 space-y-6">
@@ -143,7 +167,7 @@ export default function WalletOperationsPage() {
                     <CardHeader>
                         <div className="flex items-center justify-between gap-4 flex-wrap">
                             <div className="flex items-center gap-3">
-                                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                                <Button variant="ghost" size="icon" type="button" onClick={handleBack}>
                                     <ArrowLeft className="h-5 w-5" />
                                 </Button>
                                 <div>
