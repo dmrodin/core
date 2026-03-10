@@ -194,4 +194,20 @@ export class ApplicationResponseDto {
         amount: number;
         currency: string;
     } | null;
+
+    @ApiProperty({
+        description: 'Проводки аванса',
+        nullable: true,
+        example: [
+            { walletId: '123e4567-e89b-12d3-a456-426614174000', direction: 'debit', amount: 50 },
+            { walletId: '123e4567-e89b-12d3-a456-426614174000', direction: 'credit', amount: 50 },
+        ],
+    })
+    public advanceEntries:
+        | {
+              walletId: string;
+              direction: 'debit' | 'credit';
+              amount: number;
+          }[]
+        | null;
 }

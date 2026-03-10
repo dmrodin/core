@@ -17,6 +17,21 @@ interface CardApplicationProps {
 }
 
 export const CardApplication = ({ application }: CardApplicationProps) => {
+    const advanceEntries = application.advanceEntries ?? [];
+    const advanceDebit = advanceEntries
+        .filter((entry) => entry.direction === 'debit')
+        .reduce((sum, entry) => sum + entry.amount, 0);
+    const advanceCredit = advanceEntries
+        .filter((entry) => entry.direction === 'credit')
+        .reduce((sum, entry) => sum + entry.amount, 0);
+    const hasAdvanceEntries = advanceEntries.length > 0 && (advanceDebit > 0 || advanceCredit > 0);
+    const advanceCurrency = application.advance?.currency || application.currency.code;
+    const advanceParts = [
+        advanceDebit > 0 ? `-${formatNumber(advanceDebit)}` : null,
+        advanceCredit > 0 ? `+${formatNumber(advanceCredit)}` : null,
+    ].filter(Boolean);
+    const advanceLabel = advanceParts.length ? `${advanceParts.join(' ')} ${advanceCurrency}` : '';
+
     return (
         <Card className="w-full my-4">
             <CardHeader className="flex flex-col lg:flex-row lg:justify-between gap-2">
@@ -80,22 +95,20 @@ export const CardApplication = ({ application }: CardApplicationProps) => {
                         </span>
                     </p>
                 )}
-                {application.hasAdvance && (
+                {hasAdvanceEntries && (
+                    <div className="mt-3 rounded border border-primary/40 bg-primary/10 p-2">
+                        <p className="text-sm">
+                            <strong className="mr-1">Аванс:</strong>
+                            <span className="font-semibold">{advanceLabel}</span>
+                        </p>
+                    </div>
+                )}
+                {!hasAdvanceEntries && application.advance && application.advance.amount > 0 && (
                     <div className="mt-3 rounded border border-primary/40 bg-primary/10 p-2">
                         <p className="text-sm">
                             <strong className="mr-1">Аванс:</strong>
                             <span className="font-semibold">
-                                {formatNumber(application.amount)} {application.currency.code}
-                            </span>
-                        </p>
-                    </div>
-                )}
-                {application.advance && (
-                    <div className="mt-3 rounded border border-primary/40 bg-primary/10 p-2">
-                        <p className="text-sm">
-                            <strong className="mr-1">Аванс выделен:</strong>
-                            <span className="font-semibold">
-                                {formatNumber(application.advance.amount)} {application.advance.currency}
+                                +{formatNumber(application.advance.amount)} {application.advance.currency}
                             </span>
                         </p>
                     </div>

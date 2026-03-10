@@ -34,6 +34,30 @@ export class CreateOperationUseCase {
         } = createOperationDto;
 
         return this.prisma.$transaction(async (tx) => {
+            const appId = applicationId
+                ? typeof applicationId === 'string'
+                    ? parseInt(applicationId, 10)
+                    : applicationId
+                : null;
+            const application = appId
+                ? await tx.application.findUnique({
+                      where: { id: appId },
+                      select: { telegramUsername: true, phone: true },
+                  })
+                : null;
+            const baseDescription = (description ?? '').trim();
+            const descriptionLines = baseDescription ? [baseDescription] : [];
+
+            if (application?.telegramUsername && !baseDescription.includes(application.telegramUsername)) {
+                descriptionLines.push(`Telegram: ${application.telegramUsername}`);
+            }
+
+            if (application?.phone && !baseDescription.includes(application.phone)) {
+                descriptionLines.push(`Телефон: ${application.phone}`);
+            }
+
+            const finalDescription = descriptionLines.length ? descriptionLines.join('\n') : null;
+
             const operationDate = new Date(creatureDate);
 
             if (Number.isNaN(operationDate.getTime())) {
@@ -224,7 +248,7 @@ export class CreateOperationUseCase {
                     updatedById: userId,
                     typeId,
                     ...(applicationId && { applicationId }),
-                    description,
+                    description: finalDescription,
                     expenseCategory: normalizedExpenseCategory,
                     conversionGroupId,
                     createdAt: creatureDate,
@@ -247,9 +271,7 @@ export class CreateOperationUseCase {
 
             await this.walletRecalculationService.recalculateForOperation(tx, operation.id, userId);
 
-            if (applicationId) {
-                const appId = typeof applicationId === 'string' ? parseInt(applicationId, 10) : applicationId;
-
+            if (appId) {
                 await tx.application.update({
                     where: { id: appId },
                     data: {

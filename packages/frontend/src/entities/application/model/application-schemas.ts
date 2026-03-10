@@ -41,14 +41,12 @@ export const CreateApplicationRequestSchema = z
             return;
         }
 
-        const hasDebit = data.advance.entries.some((entry) => entry.direction === 'debit');
-        const hasCredit = data.advance.entries.some((entry) => entry.direction === 'credit');
-
-        if (!hasDebit || !hasCredit) {
+        const hasAmount = data.advance.entries.some((entry) => entry.amount > 0);
+        if (!hasAmount) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 path: ['advance', 'entries'],
-                message: 'Для аванса заполните обе стороны: "Вычесть из..." и "Прибавить к...".',
+                message: 'Укажите сумму аванса.',
             });
         }
     });
@@ -114,6 +112,16 @@ export const ApplicationResponseSchema = z.object({
             amount: z.number().int(),
             currency: z.string(),
         })
+        .nullable()
+        .optional(),
+    advanceEntries: z
+        .array(
+            z.object({
+                walletId: z.string().uuid(),
+                direction: z.enum(['credit', 'debit']),
+                amount: z.number().int(),
+            }),
+        )
         .nullable()
         .optional(),
 });

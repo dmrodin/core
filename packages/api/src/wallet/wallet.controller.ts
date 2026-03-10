@@ -267,7 +267,7 @@ export class WalletController {
 
     @Put(':id/pin')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin)
+    @Roles(RoleCode.admin, RoleCode.moderator)
     @ApiOperation({
         summary: 'Изменить закрепление кошелька',
         description: 'Изменяет параметры закрепления кошелька (pinned, pinOnMain). Доступно только администраторам.',

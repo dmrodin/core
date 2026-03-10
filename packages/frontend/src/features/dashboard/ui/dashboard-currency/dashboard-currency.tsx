@@ -27,21 +27,23 @@ interface DashboardCurrencyProps {
 export function DashboardCurrency({ isLoading, hasError, currencyGroups }: DashboardCurrencyProps) {
     const summaries = useMemo(
         () =>
-            currencyGroups.map((group) => {
-                const totalAmount = group.wallets.reduce((acc, wallet) => acc + wallet.amount, 0);
-                const walletsCount = group.wallets.length;
-                const firstWallet = group.wallets[0];
-                const currencyCode = firstWallet?.currency.code ?? group.currency.toUpperCase();
-                const currencyName = firstWallet?.currency.name ?? currencyCode;
+            currencyGroups
+                .map((group) => {
+                    const totalAmount = group.wallets.reduce((acc, wallet) => acc + wallet.amount, 0);
+                    const walletsCount = group.wallets.length;
+                    const firstWallet = group.wallets[0];
+                    const currencyCode = firstWallet?.currency.code ?? group.currency.toUpperCase();
+                    const currencyName = firstWallet?.currency.name ?? currencyCode;
 
-                return {
-                    key: group.currency,
-                    totalAmount,
-                    walletsCount,
-                    currencyCode,
-                    currencyName,
-                };
-            }),
+                    return {
+                        key: group.currency,
+                        totalAmount,
+                        walletsCount,
+                        currencyCode,
+                        currencyName,
+                    };
+                })
+                .filter((summary) => summary.totalAmount !== 0),
         [currencyGroups],
     );
 
@@ -75,6 +77,10 @@ export function DashboardCurrency({ isLoading, hasError, currencyGroups }: Dashb
                 </EmptyHeader>
             </Empty>
         );
+    }
+
+    if (summaries.length === 0) {
+        return null;
     }
     return (
         <div className="w-full">

@@ -32,9 +32,12 @@ import { ROUTER_MAP } from '@/shared/utils/constants/router-map';
 
 export const useUpdateApplication = () => {
     const router = useRouter();
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ id, ...data }: { id: string } & UpdateApplicationRequest) => ApplicationService.update(id, data),
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: APPLICATION_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: APPLICATIONS_WITH_FILTERS_KEY(undefined) });
             router.push(ROUTER_MAP.APPLICATIONS);
             toast.success('Заявка обновлена');
         },
@@ -121,14 +124,14 @@ export const useDeleteApplication = (filters?: GetApplicationsFilters) => {
     });
 };
 
-export const useApplicationsList = (enabled = true) => {
+export const useApplicationsList = (enabled = true, status: GetApplicationsFilters['status'] = 'open') => {
     return useQuery({
-        queryKey: ['applications', 'list', 'open'],
+        queryKey: ['applications', 'list', status ?? 'open'],
         queryFn: () =>
             ApplicationService.getApplications({
                 page: 1,
                 limit: 100,
-                status: 'open',
+                ...(status && status !== 'all' && { status }),
             }),
         enabled,
     });

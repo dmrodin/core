@@ -135,6 +135,31 @@ export default function WalletOperationsPage() {
     // Сортируем дни по убыванию (новые сверху)
     const sortedDays = daysWithBalance.sort((a, b) => b.date.localeCompare(a.date));
 
+    const handleBack = () => {
+        if (typeof window === 'undefined') {
+            router.push(ROUTER_MAP.WALLETS);
+            return;
+        }
+
+        const referrer = document.referrer;
+        const hasSameOriginReferrer =
+            referrer &&
+            (() => {
+                try {
+                    return new URL(referrer).origin === window.location.origin;
+                } catch {
+                    return false;
+                }
+            })();
+
+        if (window.history.length > 1 && hasSameOriginReferrer) {
+            router.back();
+            return;
+        }
+
+        router.push(ROUTER_MAP.WALLETS);
+    };
+
     return (
         <Form {...form}>
             <form className="container mx-auto py-6 space-y-6">
@@ -143,7 +168,7 @@ export default function WalletOperationsPage() {
                     <CardHeader>
                         <div className="flex items-center justify-between gap-4 flex-wrap">
                             <div className="flex items-center gap-3">
-                                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                                <Button variant="ghost" size="icon" type="button" onClick={handleBack}>
                                     <ArrowLeft className="h-5 w-5" />
                                 </Button>
                                 <div>
@@ -192,6 +217,9 @@ export default function WalletOperationsPage() {
                                     const isLastInDay = opIndex === operations.length - 1;
                                     const isDayLast = date === sortedDays[sortedDays.length - 1].date;
                                     const isLast = isLastInDay && isDayLast;
+                                    const isUpdated =
+                                        new Date(operation.updatedAt).getTime() >
+                                        new Date(operation.createdAt).getTime();
 
                                     return (
                                         <Card
@@ -322,10 +350,22 @@ export default function WalletOperationsPage() {
                                                         )}
                                                     </div>
 
-                                                    <div className="text-left sm:text-right">
-                                                        <p className="text-sm text-muted-foreground">
+                                                    <div className="text-left sm:text-right flex flex-col items-start sm:items-end">
+                                                        <p className="text-sm text-muted-foreground leading-tight">
                                                             {formatDateTime(operation.createdAt)}
                                                         </p>
+                                                        {isUpdated && (
+                                                            <div className="mt-2 text-[11px] text-muted-foreground leading-tight text-left sm:text-right">
+                                                                <p className="whitespace-nowrap">
+                                                                    Изменено: {formatDateTime(operation.updatedAt)}
+                                                                </p>
+                                                                {operation.updated_by?.username && (
+                                                                    <p className="whitespace-nowrap">
+                                                                        Исполнитель: {operation.updated_by.username}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </CardContent>

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../../common/services/prisma.service';
 import { addOperationTypeFlags, OPERATION_TYPE_CODES } from '../../operation-type/constants/operation-type.constants';
@@ -42,15 +42,6 @@ export class CreateApplicationUseCase {
         const advanceEntries = advance?.entries ?? [];
         const hasAdvanceEntries = advanceEntries.length > 0;
         const hasLegacyAdvance = typeof advance?.amount === 'number' && !!advance?.currencyId;
-
-        if (hasAdvanceEntries) {
-            const hasDebit = advanceEntries.some((entry) => entry.direction === 'debit');
-            const hasCredit = advanceEntries.some((entry) => entry.direction === 'credit');
-
-            if (!hasDebit || !hasCredit) {
-                throw new BadRequestException('Для аванса заполните обе стороны: "Вычесть из..." и "Прибавить к...".');
-            }
-        }
 
         const application = await this.prisma.$transaction(async (tx) => {
             const app = await tx.application.create({
@@ -139,6 +130,13 @@ export class CreateApplicationUseCase {
         });
 
         const { deleted: _, ...applicationResponse } = application;
+        const advanceEntriesResponse = hasAdvanceEntries
+            ? advanceEntries.map((entry) => ({
+                  walletId: entry.walletId,
+                  direction: entry.direction,
+                  amount: entry.amount,
+              }))
+            : null;
 
         return {
             message: 'Заявка успешно создана',
@@ -150,6 +148,7 @@ export class CreateApplicationUseCase {
                           currency: applicationResponse.advance.currencyId,
                       }
                     : null,
+                advanceEntries: advanceEntriesResponse,
                 operation_type: addOperationTypeFlags(applicationResponse.operation_type),
             },
         };

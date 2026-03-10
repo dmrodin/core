@@ -110,8 +110,16 @@ export class UpdateWalletUseCase {
                 ...(monthlyLimit !== undefined && { monthlyLimit }),
                 ...(updateWalletDto.details && {
                     details: {
-                        update: {
-                            ...updateWalletDto.details,
+                        upsert: {
+                            create: {
+                                ...updateWalletDto.details,
+                                userId: existingWallet.userId,
+                                updatedById,
+                            },
+                            update: {
+                                ...updateWalletDto.details,
+                                updatedById,
+                            },
                         },
                     },
                 }),
