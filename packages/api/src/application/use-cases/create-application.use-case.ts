@@ -43,14 +43,6 @@ export class CreateApplicationUseCase {
         const hasAdvanceEntries = advanceEntries.length > 0;
         const hasLegacyAdvance = typeof advance?.amount === 'number' && !!advance?.currencyId;
 
-        if (hasAdvanceEntries) {
-            const hasDebit = advanceEntries.some((entry) => entry.direction === 'debit');
-            const hasCredit = advanceEntries.some((entry) => entry.direction === 'credit');
-
-            if (!hasDebit || !hasCredit) {
-                throw new BadRequestException('Для аванса заполните обе стороны: "Вычесть из..." и "Прибавить к...".');
-            }
-        }
 
         const application = await this.prisma.$transaction(async (tx) => {
             const app = await tx.application.create({
