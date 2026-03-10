@@ -76,6 +76,20 @@ export class GetWalletByIdUseCase {
                                 name: true,
                             },
                         },
+                        platform: {
+                            select: {
+                                id: true,
+                                code: true,
+                                name: true,
+                            },
+                        },
+                        bank: {
+                            select: {
+                                id: true,
+                                code: true,
+                                name: true,
+                            },
+                        },
                     },
                 },
             },
