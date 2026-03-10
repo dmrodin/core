@@ -253,8 +253,8 @@ export function OperationForm({
     const directions = React.useMemo(() => {
         const result: Array<'credit' | 'debit'> = [];
 
-        if (isCreditAllowed) result.push('credit');
         if (isDebitAllowed) result.push('debit');
+        if (isCreditAllowed) result.push('credit');
 
         return result;
     }, [isCreditAllowed, isDebitAllowed]);
