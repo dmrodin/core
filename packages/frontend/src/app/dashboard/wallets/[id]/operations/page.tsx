@@ -216,6 +216,9 @@ export default function WalletOperationsPage() {
                                     const isLastInDay = opIndex === operations.length - 1;
                                     const isDayLast = date === sortedDays[sortedDays.length - 1].date;
                                     const isLast = isLastInDay && isDayLast;
+                                    const isUpdated =
+                                        new Date(operation.updatedAt).getTime() >
+                                        new Date(operation.createdAt).getTime();
 
                                     return (
                                         <Card
@@ -346,10 +349,22 @@ export default function WalletOperationsPage() {
                                                         )}
                                                     </div>
 
-                                                    <div className="text-left sm:text-right">
-                                                        <p className="text-sm text-muted-foreground">
+                                                    <div className="text-left sm:text-right flex flex-col items-start sm:items-end">
+                                                        <p className="text-sm text-muted-foreground leading-tight">
                                                             {formatDateTime(operation.createdAt)}
                                                         </p>
+                                                        {isUpdated && (
+                                                            <div className="mt-2 text-[11px] text-muted-foreground leading-tight text-left sm:text-right">
+                                                                <p className="whitespace-nowrap">
+                                                                    Изменено: {formatDateTime(operation.updatedAt)}
+                                                                </p>
+                                                                {operation.updated_by?.username && (
+                                                                    <p className="whitespace-nowrap">
+                                                                        Исполнитель: {operation.updated_by.username}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </CardContent>

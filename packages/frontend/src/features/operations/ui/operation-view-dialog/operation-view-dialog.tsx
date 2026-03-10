@@ -21,6 +21,9 @@ interface OperationViewDialogProps {
 export function OperationViewDialog({ operationId, open, onOpenChange }: OperationViewDialogProps) {
     const router = useRouter();
     const { data: operation, isLoading } = useOperation(operationId || '');
+    const isUpdated = operation
+        ? new Date(operation.updatedAt).getTime() > new Date(operation.createdAt).getTime()
+        : false;
 
     const handleEdit = () => {
         if (operationId) {
@@ -83,13 +86,26 @@ export function OperationViewDialog({ operationId, open, onOpenChange }: Operati
                                         <p className="font-medium">{operation.created_by.username}</p>
                                     </div>
                                 )}
-                                {operation.updated_by && (
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Обновил</p>
-                                        <p className="font-medium">{operation.updated_by.username}</p>
-                                    </div>
-                                )}
                             </div>
+
+                            {isUpdated && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Изменено</p>
+                                        <p className="font-medium">
+                                            {format(new Date(operation.updatedAt), 'dd MMMM yyyy, HH:mm', {
+                                                locale: ru,
+                                            })}
+                                        </p>
+                                    </div>
+                                    {operation.updated_by && (
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Исполнитель</p>
+                                            <p className="font-medium">{operation.updated_by.username}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* Записи операции */}
