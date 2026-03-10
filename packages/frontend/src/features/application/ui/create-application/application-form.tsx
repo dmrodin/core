@@ -336,7 +336,10 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                 .map((item, realIndex) => ({ item, realIndex }))
                                                 .filter(({ item }) => item.direction === dir)
                                                 .map(({ item, realIndex }) => (
-                                                    <div key={item.fieldId} className="flex gap-3 items-end">
+                                                    <div
+                                                        key={item.fieldId}
+                                                        className="flex flex-col gap-3 sm:flex-row sm:items-end"
+                                                    >
                                                         <FormField
                                                             control={form.control}
                                                             name={`advance.entries.${realIndex}.walletId`}
@@ -399,7 +402,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                             control={form.control}
                                                             name={`advance.entries.${realIndex}.amount`}
                                                             render={({ field }) => (
-                                                                <FormItem>
+                                                                <FormItem className="w-full sm:w-28">
                                                                     <FormLabel>Сумма</FormLabel>
                                                                     <FormControl>
                                                                         <Input
@@ -439,7 +442,7 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
                                                             variant="outline"
                                                             size="icon"
                                                             onClick={() => removeAdvanceEntry(realIndex)}
-                                                            className="text-destructive hover:bg-destructive/10"
+                                                            className="text-destructive hover:bg-destructive/10 sm:self-auto self-start"
                                                         >
                                                             <Trash2 className="size-4" />
                                                         </Button>
