@@ -7,6 +7,33 @@ import { OperationTypeInfoSchema } from './operation-type-schemas';
 
 export const ExpenseCategorySchema = z.enum(['salary', 'other']);
 
+const isDateNotInFuture = (value?: string) => {
+    if (!value) return true;
+    let parsed: Date | null = null;
+    if (value.includes('T')) {
+        const date = new Date(value);
+        parsed = Number.isNaN(date.getTime()) ? null : date;
+    } else if (value.includes('.')) {
+        const parts = value.split('.');
+        if (parts.length === 3) {
+            const [dd, mm, yyyy] = parts.map(Number);
+            const date = new Date(yyyy, mm - 1, dd);
+            parsed = Number.isNaN(date.getTime()) ? null : date;
+        }
+    } else {
+        const date = new Date(value);
+        parsed = Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    if (!parsed) return true;
+
+    const today = new Date();
+    const todayLocal = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const parsedLocal = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+
+    return parsedLocal <= todayLocal;
+};
+
 export const OperationSchema = z.object({
     id: z.string().uuid(),
     description: z.string().nullable(),
@@ -66,7 +93,9 @@ export const CreateOperationDtoSchema = z.object({
     conversionGroupId: z.number().int().positive().optional().nullable(),
     banksGroupId: z.string().optional().nullable(),
     entries: z.array(OperationEntryCreateDtoSchema).min(1, 'Добавьте хотя бы одну запись операции'),
-    creatureDate: z.string().optional(),
+    creatureDate: z.string().optional().refine(isDateNotInFuture, {
+        message: 'Дата операции не может быть в будущем',
+    }),
 });
 
 export const CreateOperationBackendDtoSchema = z.object({

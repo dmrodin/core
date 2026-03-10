@@ -161,22 +161,65 @@ export function OperationForm({
         [],
     );
 
-    const parseDateValue = React.useCallback((value?: string) => {
+    const getDayKey = React.useCallback((value: Date) => {
+        const year = value.getFullYear();
+        const month = value.getMonth() + 1;
+        const day = value.getDate();
+        return year * 10000 + month * 100 + day;
+    }, []);
+
+    const todayDayKey = React.useMemo(() => getDayKey(new Date()), [getDayKey]);
+
+    const makeUtcNoonIso = React.useCallback(
+        (year: number, month: number, day: number) =>
+            new Date(Date.UTC(year, month - 1, day, 12, 0, 0, 0)).toISOString(),
+        [],
+    );
+
+    const formatDateInput = React.useCallback((year: number, month: number, day: number) => {
+        const dd = String(day).padStart(2, '0');
+        const mm = String(month).padStart(2, '0');
+        return `${dd}.${mm}.${year}`;
+    }, []);
+
+    const parseDateParts = React.useCallback((value?: string) => {
         if (!value) return null;
         if (value.includes('T')) {
-            const parsed = new Date(value);
-            return Number.isNaN(parsed.getTime()) ? null : parsed;
+            const datePart = value.slice(0, 10);
+            const [yyyy, mm, dd] = datePart.split('-').map(Number);
+            if (!yyyy || !mm || !dd) return null;
+            return { year: yyyy, month: mm, day: dd };
         }
 
         const parts = value.split('.');
         if (parts.length === 3) {
             const [dd, mm, yyyy] = parts.map(Number);
-            const parsed = new Date(Date.UTC(yyyy, mm - 1, dd));
-            return Number.isNaN(parsed.getTime()) ? null : parsed;
+            if (!yyyy || !mm || !dd) return null;
+            return { year: yyyy, month: mm, day: dd };
         }
 
         return null;
     }, []);
+
+    const parseDateValue = React.useCallback(
+        (value?: string) => {
+            const parts = parseDateParts(value);
+            if (!parts) return null;
+            const parsed = new Date(parts.year, parts.month - 1, parts.day);
+            return Number.isNaN(parsed.getTime()) ? null : parsed;
+        },
+        [parseDateParts],
+    );
+
+    const isFutureDate = React.useCallback(
+        (value?: string) => {
+            const parts = parseDateParts(value);
+            if (!parts) return false;
+            const key = parts.year * 10000 + parts.month * 100 + parts.day;
+            return key > todayDayKey;
+        },
+        [parseDateParts, todayDayKey],
+    );
 
     const lockedPeriods = lockedPeriodsData?.lockedPeriods;
     const lockedPeriodForDate = React.useMemo(() => {
@@ -567,11 +610,29 @@ export function OperationForm({
                                                 const parts = formatted.split('.');
                                                 if (parts.length === 3) {
                                                     const [dd, mm, yyyy] = parts.map(Number);
-                                                    const parsed = new Date(Date.UTC(yyyy, mm - 1, dd));
+                                                    const parsed = new Date(yyyy, mm - 1, dd);
                                                     if (!isNaN(parsed.getTime())) {
-                                                        field.onChange(parsed.toISOString());
+                                                        if (getDayKey(parsed) > todayDayKey) {
+                                                            form.setError('creatureDate', {
+                                                                type: 'manual',
+                                                                message: 'Дата операции не может быть в будущем',
+                                                            });
+                                                            return;
+                                                        }
+                                                        form.clearErrors('creatureDate');
+                                                        field.onChange(makeUtcNoonIso(yyyy, mm, dd));
+                                                        setRawInput(formatDateInput(yyyy, mm, dd));
                                                         return;
                                                     }
+                                                }
+
+                                                if (isFutureDate(formatted)) {
+                                                    form.setError('creatureDate', {
+                                                        type: 'manual',
+                                                        message: 'Дата операции не может быть в будущем',
+                                                    });
+                                                } else {
+                                                    form.clearErrors('creatureDate');
                                                 }
 
                                                 field.onChange(formatted);
@@ -590,19 +651,24 @@ export function OperationForm({
                                         <PopoverContent className="w-auto overflow-hidden p-0" align="end">
                                             <Calendar
                                                 mode="single"
-                                                selected={field.value ? new Date(field.value) : undefined}
+                                                disabled={(date) => getDayKey(date) > todayDayKey}
+                                                selected={parseDateValue(field.value) ?? undefined}
                                                 onSelect={(date) => {
                                                     if (date) {
+                                                        if (getDayKey(date) > todayDayKey) {
+                                                            form.setError('creatureDate', {
+                                                                type: 'manual',
+                                                                message: 'Дата операции не может быть в будущем',
+                                                            });
+                                                            return;
+                                                        }
+                                                        form.clearErrors('creatureDate');
                                                         // Создаем дату в UTC из выбранного дня, чтобы избежать смещения часовых поясов
-                                                        const utcDate = new Date(
-                                                            Date.UTC(
-                                                                date.getFullYear(),
-                                                                date.getMonth(),
-                                                                date.getDate(),
-                                                            ),
-                                                        );
-                                                        field.onChange(utcDate.toISOString());
-                                                        setRawInput(formatDate(date));
+                                                        const year = date.getFullYear();
+                                                        const month = date.getMonth() + 1;
+                                                        const day = date.getDate();
+                                                        field.onChange(makeUtcNoonIso(year, month, day));
+                                                        setRawInput(formatDateInput(year, month, day));
                                                     }
                                                     setOpen(false);
                                                 }}
@@ -610,6 +676,7 @@ export function OperationForm({
                                         </PopoverContent>
                                     </Popover>
                                 </div>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
