@@ -50,7 +50,7 @@ export function OperationsFiltersSheet({
         undefined,
         canLoadReferenceData,
     );
-    const { data: applications, isLoading: applicationsLoading } = useApplicationsList(canLoadReferenceData);
+    const { data: applications, isLoading: applicationsLoading } = useApplicationsList(canLoadReferenceData, 'all');
     const { data: users } = useUsers(canLoadReferenceData);
 
     const [localFilters, setLocalFilters] = useState<Partial<GetOperationsParams>>({});

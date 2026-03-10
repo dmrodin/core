@@ -121,14 +121,14 @@ export const useDeleteApplication = (filters?: GetApplicationsFilters) => {
     });
 };
 
-export const useApplicationsList = (enabled = true) => {
+export const useApplicationsList = (enabled = true, status: GetApplicationsFilters['status'] = 'open') => {
     return useQuery({
-        queryKey: ['applications', 'list', 'open'],
+        queryKey: ['applications', 'list', status ?? 'open'],
         queryFn: () =>
             ApplicationService.getApplications({
                 page: 1,
                 limit: 100,
-                status: 'open',
+                ...(status && status !== 'all' && { status }),
             }),
         enabled,
     });
