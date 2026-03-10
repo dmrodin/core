@@ -52,18 +52,18 @@ export function ApplicationForm({ initialData }: { initialData?: ApplicationResp
 
     const buildDefaultValues = React.useCallback((data?: ApplicationResponse): CreateApplicationRequest => {
         if (!data) {
-                return {
-                    currencyId: '',
-                    operationTypeId: '',
-                    assigneeUserId: '',
-                    description: '',
-                    amount: 0,
-                    telegramUsername: '',
-                    phone: '',
-                    meetingDate: '',
-                    advance: null,
-                };
-            }
+            return {
+                currencyId: '',
+                operationTypeId: '',
+                assigneeUserId: '',
+                description: '',
+                amount: 0,
+                telegramUsername: '',
+                phone: '',
+                meetingDate: '',
+                advance: null,
+            };
+        }
 
         return {
             currencyId: data.currencyId ?? '',
