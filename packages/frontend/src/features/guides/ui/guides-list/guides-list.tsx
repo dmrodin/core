@@ -73,9 +73,9 @@ export function GuidesList({ filters }: { filters?: GetGuidesParamsRequest }) {
                                 <BookOpen />
                             </EmptyMedia>
                             <EmptyContent>
-                                <EmptyTitle>Справочники не найдены</EmptyTitle>
+                                <EmptyTitle>Гайды не найдены</EmptyTitle>
                                 <EmptyDescription>
-                                    Нет справочников, соответствующих выбранным критериям. Создайте новый справочник.
+                                    Нет гайдов, соответствующих выбранным критериям. Создайте новый гайд.
                                 </EmptyDescription>
                             </EmptyContent>
                         </EmptyHeader>

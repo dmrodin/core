@@ -14,7 +14,7 @@ export default function EditGuidePage() {
         return (
             <div className="max-w-5xl mx-auto">
                 <div className="text-center py-12">
-                    <p className="text-muted-foreground">Справочник не найден</p>
+                    <p className="text-muted-foreground">Гайд не найден</p>
                 </div>
             </div>
         );
@@ -23,7 +23,7 @@ export default function EditGuidePage() {
         <div className="max-w-5xl mx-auto">
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-2xl">Редактировать справочник</CardTitle>
+                    <CardTitle className="text-2xl">Редактировать гайд</CardTitle>
                     <CardDescription>Измените все необходимые поля ниже.</CardDescription>
                 </CardHeader>
                 <CardContent>

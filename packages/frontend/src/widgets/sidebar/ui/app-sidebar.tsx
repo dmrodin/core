@@ -169,6 +169,14 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
 
                   if (!filteredItems.length) return null;
 
+                  if (filteredItems.length === 1 && filteredItems[0].url === ROUTER_MAP.GUIDES) {
+                      return {
+                          title: filteredItems[0].title,
+                          url: filteredItems[0].url,
+                          icon: item.icon,
+                      };
+                  }
+
                   return {
                       ...item,
                       items: filteredItems,

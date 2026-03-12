@@ -29,7 +29,7 @@ export default function CreateGuidePage() {
         <div className="max-w-5xl mx-auto">
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-2xl">Создать справочник</CardTitle>
+                    <CardTitle className="text-2xl">Создать гайд</CardTitle>
                     <CardDescription>Заполните все необходимые поля ниже.</CardDescription>
                 </CardHeader>
                 <CardContent>

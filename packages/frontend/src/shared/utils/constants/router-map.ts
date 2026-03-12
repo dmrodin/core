@@ -62,7 +62,7 @@ export const ROUTER_TITLES: Record<string, string> = {
     [ROUTER_MAP.WALLET_TYPES]: 'Типы кошельков',
     [ROUTER_MAP.WALLET_TYPES_CREATE]: 'Создать тип кошелька',
     [ROUTER_MAP.WALLET_TYPES_EDIT]: 'Редактировать тип кошелька',
-    [ROUTER_MAP.GUIDES]: 'Справочники',
+    [ROUTER_MAP.GUIDES]: 'Гайды',
     [ROUTER_MAP.GUIDES_CREATE]: 'Создание',
     [ROUTER_MAP.GUIDES_EDIT]: 'Редактирование',
     [ROUTER_MAP.APPLICATIONS]: 'Заявки',
