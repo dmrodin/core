@@ -49,7 +49,7 @@ type WalletFilterWithPagination = Partial<GetWalletsFilter> & {
     limit?: number;
 };
 
-export const useInfiniteWallets = (filters?: Partial<GetWalletsFilter>, defaultLimit = 100) => {
+export const useInfiniteWallets = (filters?: Partial<GetWalletsFilter>, defaultLimit = 100, enabled = true) => {
     return useInfiniteQuery<
         GetWalletsResponse,
         Error,
@@ -57,6 +57,9 @@ export const useInfiniteWallets = (filters?: Partial<GetWalletsFilter>, defaultL
         [string, Partial<GetWalletsFilter> | undefined]
     >({
         queryKey: WALLETS_WITH_FILTERS_KEY(filters),
+        enabled,
+        staleTime: 300000,
+        refetchOnWindowFocus: false,
 
         queryFn: async (context: QueryFunctionContext<[string, Partial<GetWalletsFilter> | undefined]>) => {
             const rawPageParam = context.pageParam;
@@ -86,7 +89,5 @@ export const useInfiniteWallets = (filters?: Partial<GetWalletsFilter>, defaultL
             const totalPages = Math.max(1, Math.ceil(total / limit));
             return allPages.length < totalPages ? allPages.length + 1 : undefined;
         },
-
-        staleTime: 30000,
     });
 };

@@ -140,7 +140,7 @@ export class WalletRecalculationService {
                 deleted: false,
                 operation: { deleted: false },
             },
-            orderBy: { createdAt: 'asc' },
+            orderBy: [{ operation: { createdAt: 'asc' } }, { createdAt: 'asc' }, { id: 'asc' }],
             select: {
                 id: true,
                 direction: true,
