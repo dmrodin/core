@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { ComponentProps } from 'react';
 
@@ -7,24 +7,14 @@ import Link from 'next/link';
 
 import {
     Book,
-    Boxes,
-    Building2,
     ChartColumnIncreasing,
-    Coins,
-    FolderKanban,
     HandshakeIcon,
     Home,
-    Layers,
     LifeBuoy,
-    ListChecks,
-    LockKeyhole,
     MessageCircle,
-    Network,
     Ticket,
-    Users,
     Wallet,
 } from 'lucide-react';
-
 import {
     ROUTER_MAP,
     Sidebar,
@@ -74,51 +64,48 @@ const data = {
             title: 'Справочники',
             url: ROUTER_MAP.GUIDES,
             icon: Book,
-        },
-        {
-            title: 'Пользователи',
-            url: ROUTER_MAP.USERS,
-            icon: Users,
-        },
-        {
-            title: 'Валюты',
-            url: ROUTER_MAP.CURRENCIES,
-            icon: Coins,
-        },
-        {
-            title: 'Сети',
-            url: ROUTER_MAP.NETWORKS,
-            icon: Network,
-        },
-        {
-            title: 'Типы сетей',
-            url: ROUTER_MAP.NETWORK_TYPES,
-            icon: Layers,
-        },
-        {
-            title: 'Типы операций',
-            url: ROUTER_MAP.OPERATION_TYPES,
-            icon: ListChecks,
-        },
-        {
-            title: 'Типы кошельков',
-            url: ROUTER_MAP.WALLET_TYPES,
-            icon: FolderKanban,
-        },
-        {
-            title: 'Платформы',
-            url: ROUTER_MAP.PLATFORMS,
-            icon: Boxes,
-        },
-        {
-            title: 'Банки',
-            url: ROUTER_MAP.BANKS,
-            icon: Building2,
-        },
-        {
-            title: 'Блокировка периодов',
-            url: ROUTER_MAP.ADMIN,
-            icon: LockKeyhole,
+            items: [
+                {
+                    title: 'Гайды',
+                    url: ROUTER_MAP.GUIDES,
+                },
+                {
+                    title: 'Пользователи',
+                    url: ROUTER_MAP.USERS,
+                },
+                {
+                    title: 'Валюты',
+                    url: ROUTER_MAP.CURRENCIES,
+                },
+                {
+                    title: 'Сети',
+                    url: ROUTER_MAP.NETWORKS,
+                },
+                {
+                    title: 'Типы сетей',
+                    url: ROUTER_MAP.NETWORK_TYPES,
+                },
+                {
+                    title: 'Типы операций',
+                    url: ROUTER_MAP.OPERATION_TYPES,
+                },
+                {
+                    title: 'Типы кошельков',
+                    url: ROUTER_MAP.WALLET_TYPES,
+                },
+                {
+                    title: 'Платформы',
+                    url: ROUTER_MAP.PLATFORMS,
+                },
+                {
+                    title: 'Банки',
+                    url: ROUTER_MAP.BANKS,
+                },
+                {
+                    title: 'Блокировка периодов',
+                    url: ROUTER_MAP.ADMIN,
+                },
+            ],
         },
     ],
     navSecondary: [
@@ -140,7 +127,7 @@ const data = {
             icon: ChartColumnIncreasing,
         },
         {
-            title: 'Отчеты',
+            title: 'Отчёты',
             url: '#',
             isAction: true,
             icon: ChartColumnIncreasing,
@@ -172,7 +159,22 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             (currentUser?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ??
                 false));
     const navMainItems = isRestrictedRole
-        ? data.navMain.filter((item) => !USER_RESTRICTED_NAV_URLS.has(item.url))
+        ? data.navMain
+              .map((item) => {
+                  if (!item.items?.length) {
+                      return USER_RESTRICTED_NAV_URLS.has(item.url) ? null : item;
+                  }
+
+                  const filteredItems = item.items.filter((subItem) => !USER_RESTRICTED_NAV_URLS.has(subItem.url));
+
+                  if (!filteredItems.length) return null;
+
+                  return {
+                      ...item,
+                      items: filteredItems,
+                  };
+              })
+              .filter((item): item is (typeof data.navMain)[number] => Boolean(item))
         : data.navMain;
 
     return (
