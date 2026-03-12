@@ -3,15 +3,18 @@
 import React, { Fragment, useMemo, useState } from 'react';
 
 import { CheckCircle2, Users, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { useBlockUser } from '@/features/users/hooks/use-block-user';
 import { useDeleteUser } from '@/features/users/hooks/use-delete-user';
 import { useInfiniteUsers } from '@/features/users/hooks/use-infinite-users';
+import { useResetUserPassword } from '@/features/users/hooks/use-reset-user-password';
 import { useUpdateUserFlags } from '@/features/users/hooks/use-update-user-flags';
 import { useUpdateUserRole } from '@/features/users/hooks/use-update-user-role';
 import { useUsersQueryParams } from '@/features/users/hooks/use-users-query-param';
 import { useLastItemObserver } from '@/shared/lib/hooks/use-last-Item-observer';
 import { formatDateTime } from '@/shared/lib/utils';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/shadcn/dialog';
 import {
     Button,
     Empty,
@@ -20,6 +23,8 @@ import {
     EmptyHeader,
     EmptyMedia,
     EmptyTitle,
+    Input,
+    Label,
     Loading,
     Popover,
     PopoverContent,
@@ -39,8 +44,11 @@ interface UsersTableProps {
 export const UsersTable = ({ showDeleted = false }: UsersTableProps) => {
     const blockUserMutation = useBlockUser();
     const deleteUserMutation = useDeleteUser();
+    const resetUserPasswordMutation = useResetUserPassword();
     const updateUserFlagsMutation = useUpdateUserFlags();
     const [openUserId, setOpenUserId] = useState<string | null>(null);
+    const [resetDialogUser, setResetDialogUser] = useState<null | { id: string; username?: string }>(null);
+    const [resetPassword, setResetPassword] = useState('');
     const [rolePopoverUser, setRolePopoverUser] = useState<null | {
         id: string;
         current: string;
@@ -70,6 +78,15 @@ export const UsersTable = ({ showDeleted = false }: UsersTableProps) => {
     if (isLoading) {
         return <Loading />;
     }
+
+    const generatePassword = (length = 12) => {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+        let result = '';
+        for (let i = 0; i < length; i += 1) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    };
 
     return (
         <Fragment>
@@ -275,6 +292,18 @@ export const UsersTable = ({ showDeleted = false }: UsersTableProps) => {
                                                 <Button
                                                     variant="ghost"
                                                     className="justify-start"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setResetDialogUser({ id: user.id, username: user.username });
+                                                        setResetPassword('');
+                                                        setOpenUserId(null);
+                                                    }}
+                                                >
+                                                    Сбросить пароль
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    className="justify-start"
                                                     disabled={updateUserFlagsMutation.isPending}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -339,6 +368,76 @@ export const UsersTable = ({ showDeleted = false }: UsersTableProps) => {
                     </TableBody>
                 </Table>
             </div>
+            <Dialog
+                open={!!resetDialogUser}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setResetDialogUser(null);
+                        setResetPassword('');
+                    }
+                }}
+            >
+                <DialogContent className="sm:max-w-lg md:max-w-xl">
+                    <DialogHeader>
+                        <DialogTitle>Сброс пароля</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-2">
+                        <Label htmlFor="reset-password">
+                            Новый пароль{resetDialogUser?.username ? ` для ${resetDialogUser.username}` : ''}
+                        </Label>
+                        <Input
+                            id="reset-password"
+                            type="text"
+                            value={resetPassword}
+                            onChange={(e) => setResetPassword(e.target.value)}
+                            placeholder="Введите новый пароль"
+                        />
+                        <div className="flex gap-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setResetPassword(generatePassword())}
+                            >
+                                Сгенерировать
+                            </Button>
+                            <Button type="button" variant="ghost" onClick={() => setResetPassword('')}>
+                                Очистить
+                            </Button>
+                        </div>
+                    </div>
+                    <DialogFooter className="mt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setResetDialogUser(null);
+                                setResetPassword('');
+                            }}
+                        >
+                            Отмена
+                        </Button>
+                        <Button
+                            type="button"
+                            disabled={resetUserPasswordMutation.isPending}
+                            onClick={async () => {
+                                if (!resetDialogUser) return;
+                                if (!resetPassword || resetPassword.length < 8) {
+                                    toast.error('Пароль должен содержать минимум 8 символов');
+                                    return;
+                                }
+                                await resetUserPasswordMutation.mutateAsync({
+                                    id: resetDialogUser.id,
+                                    password: resetPassword,
+                                });
+                                setResetDialogUser(null);
+                                setResetPassword('');
+                            }}
+                        >
+                            {resetUserPasswordMutation.isPending ? 'Сохраняем...' : 'Сохранить'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </Fragment>
     );
 };
