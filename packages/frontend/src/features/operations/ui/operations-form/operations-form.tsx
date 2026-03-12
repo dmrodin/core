@@ -20,7 +20,6 @@ import {
     useCreateOperation,
     useOperationTypes,
     useUpdateOperation,
-    useWallets,
 } from '@/entities/operations';
 import {
     Button,
@@ -48,6 +47,7 @@ import {
 } from '@/shared';
 import { formatNumber, parseFormattedNumber } from '@/shared/lib/utils/format-number';
 import { useBanks } from '@/entities/bank';
+import { useInfiniteWallets } from '@/entities/wallet';
 import type { Wallet as WalletEntity } from '@/entities/wallet';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 
@@ -87,8 +87,31 @@ export function OperationForm({
     const [open, setOpen] = React.useState(false);
     const [rawInput, setRawInput] = React.useState('');
     const [walletSearch, setWalletSearch] = React.useState('');
+    const [walletSearchDebounced, setWalletSearchDebounced] = React.useState('');
 
-    const { data: wallets } = useWallets();
+    React.useEffect(() => {
+        const id = setTimeout(() => {
+            setWalletSearchDebounced(walletSearch.trim());
+        }, 300);
+        return () => clearTimeout(id);
+    }, [walletSearch]);
+
+    const {
+        data: walletsData,
+        fetchNextPage: fetchNextWalletsPage,
+        hasNextPage: hasNextWalletsPage,
+        isFetchingNextPage: isFetchingNextWalletsPage,
+    } = useInfiniteWallets(
+        {
+            search: walletSearchDebounced || undefined,
+            includeTabWalletTypes: true,
+            active: true,
+            visible: true,
+            deleted: false,
+        },
+        50,
+        canLoadOperationsReferences,
+    );
     const { data: banks } = useBanks();
     const { data: operationTypes, isLoading: isOperationTypesLoading } = useOperationTypes(
         undefined,
@@ -271,8 +294,35 @@ export function OperationForm({
         return INSKESH_WALLET_TYPE_CODES.has(code) || INSKESH_WALLET_TYPE_NAMES.has(name);
     };
 
+    const walletsList = React.useMemo(() => {
+        const list = walletsData?.pages.flatMap((page) => page.wallets) ?? [];
+        const byId = new Map<string, WalletEntity>();
+        for (const wallet of list) {
+            byId.set(wallet.id, wallet);
+        }
+        for (const entry of entries) {
+            const wallet = entry.wallet;
+            if (wallet?.id && !byId.has(wallet.id)) {
+                byId.set(wallet.id, wallet as WalletEntity);
+            }
+        }
+        return Array.from(byId.values());
+    }, [walletsData, entries]);
+
+    const handleWalletsScroll = React.useCallback(
+        (event: React.UIEvent<HTMLDivElement>) => {
+            if (!hasNextWalletsPage || isFetchingNextWalletsPage) return;
+            const target = event.currentTarget;
+            const threshold = 80;
+            if (target.scrollHeight - target.scrollTop - target.clientHeight <= threshold) {
+                fetchNextWalletsPage();
+            }
+        },
+        [fetchNextWalletsPage, hasNextWalletsPage, isFetchingNextWalletsPage],
+    );
+
     const selectedWallets = entries
-        .map((entry) => wallets?.wallets.find((w) => w.id === entry.wallet?.id))
+        .map((entry) => walletsList.find((w) => w.id === entry.wallet?.id))
         .filter((wallet): wallet is NonNullable<typeof wallet> => Boolean(wallet));
 
     const areAllSelectedWalletsInskesh =
@@ -710,7 +760,7 @@ export function OperationForm({
                                                         <SelectValue placeholder="Выберите кошелек" />
                                                     </SelectTrigger>
                                                 </FormControl>
-                                                <SelectContent>
+                                                <SelectContent onScroll={handleWalletsScroll}>
                                                     <div className="px-2 pb-2">
                                                         <Input
                                                             placeholder="Поиск кошелька..."
@@ -721,25 +771,11 @@ export function OperationForm({
                                                             className="h-8"
                                                         />
                                                     </div>
-                                                    {wallets?.wallets
-                                                        ?.filter((wallet) => {
-                                                            const matchesSearch = wallet.name
-                                                                .toLowerCase()
-                                                                .includes(walletSearch.toLowerCase());
-                                                            const isSelectable =
-                                                                wallet.active && wallet.visible && !wallet.deleted;
-                                                            const isSelected = wallet.id === field.value;
-                                                            if (isEditing && isSelected) {
-                                                                return true;
-                                                            }
-
-                                                            return matchesSearch && isSelectable;
-                                                        })
-                                                        .map((wallet) => (
-                                                            <SelectItem key={wallet.id} value={wallet.id}>
-                                                                {wallet.name}
-                                                            </SelectItem>
-                                                        ))}
+                                                    {walletsList?.map((wallet) => (
+                                                        <SelectItem key={wallet.id} value={wallet.id}>
+                                                            {wallet.name}
+                                                        </SelectItem>
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
@@ -856,7 +892,7 @@ export function OperationForm({
                                                                     <SelectValue placeholder="Выберите кошелек" />
                                                                 </SelectTrigger>
                                                             </FormControl>
-                                                            <SelectContent>
+                                                            <SelectContent onScroll={handleWalletsScroll}>
                                                                 <div className="px-2 pb-2">
                                                                     <Input
                                                                         placeholder="Поиск кошелька..."
@@ -869,28 +905,12 @@ export function OperationForm({
                                                                         className="h-8"
                                                                     />
                                                                 </div>
-                                                                {wallets?.wallets
-                                                                    ?.filter((wallet) => {
-                                                                        const matchesSearch = wallet.name
-                                                                            .toLowerCase()
-                                                                            .includes(walletSearch.toLowerCase());
-                                                                        const isSelectable =
-                                                                            wallet.active &&
-                                                                            wallet.visible &&
-                                                                            !wallet.deleted;
-                                                                        const isSelected = wallet.id === field.value;
-                                                                        if (isEditing && isSelected) {
-                                                                            return true;
-                                                                        }
-
-                                                                        return matchesSearch && isSelectable;
-                                                                    })
-                                                                    .map((wallet) => (
-                                                                        <SelectItem key={wallet.id} value={wallet.id}>
-                                                                            {wallet.name} — {wallet.amount}{' '}
-                                                                            {wallet.currency.code}
-                                                                        </SelectItem>
-                                                                    ))}
+                                                                {walletsList?.map((wallet) => (
+                                                                    <SelectItem key={wallet.id} value={wallet.id}>
+                                                                        {wallet.name} — {wallet.amount}{' '}
+                                                                        {wallet.currency.code}
+                                                                    </SelectItem>
+                                                                ))}
                                                             </SelectContent>
                                                         </Select>
                                                     </FormItem>
