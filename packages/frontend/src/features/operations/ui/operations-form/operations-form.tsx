@@ -908,7 +908,7 @@ export function OperationForm({
                                                                 {walletsList?.map((wallet) => (
                                                                     <SelectItem key={wallet.id} value={wallet.id}>
                                                                         {wallet.name} — {wallet.amount}{' '}
-                                                                        {wallet.currency.code}
+                                                                        {wallet.currency?.code ?? ''}
                                                                     </SelectItem>
                                                                 ))}
                                                             </SelectContent>
