@@ -50,24 +50,44 @@ export function NavMain({
         return pathname.startsWith(url);
     };
 
+    const isItemActive = (item: { url: string; items?: { url: string }[] }) => {
+        if (item.items?.length) {
+            return item.items.some((subItem) => pathname.startsWith(subItem.url));
+        }
+        return isMainActive(item.url);
+    };
+
     return (
         <SidebarGroup>
             <SidebarGroupLabel>{label}</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => (
-                    <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
+                    <Collapsible key={item.title} asChild defaultOpen={item.isActive ?? isItemActive(item)}>
                         <SidebarMenuItem>
-                            <SidebarMenuButton
-                                asChild
-                                tooltip={item.title}
-                                isActive={isMainActive(item.url)}
-                                className="data-[active=true]:bg-primary/90! data-[active=true]:text-primary-foreground!"
-                            >
-                                <Link href={item.url} onClick={handleNavigate}>
-                                    <item.icon />
-                                    <span>{item.title}</span>
-                                </Link>
-                            </SidebarMenuButton>
+                            {item.items?.length ? (
+                                <CollapsibleTrigger asChild>
+                                    <SidebarMenuButton
+                                        tooltip={item.title}
+                                        isActive={isItemActive(item)}
+                                        className="data-[active=true]:bg-primary/90! data-[active=true]:text-primary-foreground!"
+                                    >
+                                        <item.icon />
+                                        <span>{item.title}</span>
+                                    </SidebarMenuButton>
+                                </CollapsibleTrigger>
+                            ) : (
+                                <SidebarMenuButton
+                                    asChild
+                                    tooltip={item.title}
+                                    isActive={isItemActive(item)}
+                                    className="data-[active=true]:bg-primary/90! data-[active=true]:text-primary-foreground!"
+                                >
+                                    <Link href={item.url} onClick={handleNavigate}>
+                                        <item.icon />
+                                        <span>{item.title}</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            )}
                             {item.items?.length ? (
                                 <Fragment>
                                     <CollapsibleTrigger asChild>

@@ -34,14 +34,14 @@ export const GuidesPageContent = () => {
         <Fragment>
             <Card>
                 <CardHeader className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                    <CardTitle className="text-2xl">Список справочников</CardTitle>
+                    <CardTitle className="text-2xl">Список гайдов</CardTitle>
                     <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                         <GuidesFilters className="w-full sm:w-64" onFiltersChange={handleFiltersChange} />
                         {!isUserRole && (
                             <Button asChild>
                                 <Link href={ROUTER_MAP.GUIDES_CREATE}>
                                     <Plus className="w-4 h-4 mr-2" />
-                                    Создать справочник
+                                    Создать гайд
                                 </Link>
                             </Button>
                         )}
