@@ -212,8 +212,7 @@ export default function WalletOperationsPage() {
 
                                 {/* Операции дня */}
                                 {operations.map((operation, opIndex) => {
-                                    const showDetails =
-                                        expandedIds.includes(operation.id) || operation.type.isCorrection;
+                                    const showDetails = expandedIds.includes(operation.id);
                                     const isLastInDay = opIndex === operations.length - 1;
                                     const isDayLast = date === sortedDays[sortedDays.length - 1].date;
                                     const isLast = isLastInDay && isDayLast;

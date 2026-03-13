@@ -69,6 +69,10 @@ export class UpdateOperationUseCase {
 
             const effectiveTypeCode = operationType?.code ?? existingOperation.type.code;
             const nextExpenseCategory = expenseCategory ?? existingOperation.expenseCategory ?? null;
+            const operationTypeForDirections = await tx.operationType.findUnique({
+                where: { id: typeId ?? existingOperation.typeId },
+                select: { code: true, isDebit: true, isCredit: true },
+            });
 
             if (effectiveTypeCode === EXPENSE_OPERATION_TYPE_CODE) {
                 if (!nextExpenseCategory) {
@@ -85,7 +89,9 @@ export class UpdateOperationUseCase {
             }
 
             // Валидация и обработка для типа "Корректировка"
-            if (operationType && operationType.code === OPERATION_TYPE_CODES.CORRECTION && entries) {
+            let normalizedEntries = entries;
+
+            if (effectiveTypeCode === OPERATION_TYPE_CODES.CORRECTION && entries) {
                 if (entries.length !== 1) {
                     throw new BadRequestException(
                         'Операция "Корректировка" должна содержать ровно одну запись (один кошелек)',
@@ -112,6 +118,26 @@ export class UpdateOperationUseCase {
                     throw new BadRequestException(
                         'Баланс кошелька уже равен указанному значению. Корректировка не требуется.',
                     );
+                }
+            }
+
+            if (
+                entries &&
+                operationTypeForDirections &&
+                operationTypeForDirections.code !== OPERATION_TYPE_CODES.CORRECTION
+            ) {
+                const isDebitAllowed = operationTypeForDirections.isDebit ?? false;
+                const isCreditAllowed = operationTypeForDirections.isCredit ?? false;
+                const isSingleSide = isDebitAllowed !== isCreditAllowed;
+
+                if (isSingleSide) {
+                    const allowedDirection = isDebitAllowed ? 'debit' : 'credit';
+                    const allowedEntries = entries.filter((entry) => entry.direction === allowedDirection);
+
+                    normalizedEntries =
+                        allowedEntries.length > 0
+                            ? allowedEntries
+                            : entries.map((entry) => ({ ...entry, direction: allowedDirection }));
                 }
             }
 
@@ -193,9 +219,11 @@ export class UpdateOperationUseCase {
                 });
             }
 
-            if (entries) {
+            if (normalizedEntries) {
                 const existingEntries = existingOperation.entries;
-                const incomingEntryIds = new Set(entries.map((entry) => entry.id).filter((id): id is string => !!id));
+                const incomingEntryIds = new Set(
+                    normalizedEntries.map((entry) => entry.id).filter((id): id is string => !!id),
+                );
                 const entriesToDelete = existingEntries.filter((entry) => !incomingEntryIds.has(entry.id));
 
                 for (const entry of entriesToDelete) {
@@ -209,7 +237,7 @@ export class UpdateOperationUseCase {
                 }
 
                 // Проверка месячных лимитов для всех изменяемых/новых записей
-                for (const entry of entries) {
+                for (const entry of normalizedEntries) {
                     const wallet = await tx.wallet.findUnique({
                         where: { id: entry.walletId },
                         select: {
@@ -267,7 +295,7 @@ export class UpdateOperationUseCase {
                     }
                 }
 
-                for (const entry of entries) {
+                for (const entry of normalizedEntries) {
                     if (entry.id) {
                         const existingEntry = existingEntries.find((item) => item.id === entry.id);
 

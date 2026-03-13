@@ -51,7 +51,6 @@ import { useInfiniteWallets } from '@/entities/wallet';
 import type { Wallet as WalletEntity } from '@/entities/wallet';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 
-const SINGLE_SIDE_OPERATION_NAMES = new Set(['аванс', 'зачисление', 'расход', 'корректировка']);
 const EXPENSE_OPERATION_TYPE_CODE = 'expense';
 const EXPENSE_CATEGORY_OPTIONS = [
     { value: 'salary', label: 'Заработная плата' },
@@ -336,12 +335,9 @@ export function OperationForm({
     const isBankRequired = isConversion && areAllSelectedWalletsInskesh;
     const isBankDisabled = !isBankRequired;
     const isConversionNumberRequired = isConversion && areAllSelectedWalletsInskesh;
-    const isSingleSideOperation = selectedOperationType
-        ? SINGLE_SIDE_OPERATION_NAMES.has(selectedOperationType.name.trim().toLocaleLowerCase('ru'))
-        : false;
-
     const isCreditAllowed = selectedOperationType?.isCredit ?? false;
     const isDebitAllowed = selectedOperationType?.isDebit ?? false;
+    const isSingleSideOperation = selectedOperationType ? isCreditAllowed !== isDebitAllowed : false;
 
     const directions = React.useMemo(() => {
         const result: Array<'credit' | 'debit'> = [];
@@ -367,6 +363,36 @@ export function OperationForm({
             }
         }
     }, [isCorrection, fields.length, remove, append]);
+
+    React.useEffect(() => {
+        if (isCorrection) return;
+        if (isDebitAllowed === isCreditAllowed) return;
+
+        const allowedDirection: 'debit' | 'credit' = isDebitAllowed ? 'debit' : 'credit';
+        const currentEntries = form.getValues('entries') ?? [];
+        if (currentEntries.length === 0) {
+            form.setValue('entries', [{ wallet: { id: '', name: '' }, direction: allowedDirection, amount: 0 }], {
+                shouldDirty: true,
+                shouldValidate: true,
+            });
+            return;
+        }
+
+        const allowedEntries = currentEntries.filter((entry) => entry.direction === allowedDirection);
+        const baseEntries = allowedEntries.length > 0 ? allowedEntries : currentEntries;
+        const nextEntries = baseEntries.map((entry) => ({
+            ...entry,
+            direction: allowedDirection,
+        }));
+
+        const needsUpdate =
+            nextEntries.length !== currentEntries.length ||
+            currentEntries.some((entry) => entry.direction !== allowedDirection);
+
+        if (needsUpdate) {
+            form.setValue('entries', nextEntries, { shouldDirty: true, shouldValidate: true });
+        }
+    }, [form, isCorrection, isDebitAllowed, isCreditAllowed]);
 
     React.useEffect(() => {
         if (isBankDisabled) {

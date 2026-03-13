@@ -137,6 +137,7 @@ export class GetOperationsUseCase {
                             select: {
                                 id: true,
                                 name: true,
+                                currency: true,
                             },
                         },
                     },
@@ -177,6 +178,9 @@ export class GetOperationsUseCase {
             ...operation,
             type: addOperationTypeFlags(operation.type),
         }));
+
+        // console.warn(operations);
+        // console.warn(operationsResponse[0].entries[0].wallet.currency.code);
 
         const paginationResponse = pagination.shouldPaginate
             ? createPaginationResponse(total, page!, limit!)

@@ -98,10 +98,29 @@ export class CreateOperationUseCase {
 
             const operationType = await tx.operationType.findUnique({
                 where: { id: typeId },
-                select: { code: true },
+                select: { code: true, isDebit: true, isCredit: true },
             });
 
             const normalizedExpenseCategory = expenseCategory ?? null;
+            let normalizedEntries = entries;
+
+            const isDebitAllowed = operationType?.isDebit ?? false;
+            const isCreditAllowed = operationType?.isCredit ?? false;
+            const isSingleSide =
+                operationType?.code !== OPERATION_TYPE_CODES.CORRECTION && isDebitAllowed !== isCreditAllowed;
+
+            if (isSingleSide) {
+                const allowedDirection = isDebitAllowed ? 'debit' : 'credit';
+                const allowedEntries = entries.filter((entry) => entry.direction === allowedDirection);
+
+                normalizedEntries =
+                    allowedEntries.length > 0
+                        ? allowedEntries
+                        : entries.map((entry) => ({
+                              ...entry,
+                              direction: allowedDirection,
+                          }));
+            }
 
             if (operationType?.code === EXPENSE_OPERATION_TYPE_CODE) {
                 if (!normalizedExpenseCategory) {
@@ -118,7 +137,7 @@ export class CreateOperationUseCase {
             }
 
             if (operationType?.code === OPERATION_TYPE_CODES.CONVERSION) {
-                const walletIds = Array.from(new Set(entries.map((entry) => entry.walletId)));
+                const walletIds = Array.from(new Set(normalizedEntries.map((entry) => entry.walletId)));
                 const walletsForConversionRule = await tx.wallet.findMany({
                     where: { id: { in: walletIds } },
                     select: {
@@ -151,13 +170,13 @@ export class CreateOperationUseCase {
 
             // Валидация и обработка длятипа "Корректировка"
             if (operationType?.code === OPERATION_TYPE_CODES.CORRECTION) {
-                if (entries.length !== 1) {
+                if (normalizedEntries.length !== 1) {
                     throw new BadRequestException(
                         'Операция "Корректировка" должна содержать ровно одну запись (один кошелек)',
                     );
                 }
 
-                const entry = entries[0];
+                const entry = normalizedEntries[0];
                 const currentBalance = await this.walletRecalculationService.getCalculatedWalletAmount(
                     tx,
                     entry.walletId,
@@ -178,7 +197,7 @@ export class CreateOperationUseCase {
                 }
             }
 
-            for (const entry of entries) {
+            for (const entry of normalizedEntries) {
                 const wallet = await tx.wallet.findUnique({
                     where: { id: entry.walletId },
                     select: {
@@ -256,7 +275,7 @@ export class CreateOperationUseCase {
                 },
             });
 
-            for (const entry of entries) {
+            for (const entry of normalizedEntries) {
                 await tx.operationEntry.create({
                     data: {
                         userId,
