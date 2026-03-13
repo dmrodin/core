@@ -220,8 +220,7 @@ export default function OperationsPage() {
                                                     pageIndex === data.pages.length - 1 &&
                                                     operationIndex === page.operations.length - 1;
 
-                                                const showDetails =
-                                                    expandedIds.includes(operation.id) || operation.type.isCorrection;
+                                                const showDetails = expandedIds.includes(operation.id);
                                                 const isUpdated =
                                                     new Date(operation.updatedAt).getTime() >
                                                     new Date(operation.createdAt).getTime();
