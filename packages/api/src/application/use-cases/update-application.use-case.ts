@@ -181,7 +181,7 @@ export class UpdateApplicationUseCase {
             if (hasAdvanceEntries && advanceType?.id) {
                 advanceOperationId = updatedApplication.operation?.id ?? updatedApplication.operationId ?? null;
 
-                const operationDescriptionLines = [`Аванс по заявке №${updatedApplication.id}`];
+                const operationDescriptionLines: string[] = [];
 
                 if (updatedApplication.telegramUsername) {
                     operationDescriptionLines.push(`Telegram: ${updatedApplication.telegramUsername}`);
@@ -189,7 +189,9 @@ export class UpdateApplicationUseCase {
                 if (updatedApplication.phone) {
                     operationDescriptionLines.push(`Телефон: ${updatedApplication.phone}`);
                 }
-                advanceOperationDescription = operationDescriptionLines.join('\n');
+                advanceOperationDescription = operationDescriptionLines.length
+                    ? operationDescriptionLines.join('\n')
+                    : null;
 
                 if (!advanceOperationId) {
                     const createdOperation = await tx.operation.create({
