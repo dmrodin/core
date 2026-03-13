@@ -87,6 +87,8 @@ export function OperationForm({
     const [rawInput, setRawInput] = React.useState('');
     const [walletSearch, setWalletSearch] = React.useState('');
     const [walletSearchDebounced, setWalletSearchDebounced] = React.useState('');
+    const [walletSearchSide, setWalletSearchSide] = React.useState<'top' | 'bottom'>('bottom');
+    const [walletSelectOpen, setWalletSelectOpen] = React.useState(false);
 
     React.useEffect(() => {
         const id = setTimeout(() => {
@@ -318,6 +320,91 @@ export function OperationForm({
             }
         },
         [fetchNextWalletsPage, hasNextWalletsPage, isFetchingNextWalletsPage],
+    );
+
+    const updateWalletSearchSide = React.useCallback(() => {
+        const content = document.querySelector(
+            '[data-slot="select-content"][data-wallet-select="wallet"][data-state="open"]',
+        ) as HTMLElement | null;
+        const side = content?.getAttribute('data-side');
+        if (side === 'top' || side === 'bottom') {
+            setWalletSearchSide(side);
+        }
+    }, []);
+
+    const handleWalletSelectOpenChange = React.useCallback(
+        (isOpen: boolean) => {
+            if (!isOpen) {
+                setWalletSearch('');
+                setWalletSelectOpen(false);
+                return;
+            }
+            setWalletSelectOpen(true);
+            setTimeout(updateWalletSearchSide, 0);
+        },
+        [updateWalletSearchSide],
+    );
+
+    React.useEffect(() => {
+        if (!walletSelectOpen) return;
+
+        const getContent = () =>
+            document.querySelector(
+                '[data-slot="select-content"][data-wallet-select="wallet"][data-state="open"]',
+            ) as HTMLElement | null;
+
+        let rafId = 0;
+        let tries = 0;
+        const tick = () => {
+            updateWalletSearchSide();
+            tries += 1;
+            if (tries < 10) {
+                rafId = window.requestAnimationFrame(tick);
+            }
+        };
+        rafId = window.requestAnimationFrame(tick);
+
+        const content = getContent();
+        if (!content) {
+            return () => {
+                if (rafId) window.cancelAnimationFrame(rafId);
+            };
+        }
+
+        const observer = new MutationObserver(() => {
+            updateWalletSearchSide();
+        });
+        observer.observe(content, { attributes: true, attributeFilter: ['data-side'] });
+
+        const handleWindowUpdate = () => updateWalletSearchSide();
+        window.addEventListener('resize', handleWindowUpdate);
+        window.addEventListener('scroll', handleWindowUpdate, true);
+
+        return () => {
+            if (rafId) window.cancelAnimationFrame(rafId);
+            observer.disconnect();
+            window.removeEventListener('resize', handleWindowUpdate);
+            window.removeEventListener('scroll', handleWindowUpdate, true);
+        };
+    }, [updateWalletSearchSide, walletSelectOpen]);
+
+    const renderWalletSearch = React.useCallback(
+        (position: 'top' | 'bottom') => (
+            <div
+                data-slot="wallet-search"
+                className={cn('sticky z-10 bg-popover px-2 pb-2 pt-2', position === 'top' ? 'top-0' : 'bottom-0')}
+            >
+                <Input
+                    placeholder="Поиск кошелька..."
+                    value={walletSearch}
+                    onChange={(e) => setWalletSearch(e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyUp={(e) => e.stopPropagation()}
+                    className="h-8"
+                />
+            </div>
+        ),
+        [walletSearch],
     );
 
     const selectedWallets = entries
@@ -774,11 +861,7 @@ export function OperationForm({
                                             </FormLabel>
                                             <Select
                                                 onValueChange={field.onChange}
-                                                onOpenChange={(isOpen) => {
-                                                    if (!isOpen) {
-                                                        setWalletSearch('');
-                                                    }
-                                                }}
+                                                onOpenChange={handleWalletSelectOpenChange}
                                                 value={field.value || ''}
                                             >
                                                 <FormControl>
@@ -786,22 +869,19 @@ export function OperationForm({
                                                         <SelectValue placeholder="Выберите кошелек" />
                                                     </SelectTrigger>
                                                 </FormControl>
-                                                <SelectContent onScroll={handleWalletsScroll}>
-                                                    <div className="px-2 pb-2">
-                                                        <Input
-                                                            placeholder="Поиск кошелька..."
-                                                            value={walletSearch}
-                                                            onChange={(e) => setWalletSearch(e.target.value)}
-                                                            onKeyDown={(e) => e.stopPropagation()}
-                                                            onKeyUp={(e) => e.stopPropagation()}
-                                                            className="h-8"
-                                                        />
-                                                    </div>
+                                                <SelectContent
+                                                    data-wallet-select="wallet"
+                                                    onScroll={handleWalletsScroll}
+                                                >
+                                                    {walletSearchSide === 'bottom' && renderWalletSearch('top')}
+                                                    {walletSearchSide === 'bottom' && <div className="h-12" />}
                                                     {walletsList?.map((wallet) => (
                                                         <SelectItem key={wallet.id} value={wallet.id}>
                                                             {wallet.name}
                                                         </SelectItem>
                                                     ))}
+                                                    {walletSearchSide === 'top' && <div className="h-12" />}
+                                                    {walletSearchSide === 'top' && renderWalletSearch('bottom')}
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
@@ -906,11 +986,7 @@ export function OperationForm({
                                                         </FormLabel>
                                                         <Select
                                                             onValueChange={field.onChange}
-                                                            onOpenChange={(isOpen) => {
-                                                                if (!isOpen) {
-                                                                    setWalletSearch('');
-                                                                }
-                                                            }}
+                                                            onOpenChange={handleWalletSelectOpenChange}
                                                             value={field.value || ''}
                                                         >
                                                             <FormControl>
@@ -918,25 +994,24 @@ export function OperationForm({
                                                                     <SelectValue placeholder="Выберите кошелек" />
                                                                 </SelectTrigger>
                                                             </FormControl>
-                                                            <SelectContent onScroll={handleWalletsScroll}>
-                                                                <div className="px-2 pb-2">
-                                                                    <Input
-                                                                        placeholder="Поиск кошелька..."
-                                                                        value={walletSearch}
-                                                                        onChange={(e) =>
-                                                                            setWalletSearch(e.target.value)
-                                                                        }
-                                                                        onKeyDown={(e) => e.stopPropagation()}
-                                                                        onKeyUp={(e) => e.stopPropagation()}
-                                                                        className="h-8"
-                                                                    />
-                                                                </div>
+                                                            <SelectContent
+                                                                data-wallet-select="wallet"
+                                                                onScroll={handleWalletsScroll}
+                                                            >
+                                                                {walletSearchSide === 'bottom' &&
+                                                                    renderWalletSearch('top')}
+                                                                {walletSearchSide === 'bottom' && (
+                                                                    <div className="h-12" />
+                                                                )}
                                                                 {walletsList?.map((wallet) => (
                                                                     <SelectItem key={wallet.id} value={wallet.id}>
                                                                         {wallet.name} — {wallet.amount}{' '}
                                                                         {wallet.currency?.code ?? ''}
                                                                     </SelectItem>
                                                                 ))}
+                                                                {walletSearchSide === 'top' && <div className="h-12" />}
+                                                                {walletSearchSide === 'top' &&
+                                                                    renderWalletSearch('bottom')}
                                                             </SelectContent>
                                                         </Select>
                                                     </FormItem>

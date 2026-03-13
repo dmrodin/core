@@ -68,6 +68,7 @@ function SelectContent({
             >
                 <SelectScrollUpButton />
                 <SelectPrimitive.Viewport
+                    data-slot="select-viewport"
                     className={cn(
                         'max-h-[var(--radix-select-content-available-height)] overflow-y-auto overflow-x-hidden p-1',
                         position === 'popper' &&
