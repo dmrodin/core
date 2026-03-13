@@ -47,6 +47,12 @@ export const OperationEntryApiSchema = z.object({
         id: z.string().uuid(),
         name: z.string(),
         walletTypeId: z.string().uuid().optional().nullable(),
+        currency: z
+            .object({
+                code: z.string(),
+            })
+            .optional()
+            .nullable(),
     }),
     direction: z.enum(['credit', 'debit']),
     amount: z.number(),
@@ -64,6 +70,12 @@ export const OperationEntryDtoSchema = z.object({
     wallet: z.object({
         id: z.string().uuid(),
         name: z.string(),
+        currency: z
+            .object({
+                code: z.string(),
+            })
+            .optional()
+            .nullable(),
     }),
     direction: z.enum(['credit', 'debit']),
     before: z.number().nullable().optional(),
@@ -122,6 +134,12 @@ export const OperationEntryUpdateDtoSchema = z.object({
     wallet: z.object({
         id: z.string().uuid(),
         name: z.string(),
+        currency: z
+            .object({
+                code: z.string(),
+            })
+            .optional()
+            .nullable(),
     }),
     direction: z.enum(['credit', 'debit']),
     before: z.number().nullable(),

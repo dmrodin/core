@@ -357,7 +357,12 @@ export default function OperationsPage() {
                                                                                                             : 'text-destructive/80 font-semibold'
                                                                                                     }
                                                                                                 >
-                                                                                                    {entry.amount}
+                                                                                                    {entry.amount}{' '}
+                                                                                                    {
+                                                                                                        entry.wallet
+                                                                                                            .currency
+                                                                                                            ?.code
+                                                                                                    }
                                                                                                 </span>
                                                                                             </p>
                                                                                         )}
