@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { PrismaService } from '../common/services/prisma.service';
 import { WalletRecalculationService } from '../wallet/services/wallet-recalculation.service';
 import { OperationController } from './operation.controller';
 import {
@@ -31,7 +30,6 @@ import {
         GetOperationByIdUseCase,
         GetOperationsUseCase,
         UpdateOperationUseCase,
-        PrismaService,
         WalletRecalculationService,
         JwtAuthGuard,
         RolesGuard,
@@ -47,7 +45,6 @@ import {
         GetOperationByIdUseCase,
         GetOperationsUseCase,
         UpdateOperationUseCase,
-        PrismaService,
         WalletRecalculationService,
     ],
 })

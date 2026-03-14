@@ -6,7 +6,6 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from '../auth/auth.controller';
 import { BcryptHasher } from '../common/services/bcrypt-hasher.service';
 import { CookieConfigService } from '../common/services/cookie-config.service';
-import { PrismaService } from '../common/services/prisma.service';
 import { JwtAuthGuard } from './guards/jwt-auth';
 import { RolesGuard } from './guards/roles.guard';
 import { JwtTokenService } from './jwt.service';
@@ -32,7 +31,6 @@ import { LoginUserUseCase, LogoutUserUseCase, RefreshTokensUseCase, RegisterUser
         LoginUserUseCase,
         LogoutUserUseCase,
         RefreshTokensUseCase,
-        PrismaService,
         BcryptHasher,
         JwtTokenService,
         CookieConfigService,
@@ -40,6 +38,6 @@ import { LoginUserUseCase, LogoutUserUseCase, RefreshTokensUseCase, RegisterUser
         JwtAuthGuard,
         RolesGuard,
     ],
-    exports: [PrismaService, BcryptHasher, JwtAuthGuard, RolesGuard, JwtTokenService],
+    exports: [BcryptHasher, JwtAuthGuard, RolesGuard, JwtTokenService],
 })
 export class AuthModule {}

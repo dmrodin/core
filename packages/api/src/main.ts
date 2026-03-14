@@ -14,6 +14,8 @@ async function bootstrap() {
     const app = await NestFactory.create(MainModule);
     const configService = app.get(ConfigService);
 
+    app.enableShutdownHooks();
+
     const port: string = configService.getOrThrow('PORT');
 
     const corsOrigins: string = configService.get('CORS_ORIGINS', '');
