@@ -89,6 +89,8 @@ export function OperationForm({
     const [walletSearchDebounced, setWalletSearchDebounced] = React.useState('');
     const [walletSearchSide, setWalletSearchSide] = React.useState<'top' | 'bottom'>('bottom');
     const [walletSelectOpen, setWalletSelectOpen] = React.useState(false);
+    const [walletSearchFocused, setWalletSearchFocused] = React.useState(false);
+    const walletSearchInputRef = React.useRef<HTMLInputElement | null>(null);
 
     React.useEffect(() => {
         const id = setTimeout(() => {
@@ -324,6 +326,7 @@ export function OperationForm({
     );
 
     const updateWalletSearchSide = React.useCallback(() => {
+        if (walletSearchFocused) return;
         const content = document.querySelector(
             '[data-slot="select-content"][data-wallet-select="wallet"][data-state="open"]',
         ) as HTMLElement | null;
@@ -331,7 +334,7 @@ export function OperationForm({
         if (side === 'top' || side === 'bottom') {
             setWalletSearchSide(side);
         }
-    }, []);
+    }, [walletSearchFocused]);
 
     const handleWalletSelectOpenChange = React.useCallback(
         (isOpen: boolean) => {
@@ -345,6 +348,14 @@ export function OperationForm({
         },
         [updateWalletSearchSide],
     );
+
+    React.useEffect(() => {
+        if (!walletSelectOpen) return;
+        const id = window.setTimeout(() => {
+            walletSearchInputRef.current?.focus();
+        }, 0);
+        return () => window.clearTimeout(id);
+    }, [walletSelectOpen, walletSearchSide]);
 
     React.useEffect(() => {
         if (!walletSelectOpen) return;
@@ -401,6 +412,9 @@ export function OperationForm({
                     onChange={(e) => setWalletSearch(e.target.value)}
                     onKeyDown={(e) => e.stopPropagation()}
                     onKeyUp={(e) => e.stopPropagation()}
+                    onFocus={() => setWalletSearchFocused(true)}
+                    onBlur={() => setWalletSearchFocused(false)}
+                    ref={walletSearchInputRef}
                     className="h-8"
                 />
             </div>
