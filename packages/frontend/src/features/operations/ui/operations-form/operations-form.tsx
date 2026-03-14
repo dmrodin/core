@@ -351,6 +351,8 @@ export function OperationForm({
 
     React.useEffect(() => {
         if (!walletSelectOpen) return;
+        const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+        if (isTouchDevice) return;
         const id = window.setTimeout(() => {
             walletSearchInputRef.current?.focus();
         }, 0);
