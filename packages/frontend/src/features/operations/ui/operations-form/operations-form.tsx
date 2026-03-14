@@ -439,6 +439,7 @@ export function OperationForm({
     const isConversionNumberRequired = isConversion && areAllSelectedWalletsInskesh;
     const isCreditAllowed = selectedOperationType?.isCredit ?? false;
     const isDebitAllowed = selectedOperationType?.isDebit ?? false;
+    const isAvans = selectedOperationType?.isAvans ?? false;
     const isSingleSideOperation = selectedOperationType ? isCreditAllowed !== isDebitAllowed : false;
 
     const directions = React.useMemo(() => {
@@ -535,7 +536,7 @@ export function OperationForm({
             return;
         }
 
-        if (!isSingleSideOperation) {
+        if (!isSingleSideOperation && !isAvans) {
             const hasDebitEntry = data.entries.some((entry) => entry.direction === 'debit');
             const hasCreditEntry = data.entries.some((entry) => entry.direction === 'credit');
 
@@ -965,7 +966,7 @@ export function OperationForm({
                             <div key={dir} className="flex flex-col gap-3 mt-2">
                                 <div className="lg:flex justify-between items-center">
                                     <p className="font-medium">
-                                        {dir === 'credit' ? 'Прибавить к...' : 'Вычесть из...'}
+                                        {dir === 'credit' ? 'Прибавить к...' : isAvans ? 'Зачислить к...' : 'Вычесть из...'}
                                     </p>
                                     <Button
                                         variant="outline"
