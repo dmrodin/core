@@ -59,7 +59,7 @@ interface WalletFormProps {
     walletId?: string;
 }
 
-const EditWalletFormSchema = CreateWalletSchema.safeExtend({
+const EditWalletFormSchema = UpdateWalletSchema.extend({
     amount: z.coerce.number().int('Сумма должна быть целым числом'),
 });
 
@@ -214,13 +214,17 @@ export function WalletForm({ initialData, walletId }: WalletFormProps) {
     }, [isCrypto, networkTypes, form]);
 
     const onSubmit = (values: CreateWalletFormValues) => {
+        const normalizedValues = {
+            ...values,
+            description: values.description === '' ? ' ' : values.description,
+        };
         if (isEditMode && updateWalletMutation) {
             const payload: UpdateWalletRequest = UpdateWalletSchema.parse(
-                Object.fromEntries(Object.entries(values).filter(([key]) => key !== 'amount')),
+                Object.fromEntries(Object.entries(normalizedValues).filter(([key]) => key !== 'amount')),
             );
             updateWalletMutation.mutate(payload);
         } else {
-            const payload: CreateWalletRequest = CreateWalletSchema.parse(values);
+            const payload: CreateWalletRequest = CreateWalletSchema.parse(normalizedValues);
             createWalletMutation.mutate(payload);
         }
     };

@@ -280,7 +280,9 @@ export const CreateWalletSchema = z
         }
     });
 
-export const UpdateWalletSchema = CreateWalletSchema.partial({ amount: true });
+export const UpdateWalletSchema = CreateWalletSchema.partial({ amount: true }).extend({
+    description: z.string().max(2000, 'Описание не должно превышать 2000 символов').optional(),
+});
 
 export const GetWalletsFilterSchema = z.object({
     search: z.string().optional(),
