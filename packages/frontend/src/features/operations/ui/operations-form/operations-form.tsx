@@ -105,6 +105,7 @@ export function OperationForm({
     } = useInfiniteWallets(
         {
             search: walletSearchDebounced || undefined,
+            searchByName: true,
             includeTabWalletTypes: true,
             active: true,
             visible: true,

@@ -29,6 +29,25 @@ export class GetWalletsDto {
     public search?: string;
 
     @ApiProperty({
+        description: 'Искать только по названию кошелька',
+        example: true,
+        required: false,
+    })
+    @IsOptional()
+    @Transform(({ value }: { value: string }) => {
+        if (value === 'true') {
+            return true;
+        }
+        if (value === 'false') {
+            return false;
+        }
+
+        return value;
+    })
+    @IsBoolean({ message: 'Параметр searchByName должен быть булевым значением' })
+    public searchByName?: boolean;
+
+    @ApiProperty({
         description: 'Фильтр по статусу баланса',
         enum: BalanceStatus,
         example: BalanceStatus.positive,

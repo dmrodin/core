@@ -13,6 +13,7 @@ export class GetWalletsUseCase {
     public async execute(getWalletsDto: GetWalletsDto): Promise<GetWalletsOutput> {
         const {
             search,
+            searchByName,
             balanceStatus,
             walletKind,
             walletTypeId,
@@ -52,24 +53,28 @@ export class GetWalletsUseCase {
         const orConditions: Prisma.WalletWhereInput[] = [];
 
         if (search) {
-            orConditions.push(
-                { name: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
-                { walletType: { name: { contains: search, mode: 'insensitive' } } },
-                { details: { ownerFullName: { contains: search, mode: 'insensitive' } } },
-                { details: { card: { contains: search, mode: 'insensitive' } } },
-                { details: { phone: { contains: search, mode: 'insensitive' } } },
-                { details: { address: { contains: search, mode: 'insensitive' } } },
-                { details: { exchangeUid: { contains: search, mode: 'insensitive' } } },
-                { details: { username: { contains: search, mode: 'insensitive' } } },
-                { details: { accountId: { contains: search, mode: 'insensitive' } } },
-                { details: { network: { name: { contains: search, mode: 'insensitive' } } } },
-                { details: { networkType: { name: { contains: search, mode: 'insensitive' } } } },
-                { currency: { code: { contains: search, mode: 'insensitive' } } },
-                { currency: { name: { contains: search, mode: 'insensitive' } } },
-                { user: { username: { contains: search, mode: 'insensitive' } } },
-                { secondUser: { username: { contains: search, mode: 'insensitive' } } },
-            );
+            if (searchByName) {
+                orConditions.push({ name: { contains: search, mode: 'insensitive' } });
+            } else {
+                orConditions.push(
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } },
+                    { walletType: { name: { contains: search, mode: 'insensitive' } } },
+                    { details: { ownerFullName: { contains: search, mode: 'insensitive' } } },
+                    { details: { card: { contains: search, mode: 'insensitive' } } },
+                    { details: { phone: { contains: search, mode: 'insensitive' } } },
+                    { details: { address: { contains: search, mode: 'insensitive' } } },
+                    { details: { exchangeUid: { contains: search, mode: 'insensitive' } } },
+                    { details: { username: { contains: search, mode: 'insensitive' } } },
+                    { details: { accountId: { contains: search, mode: 'insensitive' } } },
+                    { details: { network: { name: { contains: search, mode: 'insensitive' } } } },
+                    { details: { networkType: { name: { contains: search, mode: 'insensitive' } } } },
+                    { currency: { code: { contains: search, mode: 'insensitive' } } },
+                    { currency: { name: { contains: search, mode: 'insensitive' } } },
+                    { user: { username: { contains: search, mode: 'insensitive' } } },
+                    { secondUser: { username: { contains: search, mode: 'insensitive' } } },
+                );
+            }
 
             const searchLower = search.toLowerCase();
 

@@ -286,6 +286,7 @@ export const UpdateWalletSchema = CreateWalletSchema.partial({ amount: true }).e
 
 export const GetWalletsFilterSchema = z.object({
     search: z.string().optional(),
+    searchByName: z.boolean().optional(),
 
     balanceStatus: z.enum(BalanceStatus).optional(),
     walletKind: z.enum(WalletKind).optional(),
