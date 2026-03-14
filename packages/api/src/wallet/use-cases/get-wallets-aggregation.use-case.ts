@@ -24,6 +24,7 @@ export class GetWalletsAggregationUseCase {
             pinned,
             visible,
             deleted,
+            includeTabWalletTypes,
         } = getWalletsDto;
 
         const where: Prisma.WalletWhereInput = {};
@@ -73,6 +74,7 @@ export class GetWalletsAggregationUseCase {
         }
 
         const isAllTabContext =
+            !includeTabWalletTypes &&
             walletTypeId === undefined &&
             (visible === true || visible === undefined) &&
             (deleted === false || deleted === undefined) &&
