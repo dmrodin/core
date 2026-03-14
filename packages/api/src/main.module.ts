@@ -8,7 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { SessionActivityMiddleware } from './auth/middleware/session-activity.middleware';
 import { BankModule } from './bank/bank.module';
 import { BcryptHasher } from './common/services/bcrypt-hasher.service';
-import { PrismaService } from './common/services/prisma.service';
+import { PrismaModule } from './common/services/prisma.module';
 import { CurrencyModule } from './currency/currency.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { GuideModule } from './guide/guide.module';
@@ -29,6 +29,7 @@ import { WalletTypeModule } from './wallet-type/wallet-type.module';
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
+        PrismaModule,
         ThrottlerModule.forRootAsync({
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => [
@@ -58,7 +59,7 @@ import { WalletTypeModule } from './wallet-type/wallet-type.module';
         ScheduleModule.forRoot(),
         JobsModule,
     ],
-    providers: [PrismaService, BcryptHasher, AdminInitService],
+    providers: [BcryptHasher, AdminInitService],
 })
 export class MainModule implements NestModule {
     public configure(consumer: MiddlewareConsumer): void {

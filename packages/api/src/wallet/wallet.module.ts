@@ -2,7 +2,6 @@
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { PrismaService } from '../common/services/prisma.service';
 import { FeedbackModule } from '../feedback/feedback.module';
 import { WalletRecalculationService, WalletSecurityService } from './services';
 import {
@@ -25,7 +24,6 @@ import { WalletController } from './wallet.controller';
     imports: [FeedbackModule],
     controllers: [WalletController],
     providers: [
-        PrismaService,
         WalletRecalculationService,
         WalletSecurityService,
         JwtAuthGuard,

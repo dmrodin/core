@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 
 import { AuthModule } from '../auth/auth.module';
-import { PrismaService } from '../common/services/prisma.service';
 import {
     CreateWalletTypeUseCase,
     DeleteWalletTypeUseCase,
@@ -15,7 +14,6 @@ import { WalletTypeInitService } from './wallet-type-init.service';
     imports: [AuthModule],
     controllers: [WalletTypeController],
     providers: [
-        PrismaService,
         GetWalletTypesUseCase,
         CreateWalletTypeUseCase,
         UpdateWalletTypeUseCase,

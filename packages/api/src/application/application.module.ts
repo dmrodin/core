@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { PrismaService } from '../common/services/prisma.service';
 import { WalletRecalculationService } from '../wallet/services/wallet-recalculation.service';
 import { ApplicationController } from './application.controller';
 import {
@@ -16,7 +15,6 @@ import {
 @Module({
     controllers: [ApplicationController],
     providers: [
-        PrismaService,
         WalletRecalculationService,
         JwtAuthGuard,
         RolesGuard,

@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { PrismaService } from '../common/services/prisma.service';
 import { NetworkTypeController } from './network-type.controller';
 import { NetworkTypeInitService } from './network-type-init.service';
 import {
@@ -24,7 +23,6 @@ import {
         UpdateNetworkTypeUseCase,
         DeleteNetworkTypeUseCase,
         RestoreNetworkTypeUseCase,
-        PrismaService,
         JwtAuthGuard,
         RolesGuard,
     ],
@@ -34,7 +32,6 @@ import {
         GetNetworkTypesUseCase,
         UpdateNetworkTypeUseCase,
         DeleteNetworkTypeUseCase,
-        PrismaService,
     ],
 })
 export class NetworkTypeModule {}

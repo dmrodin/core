@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 
-import { PrismaService } from '../common/services/prisma.service';
 import { BankController } from './bank.controller';
 import {
     CreateBankUseCase,
@@ -14,7 +13,6 @@ import {
 @Module({
     controllers: [BankController],
     providers: [
-        PrismaService,
         CreateBankUseCase,
         GetBanksUseCase,
         GetBankByIdUseCase,
