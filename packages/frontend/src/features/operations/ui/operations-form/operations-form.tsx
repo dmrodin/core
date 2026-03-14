@@ -966,7 +966,11 @@ export function OperationForm({
                             <div key={dir} className="flex flex-col gap-3 mt-2">
                                 <div className="lg:flex justify-between items-center">
                                     <p className="font-medium">
-                                        {dir === 'credit' ? 'Прибавить к...' : isAvans ? 'Зачислить к...' : 'Вычесть из...'}
+                                        {dir === 'credit'
+                                            ? 'Прибавить к...'
+                                            : isAvans
+                                              ? 'Зачислить к...'
+                                              : 'Вычесть из...'}
                                     </p>
                                     <Button
                                         variant="outline"
