@@ -274,90 +274,90 @@ export const SimpleWalletCard = ({
                         </div>
                     )}
                     <CardContent
-                        className={wallet.monthlyLimit && wallet.monthlyLimit > 0 ? 'pt-3 pb-3 sm:pt-6 sm:pb-6' : ''}
+                        className={cn(
+                            wallet.monthlyLimit && wallet.monthlyLimit > 0 ? 'pt-3 pb-3 sm:pt-6 sm:pb-6' : '',
+                            'relative',
+                        )}
                     >
-                        <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
-                            <div className="space-y-1 sm:space-y-2 sm:max-w-[70%]">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    {selectionMode && (
-                                        <Checkbox
-                                            data-checkbox
-                                            checked={isSelected}
-                                            onCheckedChange={() => onSelect?.(wallet.id)}
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="relative z-10"
-                                        />
-                                    )}
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-1 right-1 h-8 w-8 z-10"
+                                aria-label="Открыть меню кошелька"
+                                onTouchStart={handleMenuTriggerTouchStart}
+                                onTouchMove={handleMenuTriggerTouchMove}
+                                onTouchEnd={(event) => {
+                                    touchStartRef.current = null;
+                                    event.stopPropagation();
+                                }}
+                                onClick={handleMenuTriggerClick}
+                                onPointerDown={(event) => event.stopPropagation()}
+                            >
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <div className="flex flex-col gap-1">
+                            <div className="flex flex-wrap items-center gap-2 pr-8">
+                                {selectionMode && (
+                                    <Checkbox
+                                        data-checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={() => onSelect?.(wallet.id)}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="relative z-10"
+                                    />
+                                )}
+                                <Button
+                                    variant="link"
+                                    className="text-sm sm:text-base p-0 h-auto font-semibold relative z-10 no-underline hover:no-underline cursor-pointer"
+                                    data-wallet-link
+                                    onPointerDown={(e) => {
+                                        e.stopPropagation();
+                                        router.push(ROUTER_MAP.WALLET_OPERATIONS(wallet.id));
+                                    }}
+                                >
+                                    {wallet.walletType ? `${getWalletTypeLabel(wallet.walletType)} ` : ''}
+                                    {wallet.walletKind === 'simple' ? 'Касса ' : ''}
+                                    {wallet.name}
+                                </Button>
+                                {formatWalletRequisites(wallet) && (
                                     <Button
-                                        variant="link"
-                                        className="text-sm sm:text-base p-0 h-auto font-semibold relative z-10 no-underline hover:no-underline cursor-pointer"
-                                        data-wallet-link
-                                        onPointerDown={(e) => {
-                                            e.stopPropagation();
-                                            router.push(ROUTER_MAP.WALLET_OPERATIONS(wallet.id));
-                                        }}
-                                    >
-                                        {wallet.walletType ? `${getWalletTypeLabel(wallet.walletType)} ` : ''}
-                                        {wallet.walletKind === 'simple' ? 'Касса ' : ''}
-                                        {wallet.name}
-                                    </Button>
-                                    {formatWalletRequisites(wallet) && (
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-6 w-6 relative z-20 cursor-pointer"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                e.preventDefault();
-                                                handleCopyRequisites();
-                                            }}
-                                            onPointerDown={(e) => {
-                                                e.stopPropagation();
-                                                e.preventDefault();
-                                            }}
-                                            title="Скопировать реквизиты"
-                                        >
-                                            <Copy className="h-3.5 w-3.5" />
-                                        </Button>
-                                    )}
-                                    <WalletOwner user={wallet.user} secondUser={wallet.secondUser} />
-                                </div>
-                                {wallet.description && <CardDescription>{wallet.description}</CardDescription>}
-                            </div>
-                            <div className="text-left sm:text-right">
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        type="button"
                                         variant="ghost"
                                         size="icon"
-                                        className="mb-2 ml-auto h-8 w-8"
-                                        aria-label="Открыть меню кошелька"
-                                        onTouchStart={handleMenuTriggerTouchStart}
-                                        onTouchMove={handleMenuTriggerTouchMove}
-                                        onTouchEnd={(event) => {
-                                            touchStartRef.current = null;
-                                            event.stopPropagation();
+                                        className="h-6 w-6 relative z-20 cursor-pointer"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            handleCopyRequisites();
                                         }}
-                                        onClick={handleMenuTriggerClick}
-                                        onPointerDown={(event) => event.stopPropagation()}
+                                        onPointerDown={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                        }}
+                                        title="Скопировать реквизиты"
                                     >
-                                        <MoreHorizontal className="h-4 w-4" />
+                                        <Copy className="h-3.5 w-3.5" />
                                     </Button>
-                                </DropdownMenuTrigger>
-                                <p className="text-base font-bold leading-tight sm:text-2xl">
+                                )}
+                                <WalletOwner user={wallet.user} secondUser={wallet.secondUser} />
+                            </div>
+                            {wallet.description && <CardDescription>{wallet.description}</CardDescription>}
+                            <div className="flex items-end justify-between mt-1">
+                                <p className="text-base font-bold leading-tight sm:text-xl">
                                     {formatNumber(wallet.amount)} {wallet.currency.code}
                                 </p>
-                                <div className="mt-1 sm:mt-2 space-y-1">
-                                    <p className="text-xs text-muted-foreground">
+                                <div className="text-right">
+                                    <p className="text-xs text-muted-foreground whitespace-nowrap">
                                         Создан: {formatDate(new Date(wallet.createdAt))}
                                     </p>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground whitespace-nowrap">
                                         Обновлен: {formatDate(new Date(wallet.updatedAt))}
                                     </p>
                                     {wallet.lastReconciledAt && (
                                         <p className="text-xs text-muted-foreground">
-                                            Дата последней сверки: {formatDateTime(wallet.lastReconciledAt)} <br />
-                                            Выполнил: {wallet.lastReconciledBy ? wallet.updated_by.username : '-'}
+                                            Сверка: {formatDateTime(wallet.lastReconciledAt)}
                                         </p>
                                     )}
                                 </div>
