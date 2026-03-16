@@ -371,38 +371,35 @@ export function OperationForm({
                 '[data-slot="select-content"][data-wallet-select="wallet"][data-state="open"]',
             ) as HTMLElement | null;
 
+        // Try to read the initial side; retry a few times until content is in the DOM
         let rafId = 0;
         let tries = 0;
         const tick = () => {
-            updateWalletSearchSide();
+            const content = getContent();
+            if (content) {
+                updateWalletSearchSide();
+                // Once found, observe future side changes (e.g. on resize)
+                const observer = new MutationObserver(updateWalletSearchSide);
+                observer.observe(content, { attributes: true, attributeFilter: ['data-side'] });
+                window.addEventListener('resize', updateWalletSearchSide);
+                // Store cleanup on the rafId variable trick — use a ref instead
+                cleanupRef.current = () => {
+                    observer.disconnect();
+                    window.removeEventListener('resize', updateWalletSearchSide);
+                };
+                return;
+            }
             tries += 1;
             if (tries < 10) {
                 rafId = window.requestAnimationFrame(tick);
             }
         };
+        const cleanupRef = { current: () => {} };
         rafId = window.requestAnimationFrame(tick);
-
-        const content = getContent();
-        if (!content) {
-            return () => {
-                if (rafId) window.cancelAnimationFrame(rafId);
-            };
-        }
-
-        const observer = new MutationObserver(() => {
-            updateWalletSearchSide();
-        });
-        observer.observe(content, { attributes: true, attributeFilter: ['data-side'] });
-
-        const handleWindowUpdate = () => updateWalletSearchSide();
-        window.addEventListener('resize', handleWindowUpdate);
-        window.addEventListener('scroll', handleWindowUpdate, true);
 
         return () => {
             if (rafId) window.cancelAnimationFrame(rafId);
-            observer.disconnect();
-            window.removeEventListener('resize', handleWindowUpdate);
-            window.removeEventListener('scroll', handleWindowUpdate, true);
+            cleanupRef.current();
         };
     }, [updateWalletSearchSide, walletSelectOpen]);
 
@@ -935,9 +932,10 @@ export function OperationForm({
                                                 <SelectContent
                                                     data-wallet-select="wallet"
                                                     onScroll={handleWalletsScroll}
+                                                    className="min-h-[240px]"
+                                                    header={walletSearchSide === 'bottom' ? renderWalletSearch('top') : undefined}
+                                                    footer={walletSearchSide === 'top' ? renderWalletSearch('bottom') : undefined}
                                                 >
-                                                    {walletSearchSide === 'bottom' && renderWalletSearch('top')}
-                                                    {walletSearchSide === 'bottom' && <div className="h-12" />}
                                                     {field.value && !walletsList?.find((w) => w.id === field.value) && (
                                                         <SelectItem value={field.value}>
                                                             {form.getValues(`entries.${realIndex}.wallet.name`) ||
@@ -950,8 +948,6 @@ export function OperationForm({
                                                             {wallet.name}
                                                         </SelectItem>
                                                     ))}
-                                                    {walletSearchSide === 'top' && <div className="h-12" />}
-                                                    {walletSearchSide === 'top' && renderWalletSearch('bottom')}
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
@@ -1090,12 +1086,10 @@ export function OperationForm({
                                                             <SelectContent
                                                                 data-wallet-select="wallet"
                                                                 onScroll={handleWalletsScroll}
+                                                                className="min-h-[240px]"
+                                                                header={walletSearchSide === 'bottom' ? renderWalletSearch('top') : undefined}
+                                                                footer={walletSearchSide === 'top' ? renderWalletSearch('bottom') : undefined}
                                                             >
-                                                                {walletSearchSide === 'bottom' &&
-                                                                    renderWalletSearch('top')}
-                                                                {walletSearchSide === 'bottom' && (
-                                                                    <div className="h-12" />
-                                                                )}
                                                                 {field.value && !walletsList?.find((w) => w.id === field.value) && (
                                                                     <SelectItem value={field.value}>
                                                                         {form.getValues(`entries.${realIndex}.wallet.name`) ||
@@ -1109,9 +1103,6 @@ export function OperationForm({
                                                                         {wallet.currency?.code ?? ''}
                                                                     </SelectItem>
                                                                 ))}
-                                                                {walletSearchSide === 'top' && <div className="h-12" />}
-                                                                {walletSearchSide === 'top' &&
-                                                                    renderWalletSearch('bottom')}
                                                             </SelectContent>
                                                         </Select>
                                                         <FormMessage />
