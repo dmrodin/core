@@ -536,6 +536,15 @@ export function OperationForm({
         form.clearErrors('entries');
         form.clearErrors('banksGroupId');
         form.clearErrors('expenseCategory');
+        form.clearErrors('conversionGroupId');
+
+        if (isConversionNumberRequired && !data.conversionGroupId) {
+            form.setError('conversionGroupId', {
+                type: 'manual',
+                message: 'Укажите номер конвертации',
+            });
+            return;
+        }
 
         if (isExpenseType && !data.expenseCategory) {
             form.setError('expenseCategory', {
