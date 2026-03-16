@@ -642,7 +642,11 @@ export function OperationForm({
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className={cn('flex flex-col gap-4 sm:gap-6', className)} {...props}>
+            <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className={cn('flex flex-col gap-4 sm:gap-6', className)}
+                {...props}
+            >
                 {!isEditing && lockedPeriodForDate && (
                     <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                         Создание операций запрещено в период{' '}
@@ -919,13 +923,24 @@ export function OperationForm({
                                                         {field.value ? (
                                                             <span className="truncate">
                                                                 {(() => {
-                                                                    const w = walletsList?.find((w) => w.id === field.value);
-                                                                    const name = w?.name ?? form.getValues(`entries.${realIndex}.wallet.name`) ?? '...';
-                                                                    return w?.amount !== undefined ? `${name} — ${w.amount} ${w.currency?.code ?? ''}` : name;
+                                                                    const w = walletsList?.find(
+                                                                        (w) => w.id === field.value,
+                                                                    );
+                                                                    const name =
+                                                                        w?.name ??
+                                                                        form.getValues(
+                                                                            `entries.${realIndex}.wallet.name`,
+                                                                        ) ??
+                                                                        '...';
+                                                                    return w?.amount !== undefined
+                                                                        ? `${name} — ${w.amount} ${w.currency?.code ?? ''}`
+                                                                        : name;
                                                                 })()}
                                                             </span>
                                                         ) : (
-                                                            <span className="text-muted-foreground">Выберите кошелек</span>
+                                                            <span className="text-muted-foreground">
+                                                                Выберите кошелек
+                                                            </span>
                                                         )}
                                                     </SelectTrigger>
                                                 </FormControl>
@@ -933,8 +948,16 @@ export function OperationForm({
                                                     data-wallet-select="wallet"
                                                     onScroll={handleWalletsScroll}
                                                     className="min-h-[240px]"
-                                                    header={walletSearchSide === 'bottom' ? renderWalletSearch('top') : undefined}
-                                                    footer={walletSearchSide === 'top' ? renderWalletSearch('bottom') : undefined}
+                                                    header={
+                                                        walletSearchSide === 'bottom'
+                                                            ? renderWalletSearch('top')
+                                                            : undefined
+                                                    }
+                                                    footer={
+                                                        walletSearchSide === 'top'
+                                                            ? renderWalletSearch('bottom')
+                                                            : undefined
+                                                    }
                                                 >
                                                     {field.value && !walletsList?.find((w) => w.id === field.value) && (
                                                         <SelectItem value={field.value}>
@@ -1042,10 +1065,7 @@ export function OperationForm({
                                     .map((item, realIndex) => ({ item, realIndex }))
                                     .filter(({ item }) => item.direction === dir)
                                     .map(({ item, realIndex }) => (
-                                        <div
-                                            key={item.fieldId}
-                                            className="flex flex-row items-end gap-2"
-                                        >
+                                        <div key={item.fieldId} className="flex flex-row items-end gap-2">
                                             <FormField
                                                 control={form.control}
                                                 name={`entries.${realIndex}.wallet.id`}
@@ -1059,7 +1079,10 @@ export function OperationForm({
                                                                 field.onChange(value);
                                                                 const found = walletsList?.find((w) => w.id === value);
                                                                 if (found) {
-                                                                    form.setValue(`entries.${realIndex}.wallet.name`, found.name);
+                                                                    form.setValue(
+                                                                        `entries.${realIndex}.wallet.name`,
+                                                                        found.name,
+                                                                    );
                                                                     selectedWalletsCache.current.set(value, found);
                                                                 }
                                                             }}
@@ -1071,15 +1094,29 @@ export function OperationForm({
                                                                     {field.value ? (
                                                                         <span className="truncate">
                                                                             {(() => {
-                                                                                const inList = walletsList?.find((w) => w.id === field.value);
-                                                                                const cached = selectedWalletsCache.current.get(field.value);
+                                                                                const inList = walletsList?.find(
+                                                                                    (w) => w.id === field.value,
+                                                                                );
+                                                                                const cached =
+                                                                                    selectedWalletsCache.current.get(
+                                                                                        field.value,
+                                                                                    );
                                                                                 const w = inList ?? cached;
-                                                                                const name = w?.name ?? form.getValues(`entries.${realIndex}.wallet.name`) ?? '...';
-                                                                                return w ? `${name} — ${w.amount ?? ''} ${w.currency?.code ?? ''}`.trimEnd() : name;
+                                                                                const name =
+                                                                                    w?.name ??
+                                                                                    form.getValues(
+                                                                                        `entries.${realIndex}.wallet.name`,
+                                                                                    ) ??
+                                                                                    '...';
+                                                                                return w
+                                                                                    ? `${name} — ${w.amount ?? ''} ${w.currency?.code ?? ''}`.trimEnd()
+                                                                                    : name;
                                                                             })()}
                                                                         </span>
                                                                     ) : (
-                                                                        <span className="text-muted-foreground">Кошелек</span>
+                                                                        <span className="text-muted-foreground">
+                                                                            Кошелек
+                                                                        </span>
                                                                     )}
                                                                 </SelectTrigger>
                                                             </FormControl>
@@ -1087,16 +1124,29 @@ export function OperationForm({
                                                                 data-wallet-select="wallet"
                                                                 onScroll={handleWalletsScroll}
                                                                 className="min-h-[240px]"
-                                                                header={walletSearchSide === 'bottom' ? renderWalletSearch('top') : undefined}
-                                                                footer={walletSearchSide === 'top' ? renderWalletSearch('bottom') : undefined}
+                                                                header={
+                                                                    walletSearchSide === 'bottom'
+                                                                        ? renderWalletSearch('top')
+                                                                        : undefined
+                                                                }
+                                                                footer={
+                                                                    walletSearchSide === 'top'
+                                                                        ? renderWalletSearch('bottom')
+                                                                        : undefined
+                                                                }
                                                             >
-                                                                {field.value && !walletsList?.find((w) => w.id === field.value) && (
-                                                                    <SelectItem value={field.value}>
-                                                                        {form.getValues(`entries.${realIndex}.wallet.name`) ||
-                                                                            selectedWalletsCache.current.get(field.value)?.name ||
-                                                                            field.value}
-                                                                    </SelectItem>
-                                                                )}
+                                                                {field.value &&
+                                                                    !walletsList?.find((w) => w.id === field.value) && (
+                                                                        <SelectItem value={field.value}>
+                                                                            {form.getValues(
+                                                                                `entries.${realIndex}.wallet.name`,
+                                                                            ) ||
+                                                                                selectedWalletsCache.current.get(
+                                                                                    field.value,
+                                                                                )?.name ||
+                                                                                field.value}
+                                                                        </SelectItem>
+                                                                    )}
                                                                 {walletsList?.map((wallet) => (
                                                                     <SelectItem key={wallet.id} value={wallet.id}>
                                                                         {wallet.name} — {wallet.amount}{' '}

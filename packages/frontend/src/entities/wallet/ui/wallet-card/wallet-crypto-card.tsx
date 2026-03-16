@@ -444,60 +444,60 @@ export const CryptoWalletCard = ({
                                 </div>
                             </div>
                             {formatWalletRequisites(wallet) && (
-                                    <div className="mt-2 flex gap-2 items-center">
-                                        {isSpecialWallet(wallet) && (
-                                            <>
-                                                {isBybitWallet(wallet) && (
-                                                    <>
-                                                        <Button
-                                                            variant="default"
-                                                            size="sm"
-                                                            onPointerDown={(e) => {
-                                                                e.stopPropagation();
-                                                                handleCopySpecificRequisite(
-                                                                    wallet.details?.address,
-                                                                    'Адрес кошелька',
-                                                                );
-                                                            }}
-                                                            className="relative z-10 cursor-pointer"
-                                                        >
-                                                            TRC
-                                                        </Button>
-                                                        <Button
-                                                            variant="default"
-                                                            size="sm"
-                                                            onPointerDown={(e) => {
-                                                                e.stopPropagation();
-                                                                handleCopySpecificRequisite(
-                                                                    wallet.details?.exchangeUid,
-                                                                    'UID',
-                                                                );
-                                                            }}
-                                                            className="relative z-10 cursor-pointer"
-                                                        >
-                                                            BB
-                                                        </Button>
-                                                    </>
-                                                )}
-                                                {isTrustWallet(wallet) && (
+                                <div className="mt-2 flex gap-2 items-center">
+                                    {isSpecialWallet(wallet) && (
+                                        <>
+                                            {isBybitWallet(wallet) && (
+                                                <>
                                                     <Button
                                                         variant="default"
                                                         size="sm"
                                                         onPointerDown={(e) => {
                                                             e.stopPropagation();
-                                                            const template = getSpecialWalletTemplate(wallet);
-                                                            if (template) handleCopySpecialTemplate(template);
+                                                            handleCopySpecificRequisite(
+                                                                wallet.details?.address,
+                                                                'Адрес кошелька',
+                                                            );
                                                         }}
                                                         className="relative z-10 cursor-pointer"
                                                     >
-                                                        <Copy className="h-4 w-4 mr-2" />
-                                                        Копировать шаблон
+                                                        TRC
                                                     </Button>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                )}
+                                                    <Button
+                                                        variant="default"
+                                                        size="sm"
+                                                        onPointerDown={(e) => {
+                                                            e.stopPropagation();
+                                                            handleCopySpecificRequisite(
+                                                                wallet.details?.exchangeUid,
+                                                                'UID',
+                                                            );
+                                                        }}
+                                                        className="relative z-10 cursor-pointer"
+                                                    >
+                                                        BB
+                                                    </Button>
+                                                </>
+                                            )}
+                                            {isTrustWallet(wallet) && (
+                                                <Button
+                                                    variant="default"
+                                                    size="sm"
+                                                    onPointerDown={(e) => {
+                                                        e.stopPropagation();
+                                                        const template = getSpecialWalletTemplate(wallet);
+                                                        if (template) handleCopySpecialTemplate(template);
+                                                    }}
+                                                    className="relative z-10 cursor-pointer"
+                                                >
+                                                    <Copy className="h-4 w-4 mr-2" />
+                                                    Копировать шаблон
+                                                </Button>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </CardHeader>
                 </Card>

@@ -176,9 +176,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                         <span className="text-xs">Гайды</span>
                                     </Button>
                                 </div>
-                                <div
-                                    className={`grid gap-2 ${isUserRole ? 'grid-cols-2' : 'grid-cols-3'}`}
-                                >
+                                <div className={`grid gap-2 ${isUserRole ? 'grid-cols-2' : 'grid-cols-3'}`}>
                                     <Button
                                         variant="default"
                                         className="text-sm"

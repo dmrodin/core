@@ -182,7 +182,10 @@ export default function WalletOperationsPage() {
                                 <div>
                                     <h1 className="text-lg sm:text-2xl font-bold">
                                         {wallet.name}
-                                        <span className="hidden sm:inline"> — {formatNumber(wallet.amount)} {wallet.currency.code}</span>
+                                        <span className="hidden sm:inline">
+                                            {' '}
+                                            — {formatNumber(wallet.amount)} {wallet.currency.code}
+                                        </span>
                                     </h1>
                                     <p className="text-sm font-semibold sm:hidden">
                                         {formatNumber(wallet.amount)} {wallet.currency.code}

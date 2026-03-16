@@ -79,8 +79,7 @@ function SelectContent({
                     data-slot="select-viewport"
                     className={cn(
                         'overflow-y-auto overflow-x-hidden p-1 flex-1',
-                        position === 'popper' &&
-                            'w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1',
+                        position === 'popper' && 'w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1',
                         viewportClassName,
                     )}
                     onScroll={onScroll}
