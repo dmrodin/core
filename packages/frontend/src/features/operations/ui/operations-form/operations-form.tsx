@@ -632,7 +632,7 @@ export function OperationForm({
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className={cn('flex flex-col gap-6', className)} {...props}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className={cn('flex flex-col gap-4 sm:gap-6', className)} {...props}>
                 {!isEditing && lockedPeriodForDate && (
                     <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                         Создание операций запрещено в период{' '}
@@ -981,7 +981,7 @@ export function OperationForm({
                     <div className="lg:grid lg:grid-cols-2 gap-4">
                         {directions.map((dir) => (
                             <div key={dir} className="flex flex-col gap-3 mt-2">
-                                <div className="lg:flex justify-between items-center">
+                                <div className="flex justify-between items-center">
                                     <p className="font-medium">
                                         {dir === 'credit'
                                             ? 'Прибавить к...'
@@ -1011,14 +1011,14 @@ export function OperationForm({
                                     .map(({ item, realIndex }) => (
                                         <div
                                             key={item.fieldId}
-                                            className="flex flex-col gap-3 sm:flex-row sm:items-end"
+                                            className="flex flex-row items-end gap-2"
                                         >
                                             <FormField
                                                 control={form.control}
                                                 name={`entries.${realIndex}.wallet.id`}
                                                 render={({ field }) => (
-                                                    <FormItem className="flex-1">
-                                                        <FormLabel>
+                                                    <FormItem className="flex-1 min-w-0">
+                                                        <FormLabel className="hidden sm:block">
                                                             Кошелек <span className="text-destructive">*</span>
                                                         </FormLabel>
                                                         <Select
@@ -1027,8 +1027,8 @@ export function OperationForm({
                                                             value={field.value || ''}
                                                         >
                                                             <FormControl>
-                                                                <SelectTrigger className="lg:w-[250px] w-full">
-                                                                    <SelectValue placeholder="Выберите кошелек" />
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Кошелек" />
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent
@@ -1051,6 +1051,7 @@ export function OperationForm({
                                                                     renderWalletSearch('bottom')}
                                                             </SelectContent>
                                                         </Select>
+                                                        <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
@@ -1059,8 +1060,8 @@ export function OperationForm({
                                                 control={form.control}
                                                 name={`entries.${realIndex}.amount`}
                                                 render={({ field }) => (
-                                                    <FormItem className="w-full sm:w-auto">
-                                                        <FormLabel>
+                                                    <FormItem className="w-24 shrink-0">
+                                                        <FormLabel className="hidden sm:block">
                                                             Сумма <span className="text-destructive">*</span>
                                                         </FormLabel>
                                                         <FormControl>
@@ -1100,7 +1101,7 @@ export function OperationForm({
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={() => remove(realIndex)}
-                                                className="self-start text-destructive hover:bg-destructive/10 sm:self-auto"
+                                                className="shrink-0 text-destructive hover:bg-destructive/10"
                                             >
                                                 <Trash2 className="size-4" />
                                             </Button>
