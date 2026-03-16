@@ -318,10 +318,18 @@ export const SimpleWalletCard = ({
                                         router.push(ROUTER_MAP.WALLET_OPERATIONS(wallet.id));
                                     }}
                                 >
-                                    {wallet.walletType ? `${getWalletTypeLabel(wallet.walletType)} ` : ''}
-                                    {wallet.walletKind === 'simple' ? 'Касса ' : ''}
                                     {wallet.name}
                                 </Button>
+                                {wallet.walletKind === 'simple' && (
+                                    <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                                        Касса
+                                    </span>
+                                )}
+                                {wallet.walletType && (
+                                    <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                                        {getWalletTypeLabel(wallet.walletType)}
+                                    </span>
+                                )}
                                 {formatWalletRequisites(wallet) && (
                                     <Button
                                         variant="ghost"

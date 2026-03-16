@@ -340,8 +340,14 @@ export const BankWalletCard = ({
                                         router.push(ROUTER_MAP.WALLET_OPERATIONS(wallet.id));
                                     }}
                                 >
-                                    {getWalletTypeLabel(wallet.walletType)} {wallet.name}
+                                    {wallet.name}
                                 </Button>
+                                <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                                    Банк
+                                </span>
+                                <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                                    {getWalletTypeLabel(wallet.walletType)}
+                                </span>
                                 {formatWalletRequisites(wallet) && (
                                     <Button
                                         variant="ghost"
