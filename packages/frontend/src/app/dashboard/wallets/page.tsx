@@ -403,7 +403,7 @@ export default function WalletsPage() {
                 </div>
             </Tabs>
 
-            <div className="space-y-4">
+            <div className="space-y-2 sm:space-y-4">
                 {wallets.length === 0 && !isFetchingNextPage && (
                     <Empty>
                         <EmptyHeader>

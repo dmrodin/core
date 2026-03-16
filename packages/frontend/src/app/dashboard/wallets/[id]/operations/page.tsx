@@ -233,9 +233,9 @@ export default function WalletOperationsPage() {
                                                 )
                                             }
                                         >
-                                            <CardContent className="py-4 relative">
-                                                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                                    <div className="space-y-2 flex-1">
+                                            <CardContent className="py-2 sm:py-4 relative">
+                                                <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                                    <div className="space-y-1 sm:space-y-2 flex-1">
                                                         <div className="flex items-center gap-2 flex-wrap">
                                                             <p className="font-semibold">{operation.type.name}</p>
                                                             {operation.applicationId && (
@@ -253,7 +253,7 @@ export default function WalletOperationsPage() {
                                                             {operation.created_by?.username}
                                                         </p>
 
-                                                        <div className="space-y-1.5">
+                                                        <div className="space-y-1">
                                                             {[...operation.entries]
                                                                 .sort(
                                                                     (a, b) =>
@@ -263,7 +263,7 @@ export default function WalletOperationsPage() {
                                                                 .map((entry) => (
                                                                     <div
                                                                         key={entry.id}
-                                                                        className="p-2 rounded-md bg-muted/50"
+                                                                        className="py-1 px-2 rounded-md bg-muted/50"
                                                                     >
                                                                         {showDetails ? (
                                                                             <p className="text-sm">

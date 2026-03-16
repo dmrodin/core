@@ -229,11 +229,11 @@ export default function OperationsPage() {
                                                     <DropdownMenu key={operation.id}>
                                                         <Card
                                                             ref={isLast ? lastOperationRef : null}
-                                                            className="relative hover:bg-accent/50 transition-colors mb-2"
+                                                            className="relative hover:bg-accent/50 transition-colors mb-1"
                                                         >
                                                             <CardContent className="py-0 relative">
-                                                                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                                                    <div className="space-y-2 flex-1">
+                                                                <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                                                    <div className="space-y-1 sm:space-y-2 flex-1">
                                                                         <div className="flex items-center gap-2 flex-wrap">
                                                                             <p className="font-semibold">
                                                                                 {operation.type.name}
@@ -254,7 +254,7 @@ export default function OperationsPage() {
                                                                             {operation.created_by?.username}
                                                                         </p>
 
-                                                                        <div className="space-y-1.5">
+                                                                        <div className="space-y-1">
                                                                             {[...operation.entries]
                                                                                 .sort(
                                                                                     (a, b) =>
@@ -268,7 +268,7 @@ export default function OperationsPage() {
                                                                                 .map((entry) => (
                                                                                     <div
                                                                                         key={entry.id}
-                                                                                        className="p-2 rounded-md bg-muted/50"
+                                                                                        className="py-1 px-2 rounded-md bg-muted/50"
                                                                                     >
                                                                                         {showDetails ? (
                                                                                             <p className="text-sm">

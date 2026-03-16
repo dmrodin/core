@@ -295,9 +295,11 @@ export const BankWalletCard = ({
                             />
                         </div>
                     )}
-                    <CardHeader className={wallet.monthlyLimit && wallet.monthlyLimit > 0 ? 'pt-6 pb-6' : ''}>
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                            <div className="space-y-2 sm:max-w-[70%]">
+                    <CardHeader
+                        className={wallet.monthlyLimit && wallet.monthlyLimit > 0 ? 'pt-3 pb-3 sm:pt-6 sm:pb-6' : ''}
+                    >
+                        <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="space-y-1 sm:space-y-2 sm:max-w-[70%]">
                                 <div className="flex flex-wrap items-center gap-2">
                                     {selectionMode && (
                                         <Checkbox
@@ -362,10 +364,10 @@ export const BankWalletCard = ({
                                         <MoreHorizontal className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <p className="text-xl font-bold leading-tight sm:text-2xl">
+                                <p className="text-base font-bold leading-tight sm:text-2xl">
                                     {formatNumber(wallet.amount)} {wallet.currency.code}
                                 </p>
-                                <div className="mt-2 space-y-1">
+                                <div className="mt-1 sm:mt-2 space-y-1">
                                     <p className="text-xs text-muted-foreground">
                                         Создан: {formatDate(new Date(wallet.createdAt))}
                                     </p>
