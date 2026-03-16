@@ -471,6 +471,21 @@ export function OperationForm({
 
     React.useEffect(() => {
         if (isCorrection) return;
+        if (!isDebitAllowed || !isCreditAllowed) return;
+        const currentEntries = form.getValues('entries') ?? [];
+        if (currentEntries.length > 0) return;
+        form.setValue(
+            'entries',
+            [
+                { wallet: { id: '', name: '' }, direction: 'debit', amount: 0 },
+                { wallet: { id: '', name: '' }, direction: 'credit', amount: 0 },
+            ],
+            { shouldDirty: true, shouldValidate: true },
+        );
+    }, [form, isCorrection, isDebitAllowed, isCreditAllowed]);
+
+    React.useEffect(() => {
+        if (isCorrection) return;
         if (isDebitAllowed === isCreditAllowed) return;
 
         const allowedDirection: 'debit' | 'credit' = isDebitAllowed ? 'debit' : 'credit';
