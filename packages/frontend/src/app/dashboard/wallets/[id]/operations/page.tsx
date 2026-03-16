@@ -119,12 +119,20 @@ export default function WalletOperationsPage() {
 
     // Вычисляем баланс на конец каждого дня
     const daysWithBalance = Object.values(groupedByDay).map((day) => {
-        // Берем последнюю операцию дня
-        const lastOperation = day.operations[day.operations.length - 1];
-        // Находим entry для нашего кошелька в последней операции
-        const walletEntry = lastOperation?.entries.find((e) => e.walletId === walletId);
-        // Баланс на конец дня = after последней операции
-        const endBalance = walletEntry?.after ?? 0;
+        // Сортируем операции внутри дня по времени и берём последнюю
+        const sortedOps = [...day.operations].sort(
+            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        );
+        // Ищем последнюю операцию, у которой есть entry для нашего кошелька с заполненным after.
+        // Если у одной операции несколько entries для этого кошелька — берём последнюю (наибольший индекс).
+        let endBalance = 0;
+        for (let i = sortedOps.length - 1; i >= 0; i--) {
+            const walletEntries = sortedOps[i].entries.filter((e) => e.walletId === walletId && e.after != null);
+            if (walletEntries.length > 0) {
+                endBalance = walletEntries[walletEntries.length - 1].after!;
+                break;
+            }
+        }
 
         return {
             ...day,
@@ -172,9 +180,13 @@ export default function WalletOperationsPage() {
                                     <ArrowLeft className="h-5 w-5" />
                                 </Button>
                                 <div>
-                                    <h1 className="text-2xl font-bold">
-                                        {wallet.name} — {formatNumber(wallet.amount)} {wallet.currency.code}
+                                    <h1 className="text-lg sm:text-2xl font-bold">
+                                        {wallet.name}
+                                        <span className="hidden sm:inline"> — {formatNumber(wallet.amount)} {wallet.currency.code}</span>
                                     </h1>
+                                    <p className="text-sm font-semibold sm:hidden">
+                                        {formatNumber(wallet.amount)} {wallet.currency.code}
+                                    </p>
                                     <p className="text-sm text-muted-foreground">История операций</p>
                                 </div>
                             </div>
