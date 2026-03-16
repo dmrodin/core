@@ -91,6 +91,7 @@ export function OperationForm({
     const [walletSelectOpen, setWalletSelectOpen] = React.useState(false);
     const [walletSearchFocused, setWalletSearchFocused] = React.useState(false);
     const walletSearchInputRef = React.useRef<HTMLInputElement | null>(null);
+    const selectedWalletsCache = React.useRef<Map<string, WalletEntity>>(new Map());
 
     React.useEffect(() => {
         const id = setTimeout(() => {
@@ -307,7 +308,9 @@ export function OperationForm({
         for (const entry of entries) {
             const wallet = entry.wallet;
             if (wallet?.id && !byId.has(wallet.id)) {
-                byId.set(wallet.id, wallet as WalletEntity);
+                // Use cached full wallet data (with amount/currency) if available
+                const cached = selectedWalletsCache.current.get(wallet.id);
+                byId.set(wallet.id, (cached ?? wallet) as WalletEntity);
             }
         }
         return Array.from(byId.values());
@@ -339,10 +342,11 @@ export function OperationForm({
     const handleWalletSelectOpenChange = React.useCallback(
         (isOpen: boolean) => {
             if (!isOpen) {
-                setWalletSearch('');
                 setWalletSelectOpen(false);
                 return;
             }
+            setWalletSearch('');
+            setWalletSearchDebounced('');
             setWalletSelectOpen(true);
             setTimeout(updateWalletSearchSide, 0);
         },
@@ -367,38 +371,35 @@ export function OperationForm({
                 '[data-slot="select-content"][data-wallet-select="wallet"][data-state="open"]',
             ) as HTMLElement | null;
 
+        // Try to read the initial side; retry a few times until content is in the DOM
         let rafId = 0;
         let tries = 0;
         const tick = () => {
-            updateWalletSearchSide();
+            const content = getContent();
+            if (content) {
+                updateWalletSearchSide();
+                // Once found, observe future side changes (e.g. on resize)
+                const observer = new MutationObserver(updateWalletSearchSide);
+                observer.observe(content, { attributes: true, attributeFilter: ['data-side'] });
+                window.addEventListener('resize', updateWalletSearchSide);
+                // Store cleanup on the rafId variable trick — use a ref instead
+                cleanupRef.current = () => {
+                    observer.disconnect();
+                    window.removeEventListener('resize', updateWalletSearchSide);
+                };
+                return;
+            }
             tries += 1;
             if (tries < 10) {
                 rafId = window.requestAnimationFrame(tick);
             }
         };
+        const cleanupRef = { current: () => {} };
         rafId = window.requestAnimationFrame(tick);
-
-        const content = getContent();
-        if (!content) {
-            return () => {
-                if (rafId) window.cancelAnimationFrame(rafId);
-            };
-        }
-
-        const observer = new MutationObserver(() => {
-            updateWalletSearchSide();
-        });
-        observer.observe(content, { attributes: true, attributeFilter: ['data-side'] });
-
-        const handleWindowUpdate = () => updateWalletSearchSide();
-        window.addEventListener('resize', handleWindowUpdate);
-        window.addEventListener('scroll', handleWindowUpdate, true);
 
         return () => {
             if (rafId) window.cancelAnimationFrame(rafId);
-            observer.disconnect();
-            window.removeEventListener('resize', handleWindowUpdate);
-            window.removeEventListener('scroll', handleWindowUpdate, true);
+            cleanupRef.current();
         };
     }, [updateWalletSearchSide, walletSelectOpen]);
 
@@ -471,6 +472,21 @@ export function OperationForm({
 
     React.useEffect(() => {
         if (isCorrection) return;
+        if (!isDebitAllowed || !isCreditAllowed) return;
+        const currentEntries = form.getValues('entries') ?? [];
+        if (currentEntries.length > 0) return;
+        form.setValue(
+            'entries',
+            [
+                { wallet: { id: '', name: '' }, direction: 'debit', amount: 0 },
+                { wallet: { id: '', name: '' }, direction: 'credit', amount: 0 },
+            ],
+            { shouldDirty: true, shouldValidate: true },
+        );
+    }, [form, isCorrection, isDebitAllowed, isCreditAllowed]);
+
+    React.useEffect(() => {
+        if (isCorrection) return;
         if (isDebitAllowed === isCreditAllowed) return;
 
         const allowedDirection: 'debit' | 'credit' = isDebitAllowed ? 'debit' : 'credit';
@@ -521,6 +537,15 @@ export function OperationForm({
         form.clearErrors('entries');
         form.clearErrors('banksGroupId');
         form.clearErrors('expenseCategory');
+        form.clearErrors('conversionGroupId');
+
+        if (isConversionNumberRequired && !data.conversionGroupId) {
+            form.setError('conversionGroupId', {
+                type: 'manual',
+                message: 'Укажите номер конвертации',
+            });
+            return;
+        }
 
         if (isExpenseType && !data.expenseCategory) {
             form.setError('expenseCategory', {
@@ -617,7 +642,11 @@ export function OperationForm({
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className={cn('flex flex-col gap-6', className)} {...props}>
+            <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className={cn('flex flex-col gap-4 sm:gap-6', className)}
+                {...props}
+            >
                 {!isEditing && lockedPeriodForDate && (
                     <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                         Создание операций запрещено в период{' '}
@@ -878,28 +907,70 @@ export function OperationForm({
                                                 Кошелек <span className="text-destructive">*</span>
                                             </FormLabel>
                                             <Select
-                                                onValueChange={field.onChange}
+                                                onValueChange={(value) => {
+                                                    field.onChange(value);
+                                                    const found = walletsList?.find((w) => w.id === value);
+                                                    if (found) {
+                                                        form.setValue(`entries.${realIndex}.wallet.name`, found.name);
+                                                        selectedWalletsCache.current.set(value, found);
+                                                    }
+                                                }}
                                                 onOpenChange={handleWalletSelectOpenChange}
-                                                value={field.value || ''}
+                                                value={field.value || undefined}
                                             >
                                                 <FormControl>
                                                     <SelectTrigger className="w-full">
-                                                        <SelectValue placeholder="Выберите кошелек" />
+                                                        {field.value ? (
+                                                            <span className="truncate">
+                                                                {(() => {
+                                                                    const w = walletsList?.find(
+                                                                        (w) => w.id === field.value,
+                                                                    );
+                                                                    const name =
+                                                                        w?.name ??
+                                                                        form.getValues(
+                                                                            `entries.${realIndex}.wallet.name`,
+                                                                        ) ??
+                                                                        '...';
+                                                                    return w?.amount !== undefined
+                                                                        ? `${name} — ${w.amount} ${w.currency?.code ?? ''}`
+                                                                        : name;
+                                                                })()}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-muted-foreground">
+                                                                Выберите кошелек
+                                                            </span>
+                                                        )}
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent
                                                     data-wallet-select="wallet"
                                                     onScroll={handleWalletsScroll}
+                                                    className="min-h-[240px]"
+                                                    header={
+                                                        walletSearchSide === 'bottom'
+                                                            ? renderWalletSearch('top')
+                                                            : undefined
+                                                    }
+                                                    footer={
+                                                        walletSearchSide === 'top'
+                                                            ? renderWalletSearch('bottom')
+                                                            : undefined
+                                                    }
                                                 >
-                                                    {walletSearchSide === 'bottom' && renderWalletSearch('top')}
-                                                    {walletSearchSide === 'bottom' && <div className="h-12" />}
+                                                    {field.value && !walletsList?.find((w) => w.id === field.value) && (
+                                                        <SelectItem value={field.value}>
+                                                            {form.getValues(`entries.${realIndex}.wallet.name`) ||
+                                                                selectedWalletsCache.current.get(field.value)?.name ||
+                                                                field.value}
+                                                        </SelectItem>
+                                                    )}
                                                     {walletsList?.map((wallet) => (
                                                         <SelectItem key={wallet.id} value={wallet.id}>
                                                             {wallet.name}
                                                         </SelectItem>
                                                     ))}
-                                                    {walletSearchSide === 'top' && <div className="h-12" />}
-                                                    {walletSearchSide === 'top' && renderWalletSearch('bottom')}
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
@@ -966,7 +1037,7 @@ export function OperationForm({
                     <div className="lg:grid lg:grid-cols-2 gap-4">
                         {directions.map((dir) => (
                             <div key={dir} className="flex flex-col gap-3 mt-2">
-                                <div className="lg:flex justify-between items-center">
+                                <div className="flex justify-between items-center">
                                     <p className="font-medium">
                                         {dir === 'credit'
                                             ? 'Прибавить к...'
@@ -994,48 +1065,97 @@ export function OperationForm({
                                     .map((item, realIndex) => ({ item, realIndex }))
                                     .filter(({ item }) => item.direction === dir)
                                     .map(({ item, realIndex }) => (
-                                        <div
-                                            key={item.fieldId}
-                                            className="flex flex-col gap-3 sm:flex-row sm:items-end"
-                                        >
+                                        <div key={item.fieldId} className="flex flex-row items-end gap-2">
                                             <FormField
                                                 control={form.control}
                                                 name={`entries.${realIndex}.wallet.id`}
                                                 render={({ field }) => (
-                                                    <FormItem className="flex-1">
-                                                        <FormLabel>
+                                                    <FormItem className="flex-1 min-w-0">
+                                                        <FormLabel className="hidden sm:block">
                                                             Кошелек <span className="text-destructive">*</span>
                                                         </FormLabel>
                                                         <Select
-                                                            onValueChange={field.onChange}
+                                                            onValueChange={(value) => {
+                                                                field.onChange(value);
+                                                                const found = walletsList?.find((w) => w.id === value);
+                                                                if (found) {
+                                                                    form.setValue(
+                                                                        `entries.${realIndex}.wallet.name`,
+                                                                        found.name,
+                                                                    );
+                                                                    selectedWalletsCache.current.set(value, found);
+                                                                }
+                                                            }}
                                                             onOpenChange={handleWalletSelectOpenChange}
-                                                            value={field.value || ''}
+                                                            value={field.value || undefined}
                                                         >
                                                             <FormControl>
-                                                                <SelectTrigger className="lg:w-[250px] w-full">
-                                                                    <SelectValue placeholder="Выберите кошелек" />
+                                                                <SelectTrigger className="w-full">
+                                                                    {field.value ? (
+                                                                        <span className="truncate">
+                                                                            {(() => {
+                                                                                const inList = walletsList?.find(
+                                                                                    (w) => w.id === field.value,
+                                                                                );
+                                                                                const cached =
+                                                                                    selectedWalletsCache.current.get(
+                                                                                        field.value,
+                                                                                    );
+                                                                                const w = inList ?? cached;
+                                                                                const name =
+                                                                                    w?.name ??
+                                                                                    form.getValues(
+                                                                                        `entries.${realIndex}.wallet.name`,
+                                                                                    ) ??
+                                                                                    '...';
+                                                                                return w
+                                                                                    ? `${name} — ${w.amount ?? ''} ${w.currency?.code ?? ''}`.trimEnd()
+                                                                                    : name;
+                                                                            })()}
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span className="text-muted-foreground">
+                                                                            Кошелек
+                                                                        </span>
+                                                                    )}
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent
                                                                 data-wallet-select="wallet"
                                                                 onScroll={handleWalletsScroll}
+                                                                className="min-h-[240px]"
+                                                                header={
+                                                                    walletSearchSide === 'bottom'
+                                                                        ? renderWalletSearch('top')
+                                                                        : undefined
+                                                                }
+                                                                footer={
+                                                                    walletSearchSide === 'top'
+                                                                        ? renderWalletSearch('bottom')
+                                                                        : undefined
+                                                                }
                                                             >
-                                                                {walletSearchSide === 'bottom' &&
-                                                                    renderWalletSearch('top')}
-                                                                {walletSearchSide === 'bottom' && (
-                                                                    <div className="h-12" />
-                                                                )}
+                                                                {field.value &&
+                                                                    !walletsList?.find((w) => w.id === field.value) && (
+                                                                        <SelectItem value={field.value}>
+                                                                            {form.getValues(
+                                                                                `entries.${realIndex}.wallet.name`,
+                                                                            ) ||
+                                                                                selectedWalletsCache.current.get(
+                                                                                    field.value,
+                                                                                )?.name ||
+                                                                                field.value}
+                                                                        </SelectItem>
+                                                                    )}
                                                                 {walletsList?.map((wallet) => (
                                                                     <SelectItem key={wallet.id} value={wallet.id}>
                                                                         {wallet.name} — {wallet.amount}{' '}
                                                                         {wallet.currency?.code ?? ''}
                                                                     </SelectItem>
                                                                 ))}
-                                                                {walletSearchSide === 'top' && <div className="h-12" />}
-                                                                {walletSearchSide === 'top' &&
-                                                                    renderWalletSearch('bottom')}
                                                             </SelectContent>
                                                         </Select>
+                                                        <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
@@ -1044,8 +1164,8 @@ export function OperationForm({
                                                 control={form.control}
                                                 name={`entries.${realIndex}.amount`}
                                                 render={({ field }) => (
-                                                    <FormItem className="w-full sm:w-auto">
-                                                        <FormLabel>
+                                                    <FormItem className="w-24 shrink-0">
+                                                        <FormLabel className="hidden sm:block">
                                                             Сумма <span className="text-destructive">*</span>
                                                         </FormLabel>
                                                         <FormControl>
@@ -1085,7 +1205,7 @@ export function OperationForm({
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={() => remove(realIndex)}
-                                                className="self-start text-destructive hover:bg-destructive/10 sm:self-auto"
+                                                className="shrink-0 text-destructive hover:bg-destructive/10"
                                             >
                                                 <Trash2 className="size-4" />
                                             </Button>

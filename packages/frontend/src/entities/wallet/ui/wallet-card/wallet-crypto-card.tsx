@@ -340,156 +340,164 @@ export const CryptoWalletCard = ({
                             />
                         </div>
                     )}
-                    <CardHeader className={wallet.monthlyLimit && wallet.monthlyLimit > 0 ? 'pt-6 pb-6' : ''}>
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                            <div className="space-y-2 sm:max-w-[70%]">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    {selectionMode && (
-                                        <Checkbox
-                                            data-checkbox
-                                            checked={isSelected}
-                                            onCheckedChange={() => onSelect?.(wallet.id)}
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="relative z-10"
-                                        />
-                                    )}
-                                    <Button
-                                        variant="link"
-                                        className="text-lg sm:text-xl p-0 h-auto font-semibold relative z-10 no-underline hover:no-underline cursor-pointer"
-                                        data-wallet-link
-                                        onPointerDown={(e) => {
-                                            e.stopPropagation();
-                                            router.push(ROUTER_MAP.WALLET_OPERATIONS(wallet.id));
-                                        }}
-                                    >
-                                        {getWalletTypeLabel(wallet.walletType)} {wallet.name}
-                                    </Button>
-                                    {formatWalletRequisites(wallet) && (
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-6 w-6 relative z-10 cursor-pointer"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                e.preventDefault();
-                                                handleCopyRequisites();
-                                            }}
-                                            onPointerDown={(e) => {
-                                                e.stopPropagation();
-                                                e.preventDefault();
-                                            }}
-                                            title="Скопировать реквизиты"
-                                        >
-                                            <Copy className="h-3.5 w-3.5" />
-                                        </Button>
-                                    )}
-                                    <WalletOwner user={wallet.user} secondUser={wallet.secondUser} />
-                                </div>
-                                {getFullDescription() && (
-                                    <CardDescription>
-                                        <span
-                                            onPointerDown={(e) => e.stopPropagation()}
-                                            onMouseDown={(e) => e.stopPropagation()}
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            {getFullDescription()}
-                                        </span>
-                                    </CardDescription>
+                    <CardHeader
+                        className={cn(
+                            wallet.monthlyLimit && wallet.monthlyLimit > 0 ? 'pt-3 pb-3 sm:pt-6 sm:pb-6' : '',
+                            'relative',
+                        )}
+                    >
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-1 right-1 h-8 w-8 z-10"
+                                aria-label="Открыть меню кошелька"
+                                onTouchStart={handleMenuTriggerTouchStart}
+                                onTouchMove={handleMenuTriggerTouchMove}
+                                onTouchEnd={(event) => {
+                                    touchStartRef.current = null;
+                                    event.stopPropagation();
+                                }}
+                                onClick={handleMenuTriggerClick}
+                                onPointerDown={(event) => event.stopPropagation()}
+                            >
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <div className="flex flex-col gap-1">
+                            <div className="flex flex-wrap items-center gap-2 pr-8">
+                                {selectionMode && (
+                                    <Checkbox
+                                        data-checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={() => onSelect?.(wallet.id)}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="relative z-10"
+                                    />
                                 )}
-                            </div>
-                            <div className="text-left sm:text-right">
-                                <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="link"
+                                    className="text-sm sm:text-base p-0 h-auto font-semibold relative z-10 no-underline hover:no-underline cursor-pointer"
+                                    data-wallet-link
+                                    onPointerDown={(e) => {
+                                        e.stopPropagation();
+                                        router.push(ROUTER_MAP.WALLET_OPERATIONS(wallet.id));
+                                    }}
+                                >
+                                    {wallet.name}
+                                </Button>
+                                <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                                    Крипто
+                                </span>
+                                <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                                    {getWalletTypeLabel(wallet.walletType)}
+                                </span>
+                                {formatWalletRequisites(wallet) && (
                                     <Button
-                                        type="button"
                                         variant="ghost"
                                         size="icon"
-                                        className="mb-2 ml-auto h-8 w-8"
-                                        aria-label="Открыть меню кошелька"
-                                        onTouchStart={handleMenuTriggerTouchStart}
-                                        onTouchMove={handleMenuTriggerTouchMove}
-                                        onTouchEnd={(event) => {
-                                            touchStartRef.current = null;
-                                            event.stopPropagation();
+                                        className="h-6 w-6 relative z-10 cursor-pointer"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            handleCopyRequisites();
                                         }}
-                                        onClick={handleMenuTriggerClick}
-                                        onPointerDown={(event) => event.stopPropagation()}
+                                        onPointerDown={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                        }}
+                                        title="Скопировать реквизиты"
                                     >
-                                        <MoreHorizontal className="h-4 w-4" />
+                                        <Copy className="h-3.5 w-3.5" />
                                     </Button>
-                                </DropdownMenuTrigger>
-                                <p className="text-xl font-bold leading-tight sm:text-2xl">
+                                )}
+                                <WalletOwner user={wallet.user} secondUser={wallet.secondUser} />
+                            </div>
+                            {getFullDescription() && (
+                                <CardDescription>
+                                    <span
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {getFullDescription()}
+                                    </span>
+                                </CardDescription>
+                            )}
+                            <div className="flex items-end justify-between mt-1">
+                                <p className="text-base font-bold leading-tight sm:text-xl">
                                     {formatNumber(wallet.amount)} {wallet.currency.code}
                                 </p>
-                                <div className="mt-2 space-y-1">
-                                    <p className="text-xs text-muted-foreground">
+                                <div className="text-right">
+                                    <p className="text-xs text-muted-foreground whitespace-nowrap">
                                         Создан: {formatDate(new Date(wallet.createdAt))}
                                     </p>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground whitespace-nowrap">
                                         Обновлен: {formatDate(new Date(wallet.updatedAt))}
                                     </p>
                                     {wallet.lastReconciledAt && (
                                         <p className="text-xs text-muted-foreground">
-                                            Дата последней сверки: {formatDateTime(wallet.lastReconciledAt)} <br />
-                                            Выполнил: {wallet.lastReconciledBy ? wallet.updated_by.username : '-'}
+                                            Сверка: {formatDateTime(wallet.lastReconciledAt)}
                                         </p>
                                     )}
                                 </div>
-                                {formatWalletRequisites(wallet) && (
-                                    <div className="mt-3 flex gap-2 items-center">
-                                        {isSpecialWallet(wallet) && (
-                                            <>
-                                                {isBybitWallet(wallet) && (
-                                                    <>
-                                                        <Button
-                                                            variant="default"
-                                                            size="sm"
-                                                            onPointerDown={(e) => {
-                                                                e.stopPropagation();
-                                                                handleCopySpecificRequisite(
-                                                                    wallet.details?.address,
-                                                                    'Адрес кошелька',
-                                                                );
-                                                            }}
-                                                            className="relative z-10 cursor-pointer"
-                                                        >
-                                                            TRC
-                                                        </Button>
-                                                        <Button
-                                                            variant="default"
-                                                            size="sm"
-                                                            onPointerDown={(e) => {
-                                                                e.stopPropagation();
-                                                                handleCopySpecificRequisite(
-                                                                    wallet.details?.exchangeUid,
-                                                                    'UID',
-                                                                );
-                                                            }}
-                                                            className="relative z-10 cursor-pointer"
-                                                        >
-                                                            BB
-                                                        </Button>
-                                                    </>
-                                                )}
-                                                {isTrustWallet(wallet) && (
+                            </div>
+                            {formatWalletRequisites(wallet) && (
+                                <div className="mt-2 flex gap-2 items-center">
+                                    {isSpecialWallet(wallet) && (
+                                        <>
+                                            {isBybitWallet(wallet) && (
+                                                <>
                                                     <Button
                                                         variant="default"
                                                         size="sm"
                                                         onPointerDown={(e) => {
                                                             e.stopPropagation();
-                                                            const template = getSpecialWalletTemplate(wallet);
-                                                            if (template) handleCopySpecialTemplate(template);
+                                                            handleCopySpecificRequisite(
+                                                                wallet.details?.address,
+                                                                'Адрес кошелька',
+                                                            );
                                                         }}
                                                         className="relative z-10 cursor-pointer"
                                                     >
-                                                        <Copy className="h-4 w-4 mr-2" />
-                                                        Копировать шаблон
+                                                        TRC
                                                     </Button>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                                                    <Button
+                                                        variant="default"
+                                                        size="sm"
+                                                        onPointerDown={(e) => {
+                                                            e.stopPropagation();
+                                                            handleCopySpecificRequisite(
+                                                                wallet.details?.exchangeUid,
+                                                                'UID',
+                                                            );
+                                                        }}
+                                                        className="relative z-10 cursor-pointer"
+                                                    >
+                                                        BB
+                                                    </Button>
+                                                </>
+                                            )}
+                                            {isTrustWallet(wallet) && (
+                                                <Button
+                                                    variant="default"
+                                                    size="sm"
+                                                    onPointerDown={(e) => {
+                                                        e.stopPropagation();
+                                                        const template = getSpecialWalletTemplate(wallet);
+                                                        if (template) handleCopySpecialTemplate(template);
+                                                    }}
+                                                    className="relative z-10 cursor-pointer"
+                                                >
+                                                    <Copy className="h-4 w-4 mr-2" />
+                                                    Копировать шаблон
+                                                </Button>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </CardHeader>
                 </Card>
