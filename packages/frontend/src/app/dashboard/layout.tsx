@@ -71,6 +71,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <div className="flex items-center gap-2 px-4 w-full">
                         {isMobile ? (
                             <>
+                                <SidebarTrigger />
                                 <Button
                                     variant="ghost"
                                     size="icon"
