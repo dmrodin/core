@@ -108,6 +108,7 @@ export const WalletSchema = z.object({
     details: WalletDetailsSchema.nullable().optional(),
     lastReconciledAt: z.string().datetime().nullable().optional(),
     lastReconciledBy: z.string().uuid().nullable().optional(),
+    lastReconciled_by: WalletUserSchema.nullable().optional(),
 });
 
 export const WalletCurrencyGroupSchema = z.object({

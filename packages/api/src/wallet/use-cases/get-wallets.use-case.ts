@@ -179,6 +179,12 @@ export class GetWalletsUseCase {
                         username: true,
                     },
                 },
+                lastReconciled_by: {
+                    select: {
+                        id: true,
+                        username: true,
+                    },
+                },
                 currency: {
                     select: {
                         id: true,
