@@ -89,7 +89,7 @@ export function OperationForm({
     const [walletSearchDebounced, setWalletSearchDebounced] = React.useState('');
     const [walletSearchSide, setWalletSearchSide] = React.useState<'top' | 'bottom'>('bottom');
     const [walletSelectOpen, setWalletSelectOpen] = React.useState(false);
-    const [walletSearchFocused, setWalletSearchFocused] = React.useState(false);
+    const walletSearchFocusedRef = React.useRef(false);
     const walletSearchInputRef = React.useRef<HTMLInputElement | null>(null);
     const selectedWalletsCache = React.useRef<Map<string, WalletEntity>>(new Map());
 
@@ -329,7 +329,7 @@ export function OperationForm({
     );
 
     const updateWalletSearchSide = React.useCallback(() => {
-        if (walletSearchFocused) return;
+        if (walletSearchFocusedRef.current) return;
         const content = document.querySelector(
             '[data-slot="select-content"][data-wallet-select="wallet"][data-state="open"]',
         ) as HTMLElement | null;
@@ -337,7 +337,7 @@ export function OperationForm({
         if (side === 'top' || side === 'bottom') {
             setWalletSearchSide(side);
         }
-    }, [walletSearchFocused]);
+    }, []);
 
     const handleWalletSelectOpenChange = React.useCallback(
         (isOpen: boolean) => {
@@ -378,15 +378,9 @@ export function OperationForm({
             const content = getContent();
             if (content) {
                 updateWalletSearchSide();
-                // Once found, observe future side changes (e.g. on resize)
-                const observer = new MutationObserver(updateWalletSearchSide);
-                observer.observe(content, { attributes: true, attributeFilter: ['data-side'] });
-                window.addEventListener('resize', updateWalletSearchSide);
-                // Store cleanup on the rafId variable trick — use a ref instead
-                cleanupRef.current = () => {
-                    observer.disconnect();
-                    window.removeEventListener('resize', updateWalletSearchSide);
-                };
+                // Once found, set the side and stop — no ongoing listeners needed
+                updateWalletSearchSide();
+                cleanupRef.current = () => {};
                 return;
             }
             tries += 1;
@@ -407,7 +401,10 @@ export function OperationForm({
         (position: 'top' | 'bottom') => (
             <div
                 data-slot="wallet-search"
-                className={cn('sticky z-10 bg-popover px-2 pb-2 pt-2', position === 'top' ? 'top-0' : 'bottom-0')}
+                className={cn(
+                    'bg-popover px-2 py-2',
+                    position === 'top' ? 'border-b border-border/40' : 'border-t border-border/40',
+                )}
             >
                 <Input
                     placeholder="Поиск кошелька..."
@@ -415,8 +412,12 @@ export function OperationForm({
                     onChange={(e) => setWalletSearch(e.target.value)}
                     onKeyDown={(e) => e.stopPropagation()}
                     onKeyUp={(e) => e.stopPropagation()}
-                    onFocus={() => setWalletSearchFocused(true)}
-                    onBlur={() => setWalletSearchFocused(false)}
+                    onFocus={() => {
+                        walletSearchFocusedRef.current = true;
+                    }}
+                    onBlur={() => {
+                        walletSearchFocusedRef.current = false;
+                    }}
                     ref={walletSearchInputRef}
                     className="h-8"
                 />
