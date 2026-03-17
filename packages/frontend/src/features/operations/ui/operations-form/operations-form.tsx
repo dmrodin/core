@@ -49,6 +49,7 @@ import { formatNumber, parseFormattedNumber } from '@/shared/lib/utils/format-nu
 import { useBanks } from '@/entities/bank';
 import { useInfiniteWallets } from '@/entities/wallet';
 import type { Wallet as WalletEntity } from '@/entities/wallet';
+import { UserRole } from '@/entities/users/model/user-schemas';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 
 const EXPENSE_OPERATION_TYPE_CODE = 'expense';
@@ -68,6 +69,7 @@ export function OperationForm({
     const router = useRouter();
     const searchParams = useSearchParams();
     const user = useAuthStore((state) => state.user);
+    const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
     const canLoadOperationsReferences = Boolean(user);
     const canLoadApplications = Boolean(user);
     const createMutation = useCreateOperation();
@@ -570,7 +572,7 @@ export function OperationForm({
             return;
         }
 
-        if (!isSingleSideOperation && !isAvans) {
+        if (!isSingleSideOperation && !isAvans && !(isCorrection && hasAdminRole)) {
             const hasDebitEntry = data.entries.some((entry) => entry.direction === 'debit');
             const hasCreditEntry = data.entries.some((entry) => entry.direction === 'credit');
 
