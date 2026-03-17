@@ -2,9 +2,11 @@
 
 import * as React from 'react';
 
-import { Locale, format, parse, setHours, setMinutes, setSeconds } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
+
+import { APP_TIMEZONE } from '@/shared/config/timezone';
 
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/shadcn/button';
@@ -20,25 +22,54 @@ interface DateTimePickerProps {
     label?: string;
 }
 
-function formatDate(date: Date | undefined, locale: Locale = ru) {
-    if (!date) {
-        return '';
-    }
-    return format(date, 'dd.MM.yyyy', { locale });
+// Format a UTC Date to display in APP_TIMEZONE
+function formatDate(date: Date | undefined) {
+    if (!date) return '';
+    return new Intl.DateTimeFormat('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        timeZone: APP_TIMEZONE,
+    }).format(date);
 }
 
 function formatTime(date: Date | undefined) {
-    if (!date) {
-        return '00:00';
-    }
-    return format(date, 'HH:mm');
+    if (!date) return '00:00';
+    const parts = new Intl.DateTimeFormat('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: APP_TIMEZONE,
+    }).formatToParts(date);
+    const hour = parts.find((p) => p.type === 'hour')?.value ?? '00';
+    const minute = parts.find((p) => p.type === 'minute')?.value ?? '00';
+    return `${hour}:${minute}`;
 }
 
 function isValidDate(date: Date | undefined) {
-    if (!date) {
-        return false;
-    }
+    if (!date) return false;
     return !isNaN(date.getTime());
+}
+
+// Returns how many ms APP_TIMEZONE is ahead of UTC at the given moment
+function getAppTimezoneOffsetMs(date: Date): number {
+    const utcStr = date.toLocaleString('en-US', { timeZone: 'UTC' });
+    const tzStr = date.toLocaleString('en-US', { timeZone: APP_TIMEZONE });
+    return new Date(tzStr).getTime() - new Date(utcStr).getTime();
+}
+
+// Converts user-entered date (dd.MM.yyyy) + time (HH:mm) treated as APP_TIMEZONE to UTC ISO string
+function buildISOString(dateStr: string, hours: number, minutes: number): string | null {
+    const parts = dateStr.split('.');
+    if (parts.length !== 3) return null;
+    const [day, month, year] = parts.map(Number);
+    if (!day || !month || !year || year < 1000) return null;
+
+    // Create a naive UTC date with user's input values
+    const naiveUTC = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0));
+    // Subtract APP_TIMEZONE offset to get actual UTC
+    const offsetMs = getAppTimezoneOffsetMs(naiveUTC);
+    return new Date(naiveUTC.getTime() - offsetMs).toISOString();
 }
 
 export function DateTimePicker({ value, onChange, className, label }: DateTimePickerProps) {
@@ -50,9 +81,7 @@ export function DateTimePicker({ value, onChange, className, label }: DateTimePi
     const [timeValue, setTimeValue] = React.useState(formatTime(date));
 
     React.useEffect(() => {
-        if (value === lastEmittedValueRef.current) {
-            return;
-        }
+        if (value === lastEmittedValueRef.current) return;
 
         const nextDate = value ? new Date(value) : undefined;
         const isNextDateValid = isValidDate(nextDate);
@@ -65,7 +94,7 @@ export function DateTimePicker({ value, onChange, className, label }: DateTimePi
     }, [value]);
 
     React.useEffect(() => {
-        if (!date) return;
+        if (!dateValue.match(/^\d{2}\.\d{2}\.\d{4}$/)) return;
 
         const matched = timeValue.match(/^(\d{2}):(\d{2})$/);
         if (!matched) return;
@@ -73,14 +102,12 @@ export function DateTimePicker({ value, onChange, className, label }: DateTimePi
         const hours = Math.min(23, Number(matched[1]));
         const minutes = Math.min(59, Number(matched[2]));
 
-        let newDate = setHours(date, hours);
-        newDate = setMinutes(newDate, minutes);
-        newDate = setSeconds(newDate, 0);
+        const nextValue = buildISOString(dateValue, hours, minutes);
+        if (!nextValue) return;
 
-        const nextValue = newDate.toISOString();
         lastEmittedValueRef.current = nextValue;
         onChange(nextValue);
-    }, [date, timeValue, onChange]);
+    }, [dateValue, timeValue, onChange]);
 
     const handleDateInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const raw = e.target.value.replace(/[^\d]/g, '').slice(0, 8);
