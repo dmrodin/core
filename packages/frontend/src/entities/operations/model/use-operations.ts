@@ -40,6 +40,7 @@ export const useCreateOperation = () => {
         mutationFn: (data: CreateOperationBackendDto) => OperationsService.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: OPERATIONS_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: ['wallets'] });
             toast.success('Справочник успешно создан');
         },
     });
@@ -137,6 +138,7 @@ export const useUpdateOperation = () => {
         mutationFn: ({ id, ...data }: { id: string } & UpdateOperationBackendDto) => OperationsService.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: OPERATIONS_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: ['wallets'] });
             router.push(ROUTER_MAP.OPERATIONS);
             toast.success('Операция обновлена');
         },

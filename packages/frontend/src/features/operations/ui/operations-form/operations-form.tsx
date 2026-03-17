@@ -477,6 +477,15 @@ export function OperationForm({
         }
     }, [isCorrection, fields.length, remove, append]);
 
+    // При редактировании корректировки подставляем желаемый баланс (after) вместо дельты (amount)
+    React.useEffect(() => {
+        if (!isEditing || !isCorrection || !initialData) return;
+        const entry = initialData.entries[0];
+        if (entry?.after != null) {
+            form.setValue('entries.0.amount', entry.after);
+        }
+    }, [isEditing, isCorrection, initialData, form]);
+
     React.useEffect(() => {
         if (isCorrection) return;
         if (!isDebitAllowed || !isCreditAllowed) return;
