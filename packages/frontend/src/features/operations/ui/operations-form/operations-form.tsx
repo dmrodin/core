@@ -570,7 +570,7 @@ export function OperationForm({
             return;
         }
 
-        if (!isSingleSideOperation && !isAvans) {
+        if (!isSingleSideOperation && !isAvans && !isCorrection) {
             const hasDebitEntry = data.entries.some((entry) => entry.direction === 'debit');
             const hasCreditEntry = data.entries.some((entry) => entry.direction === 'credit');
 

@@ -71,8 +71,12 @@ export class WalletRecalculationService {
         });
     }
 
-    public async getCalculatedWalletAmount(tx: Prisma.TransactionClient, walletId: string): Promise<number> {
-        return this.calculateWalletAmount(tx, walletId);
+    public async getCalculatedWalletAmount(
+        tx: Prisma.TransactionClient,
+        walletId: string,
+        excludeOperationId?: string,
+    ): Promise<number> {
+        return this.calculateWalletAmount(tx, walletId, excludeOperationId);
     }
 
     private async getOperationWalletIds(tx: Prisma.TransactionClient, operationId: string): Promise<string[]> {
@@ -87,13 +91,18 @@ export class WalletRecalculationService {
         return entries.map((entry) => entry.walletId);
     }
 
-    private async calculateWalletAmount(tx: Prisma.TransactionClient, walletId: string): Promise<number> {
+    private async calculateWalletAmount(
+        tx: Prisma.TransactionClient,
+        walletId: string,
+        excludeOperationId?: string,
+    ): Promise<number> {
         const groupedAmounts = await tx.operationEntry.groupBy({
             by: ['direction'],
             where: {
                 walletId,
                 deleted: false,
                 operation: { deleted: false },
+                ...(excludeOperationId && { operationId: { not: excludeOperationId } }),
             },
             _sum: {
                 amount: true,

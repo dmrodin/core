@@ -98,11 +98,13 @@ export class UpdateOperationUseCase {
                     );
                 }
 
-                // Для корректировки: amount - это желаемый баланс, нужно вычислить разницу
+                // Для корректировки: amount - это желаемый баланс, нужно вычислить разницу.
+                // Исключаем текущую операцию из расчёта, чтобы не учитывать её старый вклад.
                 const entry = entries[0];
                 const currentBalance = await this.walletRecalculationService.getCalculatedWalletAmount(
                     tx,
                     entry.walletId,
+                    operationId,
                 );
                 const desiredBalance = entry.amount;
                 const difference = desiredBalance - currentBalance;
