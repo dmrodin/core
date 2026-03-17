@@ -89,6 +89,8 @@ export function OperationForm({
     const [walletSearchDebounced, setWalletSearchDebounced] = React.useState('');
     const [walletSearchSide, setWalletSearchSide] = React.useState<'top' | 'bottom'>('bottom');
     const [walletSelectOpen, setWalletSelectOpen] = React.useState(false);
+    // Key of the currently open wallet select (entryIndex or 'correction')
+    const [openWalletKey, setOpenWalletKey] = React.useState<string | null>(null);
     const walletSearchFocusedRef = React.useRef(false);
     const walletSearchInputRef = React.useRef<HTMLInputElement | null>(null);
     const selectedWalletsCache = React.useRef<Map<string, WalletEntity>>(new Map());
@@ -339,15 +341,19 @@ export function OperationForm({
         }
     }, []);
 
-    const handleWalletSelectOpenChange = React.useCallback(
-        (isOpen: boolean) => {
+    const makeWalletOpenChangeHandler = React.useCallback(
+        (key: string) => (isOpen: boolean) => {
             if (!isOpen) {
+                // Block close while search input is focused (mobile keyboard opening)
+                if (walletSearchFocusedRef.current) return;
                 setWalletSelectOpen(false);
+                setOpenWalletKey(null);
                 return;
             }
             setWalletSearch('');
             setWalletSearchDebounced('');
             setWalletSelectOpen(true);
+            setOpenWalletKey(key);
             setTimeout(updateWalletSearchSide, 0);
         },
         [updateWalletSearchSide],
@@ -916,7 +922,10 @@ export function OperationForm({
                                                         selectedWalletsCache.current.set(value, found);
                                                     }
                                                 }}
-                                                onOpenChange={handleWalletSelectOpenChange}
+                                                open={openWalletKey === `correction_${realIndex}`}
+                                                onOpenChange={(isOpen) =>
+                                                    makeWalletOpenChangeHandler(`correction_${realIndex}`)(isOpen)
+                                                }
                                                 value={field.value || undefined}
                                             >
                                                 <FormControl>
@@ -1087,7 +1096,12 @@ export function OperationForm({
                                                                     selectedWalletsCache.current.set(value, found);
                                                                 }
                                                             }}
-                                                            onOpenChange={handleWalletSelectOpenChange}
+                                                            open={openWalletKey === `normal_${realIndex}`}
+                                                            onOpenChange={(isOpen) =>
+                                                                makeWalletOpenChangeHandler(`normal_${realIndex}`)(
+                                                                    isOpen,
+                                                                )
+                                                            }
                                                             value={field.value || undefined}
                                                         >
                                                             <FormControl>
