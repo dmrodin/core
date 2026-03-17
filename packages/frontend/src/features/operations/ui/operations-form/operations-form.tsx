@@ -929,9 +929,9 @@ export function OperationForm({
                                                 value={field.value || undefined}
                                             >
                                                 <FormControl>
-                                                    <SelectTrigger className="w-full">
+                                                    <SelectTrigger className="w-full overflow-hidden">
                                                         {field.value ? (
-                                                            <span className="truncate">
+                                                            <span className="flex-1 min-w-0 truncate">
                                                                 {(() => {
                                                                     const w = walletsList?.find(
                                                                         (w) => w.id === field.value,
@@ -1105,9 +1105,9 @@ export function OperationForm({
                                                             value={field.value || undefined}
                                                         >
                                                             <FormControl>
-                                                                <SelectTrigger className="w-full">
+                                                                <SelectTrigger className="w-full overflow-hidden">
                                                                     {field.value ? (
-                                                                        <span className="truncate">
+                                                                        <span className="flex-1 min-w-0 truncate">
                                                                             {(() => {
                                                                                 const inList = walletsList?.find(
                                                                                     (w) => w.id === field.value,
