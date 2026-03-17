@@ -171,11 +171,9 @@ export function DateTimePicker({ value, onChange, className, label }: DateTimePi
                                 <Calendar
                                     mode="single"
                                     selected={date}
-                                    captionLayout="dropdown"
                                     month={month}
                                     onMonthChange={setMonth}
                                     onSelect={handleDateSelect}
-                                    locale={ru}
                                 />
                             </PopoverContent>
                         </Popover>
