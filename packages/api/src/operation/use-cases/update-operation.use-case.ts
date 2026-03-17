@@ -98,9 +98,29 @@ export class UpdateOperationUseCase {
                     );
                 }
 
-                // Для корректировки: amount - это желаемый баланс, нужно вычислить разницу.
-                // Исключаем текущую операцию из расчёта, чтобы не учитывать её старый вклад.
                 const entry = entries[0];
+
+                // Помечаем другие корректировки по данному кошельку как удалённые
+                const previousCorrections = await tx.operation.findMany({
+                    where: {
+                        id: { not: operationId },
+                        deleted: false,
+                        type: { code: OPERATION_TYPE_CODES.CORRECTION },
+                        entries: {
+                            some: { walletId: entry.walletId, deleted: false },
+                        },
+                    },
+                    select: { id: true },
+                });
+
+                if (previousCorrections.length > 0) {
+                    await tx.operation.updateMany({
+                        where: { id: { in: previousCorrections.map((op) => op.id) } },
+                        data: { deleted: true, updatedById },
+                    });
+                }
+
+                // Пересчитываем сумму: исключаем текущую операцию, чтобы не учитывать её старый вклад
                 const currentBalance = await this.walletRecalculationService.getCalculatedWalletAmount(
                     tx,
                     entry.walletId,
@@ -109,7 +129,6 @@ export class UpdateOperationUseCase {
                 const desiredBalance = entry.amount;
                 const difference = desiredBalance - currentBalance;
 
-                // Обновляем amount на разницу и устанавливаем правильное направление
                 if (difference > 0) {
                     entry.amount = difference;
                     entry.direction = 'credit';

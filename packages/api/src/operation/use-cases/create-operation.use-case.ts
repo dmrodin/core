@@ -177,6 +177,27 @@ export class CreateOperationUseCase {
                 }
 
                 const entry = normalizedEntries[0];
+
+                // Помечаем предыдущие корректировки по данному кошельку как удалённые,
+                // чтобы база для расчёта новой корректировки была чистой
+                const previousCorrections = await tx.operation.findMany({
+                    where: {
+                        deleted: false,
+                        type: { code: OPERATION_TYPE_CODES.CORRECTION },
+                        entries: {
+                            some: { walletId: entry.walletId, deleted: false },
+                        },
+                    },
+                    select: { id: true },
+                });
+
+                if (previousCorrections.length > 0) {
+                    await tx.operation.updateMany({
+                        where: { id: { in: previousCorrections.map((op) => op.id) } },
+                        data: { deleted: true, updatedById: userId },
+                    });
+                }
+
                 const currentBalance = await this.walletRecalculationService.getCalculatedWalletAmount(
                     tx,
                     entry.walletId,
