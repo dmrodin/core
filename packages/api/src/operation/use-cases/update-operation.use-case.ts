@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
+import { BalanceStatus } from '../../../prisma/generated/prisma';
 import { PrismaService } from '../../common/services/prisma.service';
 import { addOperationTypeFlags, OPERATION_TYPE_CODES } from '../../operation-type/constants/operation-type.constants';
 import { WalletRecalculationService } from '../../wallet/services/wallet-recalculation.service';
@@ -321,6 +322,31 @@ export class UpdateOperationUseCase {
                                 walletId: entry.walletId,
                                 direction: entry.direction,
                                 amount: entry.amount,
+                            },
+                        });
+                    }
+                }
+
+                // Сбрасываем balanceStatus для всех затронутых кошельков
+                const affectedWalletIds = [
+                    ...existingOperation.entries.map((e) => e.walletId),
+                    ...normalizedEntries.map((e) => e.walletId),
+                ];
+                const uniqueWalletIds = [...new Set(affectedWalletIds)];
+
+                for (const walletId of uniqueWalletIds) {
+                    const wallet = await tx.wallet.findUnique({
+                        where: { id: walletId },
+                        select: { balanceStatus: true },
+                    });
+
+                    if (wallet?.balanceStatus === BalanceStatus.positive) {
+                        await tx.wallet.update({
+                            where: { id: walletId },
+                            data: {
+                                balanceStatus: BalanceStatus.unknown,
+                                lastReconciledAt: null,
+                                lastReconciledBy: null,
                             },
                         });
                     }

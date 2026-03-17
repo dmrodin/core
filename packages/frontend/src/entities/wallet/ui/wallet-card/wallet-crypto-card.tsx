@@ -439,6 +439,9 @@ export const CryptoWalletCard = ({
                                     {wallet.lastReconciledAt && (
                                         <p className="text-xs text-muted-foreground">
                                             Сверка: {formatDateTime(wallet.lastReconciledAt)}
+                                            {wallet.lastReconciled_by?.username && (
+                                                <> ({wallet.lastReconciled_by.username})</>
+                                            )}
                                         </p>
                                     )}
                                 </div>

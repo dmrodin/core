@@ -248,6 +248,9 @@ export class WalletResponseDto {
     @ApiProperty({ description: 'Информация об обновившем', type: UserInfoDto })
     public updated_by: UserInfoDto;
 
+    @ApiProperty({ description: 'Кто сделал последнюю сверку', type: UserInfoDto, nullable: true })
+    public lastReconciled_by: UserInfoDto | null;
+
     @ApiProperty({ description: 'Информация о валюте', type: CurrencyInfoDto })
     public currency: CurrencyInfoDto;
 

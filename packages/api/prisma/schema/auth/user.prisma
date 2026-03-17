@@ -33,6 +33,7 @@ model User {
   secondWallets           Wallet[]         @relation("wallet_second_owner")
   walletsCreated          Wallet[]         @relation("wallets_created_by")
   walletsUpdated          Wallet[]         @relation("wallets_updated_by")
+  walletsReconciledBy     Wallet[]         @relation("wallets_last_reconciled_by")
   walletDetailsCreated    WalletDetail[]   @relation("wallet_details_created_by")
   walletDetailsUpdated    WalletDetail[]   @relation("wallet_details_updated_by")
   networksCreated         Network[]        @relation("networks_created_by")

@@ -21,6 +21,7 @@ import {
     OPERATIONS_WITH_FILTERS_KEY,
     OPERATION_DELETE_MUTATION_KEY,
 } from '@/shared/utils/constants/operation-query-key';
+import { PINNED_WALLETS_QUERY_KEY, WALLETS_QUERY_KEY } from '@/shared/utils/constants/wallets-query-key';
 
 import { OperationsService } from '../api/operations-service';
 import {
@@ -40,6 +41,8 @@ export const useCreateOperation = () => {
         mutationFn: (data: CreateOperationBackendDto) => OperationsService.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: OPERATIONS_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: WALLETS_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: PINNED_WALLETS_QUERY_KEY });
             toast.success('Справочник успешно создан');
         },
     });
@@ -137,6 +140,8 @@ export const useUpdateOperation = () => {
         mutationFn: ({ id, ...data }: { id: string } & UpdateOperationBackendDto) => OperationsService.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: OPERATIONS_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: WALLETS_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: PINNED_WALLETS_QUERY_KEY });
             router.push(ROUTER_MAP.OPERATIONS);
             toast.success('Операция обновлена');
         },

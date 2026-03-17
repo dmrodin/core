@@ -46,8 +46,9 @@ model Wallet {
   operationEntries OperationEntry[] @relation("operation_entry_wallet")
   details         WalletDetail?
 
-  lastReconciledAt DateTime? @map("last_reconciled_at")
-  lastReconciledBy String?   @map("last_reconciled_by") @db.Uuid
+  lastReconciledAt  DateTime? @map("last_reconciled_at")
+  lastReconciledBy  String?   @map("last_reconciled_by") @db.Uuid
+  lastReconciled_by User?     @relation("wallets_last_reconciled_by", fields: [lastReconciledBy], references: [id], map: "wallets_last_reconciled_by_fkey")
 
   @@index([userId], map: "wallets_user_idx")
   @@index([secondUserId], map: "wallets_second_user_idx")
