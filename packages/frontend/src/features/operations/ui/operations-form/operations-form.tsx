@@ -1054,8 +1054,8 @@ export function OperationForm({
                                         {dir === 'credit'
                                             ? 'Прибавить к...'
                                             : isAvans
-                                              ? 'Зачислить к...'
-                                              : 'Вычесть из...'}
+                                              ? 'Вычесть из...'
+                                              : 'Зачислить к...'}
                                     </p>
                                     <Button
                                         variant="outline"
