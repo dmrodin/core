@@ -96,8 +96,7 @@ export function WalletsFiltersSheet({
         localFilters.balanceStatus,
         localFilters.walletKind,
         localFilters.currencyId,
-        localFilters.userId,
-        localFilters.secondUserId,
+        localFilters.ownerId,
         localFilters.minAmount,
         localFilters.maxAmount,
         localFilters.sortField,
@@ -198,39 +197,13 @@ export function WalletsFiltersSheet({
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Владелец 1</Label>
+                        <Label>Владелец</Label>
                         <Select
-                            value={localFilters.userId ?? ''}
+                            value={localFilters.ownerId ?? ''}
                             onValueChange={(val) =>
                                 setLocalFilters((prev) => ({
                                     ...prev,
-                                    userId: val || undefined,
-                                }))
-                            }
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Все" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {users?.users
-                                    ?.filter((u) => u.isHolder)
-                                    .map((u) => (
-                                        <SelectItem key={u.id} value={u.id}>
-                                            {u.username}
-                                        </SelectItem>
-                                    ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label>Владелец 2</Label>
-                        <Select
-                            value={localFilters.secondUserId ?? ''}
-                            onValueChange={(val) =>
-                                setLocalFilters((prev) => ({
-                                    ...prev,
-                                    secondUserId: val || undefined,
+                                    ownerId: val || undefined,
                                 }))
                             }
                         >

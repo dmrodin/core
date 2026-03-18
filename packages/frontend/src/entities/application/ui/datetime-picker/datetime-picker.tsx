@@ -146,7 +146,11 @@ export function DateTimePicker({ value, onChange, className, label }: DateTimePi
     const handleDateSelect = (selectedDate: Date | undefined) => {
         setDate(selectedDate);
         if (selectedDate) {
-            setDateValue(formatDate(selectedDate));
+            // react-day-picker sets local midnight for the clicked day — use local components directly
+            const day = String(selectedDate.getDate()).padStart(2, '0');
+            const mon = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const year = selectedDate.getFullYear();
+            setDateValue(`${day}.${mon}.${year}`);
             setMonth(selectedDate);
         }
         setOpen(false);
