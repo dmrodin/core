@@ -22,6 +22,7 @@ export class GetWalletsUseCase {
             currencyId,
             userId,
             secondUserId,
+            ownerId,
             active,
             pinOnMain,
             pinned,
@@ -137,6 +138,10 @@ export class GetWalletsUseCase {
 
         if (secondUserId) {
             where.secondUserId = secondUserId;
+        }
+
+        if (ownerId) {
+            where.OR = [{ userId: ownerId }, { secondUserId: ownerId }];
         }
 
         if (active !== undefined) {

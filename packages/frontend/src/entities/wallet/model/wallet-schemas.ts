@@ -299,6 +299,7 @@ export const GetWalletsFilterSchema = z.object({
     currencyId: z.string().uuid().optional(),
     userId: z.string().uuid().optional(),
     secondUserId: z.string().uuid().optional(),
+    ownerId: z.string().uuid().optional(),
 
     active: z.boolean().optional(),
 
