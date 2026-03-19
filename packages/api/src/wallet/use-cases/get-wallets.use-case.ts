@@ -3,14 +3,14 @@
 import { Prisma } from '../../../prisma/generated/prisma';
 import { PrismaService } from '../../common/services/prisma.service';
 import { calculatePagination, createAllDataPaginationResponse, createPaginationResponse } from '../../common/utils';
-import { GetWalletsDto, WalletSortField } from '../dto';
+import { GetWalletsDto, WalletResponseDto, WalletSortField } from '../dto';
 import { GetWalletsOutput } from '../types';
 
 @Injectable()
 export class GetWalletsUseCase {
     constructor(private readonly prisma: PrismaService) {}
 
-    public async execute(getWalletsDto: GetWalletsDto): Promise<GetWalletsOutput> {
+    public async execute(getWalletsDto: GetWalletsDto, currentUserId?: string): Promise<GetWalletsOutput> {
         const {
             search,
             searchByName,
@@ -154,111 +154,156 @@ export class GetWalletsUseCase {
 
         const total = await this.prisma.wallet.count({ where });
 
-        const baseOptions = {
-            where,
-            orderBy: {
-                [sortField]: sortOrder,
+        const orderBy = { [sortField]: sortOrder };
+
+        const include = {
+            user: {
+                select: {
+                    id: true,
+                    username: true,
+                },
             },
-            include: {
-                user: {
-                    select: {
-                        id: true,
-                        username: true,
-                    },
+            secondUser: {
+                select: {
+                    id: true,
+                    username: true,
                 },
-                secondUser: {
-                    select: {
-                        id: true,
-                        username: true,
-                    },
+            },
+            created_by: {
+                select: {
+                    id: true,
+                    username: true,
                 },
-                created_by: {
-                    select: {
-                        id: true,
-                        username: true,
-                    },
+            },
+            updated_by: {
+                select: {
+                    id: true,
+                    username: true,
                 },
-                updated_by: {
-                    select: {
-                        id: true,
-                        username: true,
-                    },
+            },
+            lastReconciled_by: {
+                select: {
+                    id: true,
+                    username: true,
                 },
-                lastReconciled_by: {
-                    select: {
-                        id: true,
-                        username: true,
-                    },
+            },
+            currency: {
+                select: {
+                    id: true,
+                    name: true,
+                    code: true,
                 },
-                currency: {
-                    select: {
-                        id: true,
-                        name: true,
-                        code: true,
-                    },
+            },
+            walletType: {
+                select: {
+                    id: true,
+                    code: true,
+                    name: true,
+                    description: true,
+                    showInTabs: true,
+                    tabOrder: true,
                 },
-                walletType: {
-                    select: {
-                        id: true,
-                        code: true,
-                        name: true,
-                        description: true,
-                        showInTabs: true,
-                        tabOrder: true,
-                    },
-                },
-                details: {
-                    select: {
-                        id: true,
-                        phone: true,
-                        card: true,
-                        ownerFullName: true,
-                        address: true,
-                        accountId: true,
-                        username: true,
-                        exchangeUid: true,
-                        network: {
-                            select: {
-                                id: true,
-                                code: true,
-                                name: true,
-                            },
+            },
+            details: {
+                select: {
+                    id: true,
+                    phone: true,
+                    card: true,
+                    ownerFullName: true,
+                    address: true,
+                    accountId: true,
+                    username: true,
+                    exchangeUid: true,
+                    network: {
+                        select: {
+                            id: true,
+                            code: true,
+                            name: true,
                         },
-                        networkType: {
-                            select: {
-                                id: true,
-                                code: true,
-                                name: true,
-                            },
+                    },
+                    networkType: {
+                        select: {
+                            id: true,
+                            code: true,
+                            name: true,
                         },
-                        platform: {
-                            select: {
-                                id: true,
-                                code: true,
-                                name: true,
-                            },
+                    },
+                    platform: {
+                        select: {
+                            id: true,
+                            code: true,
+                            name: true,
                         },
-                        bank: {
-                            select: {
-                                id: true,
-                                code: true,
-                                name: true,
-                            },
+                    },
+                    bank: {
+                        select: {
+                            id: true,
+                            code: true,
+                            name: true,
                         },
                     },
                 },
             },
         };
 
-        const findManyOptions = pagination.shouldPaginate
-            ? {
-                  ...baseOptions,
-                  skip: pagination.skip,
-                  take: pagination.take,
-              }
-            : baseOptions;
+        let wallets: WalletResponseDto[];
 
-        const wallets = await this.prisma.wallet.findMany(findManyOptions);
+        if (currentUserId) {
+            const whereByMe: Prisma.WalletWhereInput = { AND: [where, { updatedById: currentUserId }] };
+            const whereOthers: Prisma.WalletWhereInput = {
+                AND: [where, { updatedById: { not: currentUserId } }],
+            };
+
+            const orderByMe = { updatedAt: 'desc' as const };
+
+            if (!pagination.shouldPaginate) {
+                const [byMe, byOthers] = await Promise.all([
+                    this.prisma.wallet.findMany({ where: whereByMe, orderBy: orderByMe, include }),
+                    this.prisma.wallet.findMany({ where: whereOthers, orderBy, include }),
+                ]);
+
+                wallets = [...byMe, ...byOthers] as unknown as WalletResponseDto[];
+            } else {
+                const countByMe = await this.prisma.wallet.count({ where: whereByMe });
+                const skip = pagination.skip ?? 0;
+                const take = pagination.take ?? limit;
+
+                const mySkip = Math.min(skip, countByMe);
+                const myTake = Math.max(0, Math.min(take, countByMe - mySkip));
+                const othersSkip = Math.max(0, skip - countByMe);
+                const othersTake = take - myTake;
+
+                const [byMe, byOthers] = await Promise.all([
+                    myTake > 0
+                        ? this.prisma.wallet.findMany({
+                              where: whereByMe,
+                              orderBy: orderByMe,
+                              include,
+                              skip: mySkip,
+                              take: myTake,
+                          })
+                        : Promise.resolve([]),
+                    othersTake > 0
+                        ? this.prisma.wallet.findMany({
+                              where: whereOthers,
+                              orderBy,
+                              include,
+                              skip: othersSkip,
+                              take: othersTake,
+                          })
+                        : Promise.resolve([]),
+                ]);
+
+                wallets = [...byMe, ...byOthers] as unknown as WalletResponseDto[];
+            }
+        } else {
+            const baseOptions = { where, orderBy, include };
+            const findManyOptions = pagination.shouldPaginate
+                ? { ...baseOptions, skip: pagination.skip, take: pagination.take }
+                : baseOptions;
+
+            wallets = (await this.prisma.wallet.findMany(findManyOptions)) as unknown as WalletResponseDto[];
+        }
 
         const paginationResponse = pagination.shouldPaginate
             ? createPaginationResponse(total, page, limit)

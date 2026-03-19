@@ -139,8 +139,11 @@ export class WalletController {
         type: GetWalletsResponseDto,
     })
     @ApiReadResponses()
-    public async getWallets(@Query() getWalletsDto: GetWalletsDto): Promise<GetWalletsResponseDto> {
-        const result = await this.getWalletsUseCase.execute(getWalletsDto);
+    public async getWallets(
+        @Query() getWalletsDto: GetWalletsDto,
+        @CurrentUserId() currentUserId: string,
+    ): Promise<GetWalletsResponseDto> {
+        const result = await this.getWalletsUseCase.execute(getWalletsDto, currentUserId);
 
         return {
             wallets: result.wallets,
