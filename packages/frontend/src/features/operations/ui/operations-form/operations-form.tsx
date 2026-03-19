@@ -1053,9 +1053,7 @@ export function OperationForm({
                                     <p className="font-medium">
                                         {dir === 'credit'
                                             ? 'Прибавить к...'
-                                            : isAvans
-                                              ? 'Вычесть из...'
-                                              : 'Зачислить к...'}
+                                            : 'Вычесть из...'}
                                     </p>
                                     <Button
                                         variant="outline"
