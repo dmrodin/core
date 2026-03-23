@@ -410,6 +410,6 @@ export class UpdateOperationUseCase {
                     type: addOperationTypeFlags(operationResponse.type),
                 },
             };
-        });
+        }, { timeout: 30000 });
     }
 }

@@ -41,7 +41,7 @@ export class DeleteOperationUseCase {
             });
 
             await this.walletRecalculationService.recalculateForOperation(tx, operationId, deletedById);
-        });
+        }, { timeout: 30000 });
 
         return {
             message: 'Операция успешно удалена',

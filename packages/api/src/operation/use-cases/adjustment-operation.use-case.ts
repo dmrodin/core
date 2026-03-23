@@ -137,6 +137,6 @@ export class AdjustmentOperationUseCase {
                 newAmount: targetAmount,
                 adjustmentAmount,
             };
-        });
+        }, { timeout: 30000 });
     }
 }

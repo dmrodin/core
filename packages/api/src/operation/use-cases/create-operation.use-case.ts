@@ -355,6 +355,6 @@ export class CreateOperationUseCase {
                     type: addOperationTypeFlags(operationResponse.type),
                 },
             };
-        });
+        }, { timeout: 30000 });
     }
 }
