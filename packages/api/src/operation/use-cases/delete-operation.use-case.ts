@@ -30,18 +30,21 @@ export class DeleteOperationUseCase {
             throw new NotFoundException('Операция не найдена');
         }
 
-        await this.prisma.$transaction(async (tx) => {
-            await tx.operation.update({
-                where: { id: operationId },
-                data: {
-                    deleted: true,
-                    updatedById: deletedById,
-                    applicationId: null,
-                },
-            });
+        await this.prisma.$transaction(
+            async (tx) => {
+                await tx.operation.update({
+                    where: { id: operationId },
+                    data: {
+                        deleted: true,
+                        updatedById: deletedById,
+                        applicationId: null,
+                    },
+                });
 
-            await this.walletRecalculationService.recalculateForOperation(tx, operationId, deletedById);
-        }, { timeout: 30000 });
+                await this.walletRecalculationService.recalculateForOperation(tx, operationId, deletedById);
+            },
+            { timeout: 30000 },
+        );
 
         return {
             message: 'Операция успешно удалена',
