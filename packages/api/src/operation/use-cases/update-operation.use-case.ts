@@ -360,7 +360,7 @@ export class UpdateOperationUseCase {
                         }
                     }
 
-                    await this.walletRecalculationService.recalculateForOperation(tx, operationId, updatedById);
+                    await this.walletRecalculationService.recalculateForWallets(tx, uniqueWalletIds, updatedById);
                 }
 
                 const updatedOperation = await tx.operation.findUnique({

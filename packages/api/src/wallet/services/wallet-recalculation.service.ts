@@ -31,6 +31,21 @@ export class WalletRecalculationService {
         await this.updateBeforeAfterForWallets(tx, [walletId]);
     }
 
+    public async recalculateForWallets(
+        tx: Prisma.TransactionClient,
+        walletIds: string[],
+        updatedById?: string,
+    ): Promise<void> {
+        const uniqueIds = [...new Set(walletIds)];
+
+        if (uniqueIds.length === 0) {
+            return;
+        }
+
+        await this.recalculateWallets(tx, uniqueIds, updatedById);
+        await this.updateBeforeAfterForWallets(tx, uniqueIds);
+    }
+
     public async recalculateWallets(
         tx: Prisma.TransactionClient,
         walletIds: string[],
