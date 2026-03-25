@@ -3,6 +3,7 @@ export { CreateOperationDto, OperationEntryDto } from './create-operation.dto';
 export { GetBalancesReportDto } from './get-balances-report.dto';
 export { GetClosingPeriodReportDto } from './get-closing-period-report.dto';
 export { GetConversionReportDto } from './get-conversion-report.dto';
+export { GetConversionWalletsReportDto } from './get-conversion-wallets-report.dto';
 export { GetOperationsDto, OperationSortField } from './get-operations.dto';
 export { GetOperationsReportDto, OperationReportWalletFilter } from './get-operations-report.dto';
 export { UpdateOperationDto, UpdateOperationEntryDto } from './update-operation.dto';

@@ -22,7 +22,14 @@ export const ReportsBalancesSchema = z.object({
     sections: z.array(z.string()).min(1, 'Выберите хотя бы один раздел'),
 });
 
+export const ReportsConversionWalletsSchema = z.object({
+    dateStart: z.string().datetime(),
+    dateEnd: z.string().datetime(),
+    sections: z.array(z.string()).min(1, 'Выберите хотя бы один раздел'),
+});
+
 export type ReportsGeneral = z.infer<typeof ReportsGeneralSchema>;
 export type ReportsConversion = z.infer<typeof ReportsConversionSchema>;
 export type ReportsPeriod = z.infer<typeof ReportsPeriodSchema>;
 export type ReportsBalances = z.infer<typeof ReportsBalancesSchema>;
+export type ReportsConversionWallets = z.infer<typeof ReportsConversionWalletsSchema>;

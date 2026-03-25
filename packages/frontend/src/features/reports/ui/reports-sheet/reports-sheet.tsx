@@ -5,12 +5,13 @@ import { useState } from 'react';
 import { ReportGeneralForm } from '@/entities/reports';
 import { ReportsBalancesForm } from '@/entities/reports';
 import { ReportsConversionForm } from '@/entities/reports';
+import { ReportsConversionWalletsForm } from '@/entities/reports';
 import { ReportsPeriodForm } from '@/entities/reports';
 import { usePopapStore } from '@/entities/reports';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/shared/ui/shadcn/sheet';
 
-type ReportType = 'general' | 'conversions' | 'period' | 'balances';
+type ReportType = 'general' | 'conversions' | 'conversions-wallets' | 'period' | 'balances';
 
 export function ReportsSheet() {
     const active = usePopapStore((state) => state.active);
@@ -36,6 +37,9 @@ export function ReportsSheet() {
                                     <SelectContent>
                                         <SelectItem value="general">Общий</SelectItem>
                                         <SelectItem value="conversions">По конвертациям</SelectItem>
+                                        <SelectItem value="conversions-wallets">
+                                            По конвертациям (по разделам)
+                                        </SelectItem>
                                         <SelectItem value="period">По остаткам</SelectItem>
                                         <SelectItem value="balances">По балансам</SelectItem>
                                     </SelectContent>
@@ -44,6 +48,7 @@ export function ReportsSheet() {
 
                             {reportType === 'general' && <ReportGeneralForm />}
                             {reportType === 'conversions' && <ReportsConversionForm />}
+                            {reportType === 'conversions-wallets' && <ReportsConversionWalletsForm />}
                             {reportType === 'period' && <ReportsPeriodForm />}
                             {reportType === 'balances' && <ReportsBalancesForm />}
                         </div>

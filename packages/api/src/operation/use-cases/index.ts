@@ -4,6 +4,7 @@ export { DeleteOperationUseCase } from './delete-operation.use-case';
 export { GenerateBalancesReportUseCase } from './generate-balances-report.use-case';
 export { GenerateClosingPeriodReportUseCase } from './generate-closing-period-report.use-case';
 export { GenerateConversionReportUseCase } from './generate-conversion-report.use-case';
+export { GenerateConversionWalletsReportUseCase } from './generate-conversion-wallets-report.use-case';
 export { GenerateOperationsReportUseCase } from './generate-operations-report.use-case';
 export { GetOperationByIdUseCase } from './get-operation-by-id.use-case';
 export { GetOperationsUseCase } from './get-operations.use-case';
