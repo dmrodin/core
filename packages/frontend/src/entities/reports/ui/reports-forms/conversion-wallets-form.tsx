@@ -9,13 +9,33 @@ import z from 'zod';
 
 import { ReportsConversionWalletsSchema, useConversionWalletsReport, usePopapStore } from '@/entities/reports';
 import { useWalletTypes } from '@/entities/wallet-type';
-import { Button, Calendar, Checkbox, cn, formatDate, Loading, Popover, PopoverContent, PopoverTrigger } from '@/shared';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared';
+import { APP_TIMEZONE } from '@/shared/config/timezone';
+import { Button, Calendar, Checkbox, cn, Loading, Popover, PopoverContent, PopoverTrigger } from '@/shared';
+import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/shared';
 import { Input } from '@/shared';
 import { Skeleton } from '@/shared';
 
 const SECTION_ALL = 'all';
 const SECTION_HIDDEN = 'hidden';
+
+function getAppTimezoneOffsetMs(date: Date): number {
+    const utcStr = date.toLocaleString('en-US', { timeZone: 'UTC' });
+    const tzStr = date.toLocaleString('en-US', { timeZone: APP_TIMEZONE });
+    return new Date(tzStr).getTime() - new Date(utcStr).getTime();
+}
+
+function buildDateISO(day: number, month: number, year: number): string {
+    const naiveUTC = new Date(Date.UTC(year, month, day, 0, 0, 0));
+    const offsetMs = getAppTimezoneOffsetMs(naiveUTC);
+    return new Date(naiveUTC.getTime() - offsetMs).toISOString();
+}
+
+function formatDateValue(date: Date): string {
+    const day = String(date.getDate()).padStart(2, '0');
+    const mon = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}.${mon}.${year}`;
+}
 
 export function ReportsConversionWalletsForm() {
     const { data: walletTypesData, isLoading: walletTypesLoading } = useWalletTypes();
@@ -24,6 +44,8 @@ export function ReportsConversionWalletsForm() {
 
     const [openStart, setOpenStart] = React.useState(false);
     const [openEnd, setOpenEnd] = React.useState(false);
+    const [dateStart, setDateStart] = React.useState<Date | undefined>(undefined);
+    const [dateEnd, setDateEnd] = React.useState<Date | undefined>(undefined);
     const [rawInputStart, setRawInputStart] = React.useState('');
     const [rawInputEnd, setRawInputEnd] = React.useState('');
 
@@ -49,6 +71,54 @@ export function ReportsConversionWalletsForm() {
         setActive(false);
     };
 
+    const handleInputChange = (
+        raw: string,
+        setRawInput: (v: string) => void,
+        setDate: (d: Date | undefined) => void,
+        fieldOnChange: (v: string) => void,
+    ) => {
+        let digits = raw.replace(/\D/g, '');
+        if (digits.length > 8) digits = digits.slice(0, 8);
+
+        let formatted = digits;
+        if (digits.length > 4) formatted = `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4)}`;
+        else if (digits.length > 2) formatted = `${digits.slice(0, 2)}.${digits.slice(2)}`;
+
+        setRawInput(formatted);
+
+        if (digits.length === 8) {
+            const [dd, mm, yyyy] = [
+                Number(formatted.slice(0, 2)),
+                Number(formatted.slice(3, 5)),
+                Number(formatted.slice(6)),
+            ];
+            const parsed = new Date(yyyy, mm - 1, dd);
+            if (!isNaN(parsed.getTime())) {
+                setDate(parsed);
+                fieldOnChange(buildDateISO(dd, mm - 1, yyyy));
+                return;
+            }
+        }
+
+        setDate(undefined);
+        fieldOnChange(formatted);
+    };
+
+    const handleCalendarSelect = (
+        selected: Date | undefined,
+        setRawInput: (v: string) => void,
+        setDate: (d: Date | undefined) => void,
+        fieldOnChange: (v: string) => void,
+        setOpen: (v: boolean) => void,
+    ) => {
+        if (selected) {
+            setDate(selected);
+            setRawInput(formatDateValue(selected));
+            fieldOnChange(buildDateISO(selected.getDate(), selected.getMonth(), selected.getFullYear()));
+        }
+        setOpen(false);
+    };
+
     return (
         <div>
             <Form {...form}>
@@ -60,37 +130,19 @@ export function ReportsConversionWalletsForm() {
                             <FormItem>
                                 <FormLabel>Начало периода</FormLabel>
                                 <div className="relative flex gap-2">
-                                    <FormControl>
-                                        <Input
-                                            value={rawInputStart}
-                                            placeholder="дд.мм.гггг"
-                                            className="bg-background pr-10"
-                                            onChange={(e) => {
-                                                let raw = e.target.value.replace(/\D/g, '');
-                                                if (raw.length > 8) raw = raw.slice(0, 8);
-
-                                                let formatted = raw;
-                                                if (raw.length > 4)
-                                                    formatted = `${raw.slice(0, 2)}.${raw.slice(2, 4)}.${raw.slice(4)}`;
-                                                else if (raw.length > 2)
-                                                    formatted = `${raw.slice(0, 2)}.${raw.slice(2)}`;
-
-                                                setRawInputStart(formatted);
-
-                                                const parts = formatted.split('.');
-                                                if (parts.length === 3) {
-                                                    const [dd, mm, yyyy] = parts.map(Number);
-                                                    const parsed = new Date(yyyy, mm - 1, dd);
-                                                    if (!isNaN(parsed.getTime())) {
-                                                        field.onChange(parsed.toISOString());
-                                                        return;
-                                                    }
-                                                }
-
-                                                field.onChange(formatted);
-                                            }}
-                                        />
-                                    </FormControl>
+                                    <Input
+                                        value={rawInputStart}
+                                        placeholder="дд.мм.гггг"
+                                        className="bg-background pr-10"
+                                        onChange={(e) =>
+                                            handleInputChange(
+                                                e.target.value,
+                                                setRawInputStart,
+                                                setDateStart,
+                                                field.onChange,
+                                            )
+                                        }
+                                    />
                                     <Popover open={openStart} onOpenChange={setOpenStart}>
                                         <PopoverTrigger asChild>
                                             <Button
@@ -103,21 +155,16 @@ export function ReportsConversionWalletsForm() {
                                         <PopoverContent className="w-auto overflow-hidden p-0" align="end">
                                             <Calendar
                                                 mode="single"
-                                                selected={field.value ? new Date(field.value) : undefined}
-                                                onSelect={(date) => {
-                                                    if (date) {
-                                                        const utcDate = new Date(
-                                                            Date.UTC(
-                                                                date.getFullYear(),
-                                                                date.getMonth(),
-                                                                date.getDate(),
-                                                            ),
-                                                        );
-                                                        field.onChange(utcDate.toISOString());
-                                                        setRawInputStart(formatDate(date));
-                                                    }
-                                                    setOpenStart(false);
-                                                }}
+                                                selected={dateStart}
+                                                onSelect={(d) =>
+                                                    handleCalendarSelect(
+                                                        d,
+                                                        setRawInputStart,
+                                                        setDateStart,
+                                                        field.onChange,
+                                                        setOpenStart,
+                                                    )
+                                                }
                                             />
                                         </PopoverContent>
                                     </Popover>
@@ -134,37 +181,19 @@ export function ReportsConversionWalletsForm() {
                             <FormItem>
                                 <FormLabel>Конец периода</FormLabel>
                                 <div className="relative flex gap-2">
-                                    <FormControl>
-                                        <Input
-                                            value={rawInputEnd}
-                                            placeholder="дд.мм.гггг"
-                                            className="bg-background pr-10"
-                                            onChange={(e) => {
-                                                let raw = e.target.value.replace(/\D/g, '');
-                                                if (raw.length > 8) raw = raw.slice(0, 8);
-
-                                                let formatted = raw;
-                                                if (raw.length > 4)
-                                                    formatted = `${raw.slice(0, 2)}.${raw.slice(2, 4)}.${raw.slice(4)}`;
-                                                else if (raw.length > 2)
-                                                    formatted = `${raw.slice(0, 2)}.${raw.slice(2)}`;
-
-                                                setRawInputEnd(formatted);
-
-                                                const parts = formatted.split('.');
-                                                if (parts.length === 3) {
-                                                    const [dd, mm, yyyy] = parts.map(Number);
-                                                    const parsed = new Date(yyyy, mm - 1, dd);
-                                                    if (!isNaN(parsed.getTime())) {
-                                                        field.onChange(parsed.toISOString());
-                                                        return;
-                                                    }
-                                                }
-
-                                                field.onChange(formatted);
-                                            }}
-                                        />
-                                    </FormControl>
+                                    <Input
+                                        value={rawInputEnd}
+                                        placeholder="дд.мм.гггг"
+                                        className="bg-background pr-10"
+                                        onChange={(e) =>
+                                            handleInputChange(
+                                                e.target.value,
+                                                setRawInputEnd,
+                                                setDateEnd,
+                                                field.onChange,
+                                            )
+                                        }
+                                    />
                                     <Popover open={openEnd} onOpenChange={setOpenEnd}>
                                         <PopoverTrigger asChild>
                                             <Button
@@ -177,21 +206,16 @@ export function ReportsConversionWalletsForm() {
                                         <PopoverContent className="w-auto overflow-hidden p-0" align="end">
                                             <Calendar
                                                 mode="single"
-                                                selected={field.value ? new Date(field.value) : undefined}
-                                                onSelect={(date) => {
-                                                    if (date) {
-                                                        const utcDate = new Date(
-                                                            Date.UTC(
-                                                                date.getFullYear(),
-                                                                date.getMonth(),
-                                                                date.getDate(),
-                                                            ),
-                                                        );
-                                                        field.onChange(utcDate.toISOString());
-                                                        setRawInputEnd(formatDate(date));
-                                                    }
-                                                    setOpenEnd(false);
-                                                }}
+                                                selected={dateEnd}
+                                                onSelect={(d) =>
+                                                    handleCalendarSelect(
+                                                        d,
+                                                        setRawInputEnd,
+                                                        setDateEnd,
+                                                        field.onChange,
+                                                        setOpenEnd,
+                                                    )
+                                                }
                                             />
                                         </PopoverContent>
                                     </Popover>
@@ -212,21 +236,19 @@ export function ReportsConversionWalletsForm() {
                                 ) : (
                                     <Popover>
                                         <PopoverTrigger asChild>
-                                            <FormControl>
-                                                <Button
-                                                    variant="outline"
-                                                    role="combobox"
-                                                    className={cn(
-                                                        'w-full justify-between',
-                                                        !field.value?.length && 'text-muted-foreground',
-                                                    )}
-                                                >
-                                                    {field.value?.includes(SECTION_ALL)
-                                                        ? 'Все разделы'
-                                                        : `Выбрано: ${field.value?.length ?? 0}`}
-                                                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                </Button>
-                                            </FormControl>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                className={cn(
+                                                    'w-full justify-between',
+                                                    !field.value?.length && 'text-muted-foreground',
+                                                )}
+                                            >
+                                                {field.value?.includes(SECTION_ALL)
+                                                    ? 'Все разделы'
+                                                    : `Выбрано: ${field.value?.length ?? 0}`}
+                                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-[365px] p-0" align="start">
                                             <div className="max-h-64 overflow-auto p-2">
