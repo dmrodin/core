@@ -1,0 +1,15 @@
+model Regulation {
+  id           String   @id @default(uuid()) @db.Uuid
+  uploadedById String   @map("uploaded_by_id") @db.Uuid
+  originalName String   @map("original_name")
+  storedName   String   @map("stored_name")
+  mimeType     String   @map("mime_type")
+  size         Int
+  deleted      Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  uploaded_by User @relation("regulations_uploaded_by", fields: [uploadedById], references: [id])
+
+  @@index([deleted, createdAt(sort: Desc)], map: "regulations_deleted_created_idx")
+  @@map("regulations")
+}

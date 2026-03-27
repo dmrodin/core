@@ -8,6 +8,7 @@ import Link from 'next/link';
 import {
     Book,
     ChartColumnIncreasing,
+    ClipboardList,
     HandshakeIcon,
     Home,
     LifeBuoy,
@@ -59,6 +60,11 @@ const data = {
             title: 'Заявки',
             url: ROUTER_MAP.APPLICATIONS,
             icon: Ticket,
+        },
+        {
+            title: 'Регламенты',
+            url: ROUTER_MAP.REGULATIONS,
+            icon: ClipboardList,
         },
         {
             title: 'Справочники',

@@ -74,6 +74,11 @@ export const API_MAP = {
     FEEDBACK: {
         FEEDBACK: '/feedback',
     },
+    REGULATIONS: {
+        REGULATIONS: '/regulations',
+        REGULATION_DOWNLOAD: (id: string) => `/regulations/${id}/download`,
+        REGULATION_BY_ID: (id: string) => `/regulations/${id}`,
+    },
     LOCKED_PERIODS: {
         LOCKED_PERIODS: '/locked-periods',
         OPEN_LOCKED_PERIOD: (id: string) => `/locked-periods/${id}/open`,
