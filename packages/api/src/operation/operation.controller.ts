@@ -30,9 +30,11 @@ import {
     GetBalancesReportDto,
     GetClosingPeriodReportDto,
     GetConversionReportDto,
+    GetConversionWalletsReportDto,
     GetOperationsDto,
     GetOperationsReportDto,
     GetOperationsResponseDto,
+    GetOperationsWalletsReportDto,
     OperationResponseDto,
     UpdateOperationDto,
     UpdateOperationResponseDto,
@@ -44,7 +46,9 @@ import {
     GenerateBalancesReportUseCase,
     GenerateClosingPeriodReportUseCase,
     GenerateConversionReportUseCase,
+    GenerateConversionWalletsReportUseCase,
     GenerateOperationsReportUseCase,
+    GenerateOperationsWalletsReportUseCase,
     GetOperationByIdUseCase,
     GetOperationsUseCase,
     UpdateOperationUseCase,
@@ -63,6 +67,8 @@ export class OperationController {
         private readonly generateClosingPeriodReportUseCase: GenerateClosingPeriodReportUseCase,
         private readonly generateOperationsReportUseCase: GenerateOperationsReportUseCase,
         private readonly generateConversionReportUseCase: GenerateConversionReportUseCase,
+        private readonly generateConversionWalletsReportUseCase: GenerateConversionWalletsReportUseCase,
+        private readonly generateOperationsWalletsReportUseCase: GenerateOperationsWalletsReportUseCase,
         private readonly createOperationUseCase: CreateOperationUseCase,
         private readonly getOperationsUseCase: GetOperationsUseCase,
         private readonly getOperationByIdUseCase: GetOperationByIdUseCase,
@@ -94,6 +100,34 @@ export class OperationController {
     @ApiResponse({ status: 200, description: 'Отчет сформирован' })
     public async downloadConversionReport(@Query() dto: GetConversionReportDto): Promise<StreamableFile> {
         const report = await this.generateConversionReportUseCase.execute(dto);
+
+        return this.buildStreamableFile(report.buffer, report.filename);
+    }
+
+    @Get('reports/conversion-wallets')
+    @HttpCode(HttpStatus.OK)
+    @Roles(RoleCode.admin)
+    @ApiOperation({
+        summary: 'Выгрузить отчет по конвертациям с фильтром по разделам кошельков',
+        description: 'Формирует Excel-отчет по операциям конвертации с фильтрацией по разделам кошельков.',
+    })
+    @ApiResponse({ status: 200, description: 'Отчет сформирован' })
+    public async downloadConversionWalletsReport(@Query() dto: GetConversionWalletsReportDto): Promise<StreamableFile> {
+        const report = await this.generateConversionWalletsReportUseCase.execute(dto);
+
+        return this.buildStreamableFile(report.buffer, report.filename);
+    }
+
+    @Get('reports/operations-wallets')
+    @HttpCode(HttpStatus.OK)
+    @Roles(RoleCode.admin)
+    @ApiOperation({
+        summary: 'Выгрузить общий отчет по операциям с фильтром по разделам кошельков',
+        description: 'Формирует Excel-отчет по всем операциям с фильтрацией по разделам кошельков.',
+    })
+    @ApiResponse({ status: 200, description: 'Отчет сформирован' })
+    public async downloadOperationsWalletsReport(@Query() dto: GetOperationsWalletsReportDto): Promise<StreamableFile> {
+        const report = await this.generateOperationsWalletsReportUseCase.execute(dto);
 
         return this.buildStreamableFile(report.buffer, report.filename);
     }
