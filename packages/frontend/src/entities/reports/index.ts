@@ -1,6 +1,7 @@
 export * from './ui/reports-forms/general-form';
 export * from './ui/reports-forms/conversion-form';
 export * from './ui/reports-forms/conversion-wallets-form';
+export * from './ui/reports-forms/operations-wallets-form';
 export * from './ui/reports-forms/period-form';
 export * from './ui/reports-forms/balances-form';
 export * from './model/reports-schemas';
@@ -8,6 +9,7 @@ export * from './model/use-balances-reports';
 export * from './model/use-general-reports';
 export * from './model/use-conversion-reports';
 export * from './model/use-conversion-wallets-reports';
+export * from './model/use-operations-wallets-reports';
 export * from './model/use-period-reports';
 export * from './model/popap-store';
 export * from './api/reports-service';

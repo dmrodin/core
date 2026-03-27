@@ -6,6 +6,7 @@ export { GenerateClosingPeriodReportUseCase } from './generate-closing-period-re
 export { GenerateConversionReportUseCase } from './generate-conversion-report.use-case';
 export { GenerateConversionWalletsReportUseCase } from './generate-conversion-wallets-report.use-case';
 export { GenerateOperationsReportUseCase } from './generate-operations-report.use-case';
+export { GenerateOperationsWalletsReportUseCase } from './generate-operations-wallets-report.use-case';
 export { GetOperationByIdUseCase } from './get-operation-by-id.use-case';
 export { GetOperationsUseCase } from './get-operations.use-case';
 export { UpdateOperationUseCase } from './update-operation.use-case';

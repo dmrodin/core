@@ -7,6 +7,8 @@ import {
     ReportsConversionWalletsSchema,
     ReportsGeneral,
     ReportsGeneralSchema,
+    ReportsOperationsWallets,
+    ReportsOperationsWalletsSchema,
     ReportsPeriod,
     ReportsPeriodSchema,
 } from '@/entities/reports/model/reports-schemas';
@@ -40,6 +42,19 @@ export class ReportsService {
     public static async getConversionWalletsReport(params: ReportsConversionWallets): Promise<Blob> {
         const parsedParams = ReportsConversionWalletsSchema.parse(params);
         const response = await axiosInstance.get('/operations/reports/conversion-wallets', {
+            params: {
+                dateStart: parsedParams.dateStart,
+                dateEnd: parsedParams.dateEnd,
+                sections: parsedParams.sections.join(','),
+            },
+            responseType: 'blob',
+        });
+        return response.data as Blob;
+    }
+
+    public static async getOperationsWalletsReport(params: ReportsOperationsWallets): Promise<Blob> {
+        const parsedParams = ReportsOperationsWalletsSchema.parse(params);
+        const response = await axiosInstance.get('/operations/reports/operations-wallets', {
             params: {
                 dateStart: parsedParams.dateStart,
                 dateEnd: parsedParams.dateEnd,

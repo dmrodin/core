@@ -44,9 +44,7 @@ export class GenerateConversionWalletsReportUseCase {
                               ...(dto.dateStart ? { gte: dto.dateStart } : {}),
                               ...(dto.dateEnd
                                   ? {
-                                        lte: new Date(
-                                            new Date(dto.dateEnd).setUTCHours(23, 59, 59, 999),
-                                        ),
+                                        lte: new Date(new Date(dto.dateEnd).setUTCHours(23, 59, 59, 999)),
                                     }
                                   : {}),
                           },
@@ -123,7 +121,8 @@ export class GenerateConversionWalletsReportUseCase {
 
     private async getWalletIdsBySections(sections: string[]): Promise<string[]> {
         const hasAllSection = sections.includes(GenerateConversionWalletsReportUseCase.SECTION_ALL);
-        const hasHiddenSection = hasAllSection || sections.includes(GenerateConversionWalletsReportUseCase.SECTION_HIDDEN);
+        const hasHiddenSection =
+            hasAllSection || sections.includes(GenerateConversionWalletsReportUseCase.SECTION_HIDDEN);
         const walletTypeCodes = hasAllSection
             ? []
             : sections.filter(
@@ -201,13 +200,16 @@ export class GenerateConversionWalletsReportUseCase {
         operations: ConversionReportOperation[],
         walletMap: Map<string, WalletLookupEntry>,
     ): Array<Omit<ConversionReportRow, 'number' | 'amount'> & { number: number | string; amount: number }> {
-        const rows: Array<Omit<ConversionReportRow, 'number' | 'amount'> & { number: number | string; amount: number }> = [];
+        const rows: Array<
+            Omit<ConversionReportRow, 'number' | 'amount'> & { number: number | string; amount: number }
+        > = [];
         const grouped = new Map<number, ConversionReportOperation[]>();
         const ungrouped: ConversionReportOperation[] = [];
 
         operations.forEach((operation) => {
             if (operation.conversionGroupId === null) {
                 ungrouped.push(operation);
+
                 return;
             }
 
@@ -258,7 +260,9 @@ export class GenerateConversionWalletsReportUseCase {
         const creditEntries = this.collectEntries(operation, walletMap, OperationDirection.credit);
         const debitEntries = this.collectEntries(operation, walletMap, OperationDirection.debit);
 
-        if (creditEntries.length === 0 && debitEntries.length === 0) return;
+        if (creditEntries.length === 0 && debitEntries.length === 0) {
+            return;
+        }
 
         const { normalizedCredits, normalizedDebits } = this.normalizeEntries(creditEntries, debitEntries);
         const length = Math.max(normalizedCredits.length, normalizedDebits.length);
@@ -269,11 +273,23 @@ export class GenerateConversionWalletsReportUseCase {
             const exchangeRate = this.calculateExchangeRate(credit, debit);
 
             if (credit) {
-                rows.push({ ...baseRow, source: credit.name, amount: credit.amount, exchangeRate, currency: credit.currency });
+                rows.push({
+                    ...baseRow,
+                    source: credit.name,
+                    amount: credit.amount,
+                    exchangeRate,
+                    currency: credit.currency,
+                });
             }
 
             if (debit) {
-                rows.push({ ...baseRow, source: debit.name, amount: -debit.amount, exchangeRate, currency: debit.currency });
+                rows.push({
+                    ...baseRow,
+                    source: debit.name,
+                    amount: -debit.amount,
+                    exchangeRate,
+                    currency: debit.currency,
+                });
             }
         }
     }
@@ -313,7 +329,9 @@ export class GenerateConversionWalletsReportUseCase {
     }
 
     private mergeEntries(entries: ConversionWalletEntry[], targetLength: number): ConversionWalletEntry[] {
-        if (entries.length <= targetLength || targetLength <= 0) return entries;
+        if (entries.length <= targetLength || targetLength <= 0) {
+            return entries;
+        }
 
         const merged = entries.slice(0, targetLength);
         const mergeIndex = targetLength - 1;
@@ -333,7 +351,9 @@ export class GenerateConversionWalletsReportUseCase {
         const creditAmount = credit?.amount ?? 0;
         const debitAmount = debit?.amount ?? 0;
 
-        if (creditAmount === 0 || debitAmount === 0) return 1;
+        if (creditAmount === 0 || debitAmount === 0) {
+            return 1;
+        }
 
         const larger = Math.max(creditAmount, debitAmount);
         const smaller = Math.min(creditAmount, debitAmount);
