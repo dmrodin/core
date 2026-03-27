@@ -259,180 +259,9 @@ export default function WalletOperationsPage() {
 
                                     return (
                                         <DropdownMenu key={operation.id}>
-                                        <Card
-                                            ref={isLast ? lastOperationRef : null}
-                                            className="cursor-pointer hover:bg-accent/50 transition-colors"
-                                            onClick={() =>
-                                                setExpandedIds((prev) =>
-                                                    prev.includes(operation.id)
-                                                        ? prev.filter((id) => id !== operation.id)
-                                                        : [...prev, operation.id],
-                                                )
-                                            }
-                                        >
-                                            <CardContent className="py-2 sm:py-4 relative">
-                                                <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                                    <div className="space-y-1 sm:space-y-2 flex-1">
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            <p className="font-semibold">{operation.type.name}</p>
-                                                            {operation.applicationId && (
-                                                                <span className="text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">
-                                                                    Заявка #{operation.applicationId}
-                                                                </span>
-                                                            )}
-                                                            {operation.conversionGroupId && (
-                                                                <span className="text-xs bg-purple-500/10 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-md">
-                                                                    Конвертация #{operation.conversionGroupId}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {operation.created_by?.username}
-                                                        </p>
-
-                                                        <div className="space-y-1">
-                                                            {[...operation.entries]
-                                                                .sort(
-                                                                    (a, b) =>
-                                                                        (a.direction === 'debit' ? 0 : 1) -
-                                                                        (b.direction === 'debit' ? 0 : 1),
-                                                                )
-                                                                .map((entry) => (
-                                                                    <div
-                                                                        key={entry.id}
-                                                                        className="py-1 px-2 rounded-md bg-muted/50"
-                                                                    >
-                                                                        {showDetails ? (
-                                                                            <p className="text-sm">
-                                                                                <Button
-                                                                                    variant="link"
-                                                                                    className="p-0 h-auto font-medium relative z-10 no-underline hover:no-underline cursor-pointer"
-                                                                                    data-wallet-link
-                                                                                    onPointerDown={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        router.push(
-                                                                                            ROUTER_MAP.WALLET_OPERATIONS(
-                                                                                                entry.walletId,
-                                                                                            ),
-                                                                                        );
-                                                                                    }}
-                                                                                >
-                                                                                    {entry.wallet.name}:
-                                                                                </Button>{' '}
-                                                                                {entry.direction === 'credit' ? (
-                                                                                    <>
-                                                                                        <span className="text-muted-foreground">
-                                                                                            {entry.before ?? 0} +{' '}
-                                                                                        </span>
-                                                                                        <span className="text-success/80 font-semibold">
-                                                                                            {entry.amount}
-                                                                                        </span>
-                                                                                        <span className="text-muted-foreground">
-                                                                                            {' '}
-                                                                                            = {entry.after ?? 0}
-                                                                                        </span>
-                                                                                    </>
-                                                                                ) : (
-                                                                                    <>
-                                                                                        <span className="text-muted-foreground">
-                                                                                            {entry.before ?? 0} -{' '}
-                                                                                        </span>
-                                                                                        <span className="text-destructive/80 font-semibold">
-                                                                                            {entry.amount}
-                                                                                        </span>
-                                                                                        <span className="text-muted-foreground">
-                                                                                            {' '}
-                                                                                            = {entry.after ?? 0}
-                                                                                        </span>
-                                                                                    </>
-                                                                                )}
-                                                                            </p>
-                                                                        ) : (
-                                                                            <p className="text-sm">
-                                                                                <Button
-                                                                                    variant="link"
-                                                                                    className="p-0 h-auto font-medium relative z-10 no-underline hover:no-underline cursor-pointer"
-                                                                                    data-wallet-link
-                                                                                    onPointerDown={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        router.push(
-                                                                                            ROUTER_MAP.WALLET_OPERATIONS(
-                                                                                                entry.walletId,
-                                                                                            ),
-                                                                                        );
-                                                                                    }}
-                                                                                >
-                                                                                    {entry.wallet.name}:
-                                                                                </Button>{' '}
-                                                                                <span
-                                                                                    className={
-                                                                                        entry.direction === 'credit'
-                                                                                            ? 'text-success/80 font-semibold'
-                                                                                            : 'text-destructive/80 font-semibold'
-                                                                                    }
-                                                                                >
-                                                                                    {entry.amount}
-                                                                                </span>
-                                                                            </p>
-                                                                        )}
-                                                                    </div>
-                                                                ))}
-                                                        </div>
-
-                                                        {operation.description && (
-                                                            <p className="text-sm text-muted-foreground">
-                                                                {operation.description}
-                                                            </p>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="text-left sm:text-right flex flex-col items-start sm:items-end">
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="mb-2 ml-auto h-8 w-8"
-                                                                aria-label="Открыть меню операции"
-                                                                onPointerDown={(e) => e.stopPropagation()}
-                                                            >
-                                                                <MoreHorizontal className="h-4 w-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <p className="text-sm text-muted-foreground leading-tight">
-                                                            {formatDateTime(operation.createdAt)}
-                                                        </p>
-                                                        {isUpdated && (
-                                                            <div className="mt-2 text-[11px] text-muted-foreground leading-tight text-left sm:text-right">
-                                                                <p className="whitespace-nowrap">
-                                                                    Изменено: {formatDateTime(operation.updatedAt)}
-                                                                </p>
-                                                                {operation.updated_by?.username && (
-                                                                    <p className="whitespace-nowrap">
-                                                                        Исполнитель: {operation.updated_by.username}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                        <DropdownMenuContent
-                                            align="center"
-                                            className="w-40 bg-background shadow-md rounded-md text-foreground"
-                                        >
-                                            <DropdownMenuItem
-                                                className="hover:bg-primary/60 dark:hover:bg-primary/60"
-                                                onClick={() =>
-                                                    router.push(ROUTER_MAP.OPERATIONS_EDIT + '/' + operation.id)
-                                                }
-                                            >
-                                                <Pencil className="mr-2 h-4 w-4 text-primary" />
-                                                Редактировать
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                className="hover:bg-primary/60 dark:hover:bg-primary/60"
+                                            <Card
+                                                ref={isLast ? lastOperationRef : null}
+                                                className="cursor-pointer hover:bg-accent/50 transition-colors"
                                                 onClick={() =>
                                                     setExpandedIds((prev) =>
                                                         prev.includes(operation.id)
@@ -441,24 +270,197 @@ export default function WalletOperationsPage() {
                                                     )
                                                 }
                                             >
-                                                <MoreHorizontal className="mr-2 h-4 w-4 text-primary" />
-                                                {showDetails ? 'Скрыть' : 'Подробнее'}
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                className="hover:bg-primary/60 dark:hover:bg-primary/60"
-                                                onClick={() => copyOperation(operation)}
+                                                <CardContent className="py-2 sm:py-4 relative">
+                                                    <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                                        <div className="space-y-1 sm:space-y-2 flex-1">
+                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                <p className="font-semibold">{operation.type.name}</p>
+                                                                {operation.applicationId && (
+                                                                    <span className="text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">
+                                                                        Заявка #{operation.applicationId}
+                                                                    </span>
+                                                                )}
+                                                                {operation.conversionGroupId && (
+                                                                    <span className="text-xs bg-purple-500/10 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-md">
+                                                                        Конвертация #{operation.conversionGroupId}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                {operation.created_by?.username}
+                                                            </p>
+
+                                                            <div className="space-y-1">
+                                                                {[...operation.entries]
+                                                                    .sort(
+                                                                        (a, b) =>
+                                                                            (a.direction === 'debit' ? 0 : 1) -
+                                                                            (b.direction === 'debit' ? 0 : 1),
+                                                                    )
+                                                                    .map((entry) => (
+                                                                        <div
+                                                                            key={entry.id}
+                                                                            className="py-1 px-2 rounded-md bg-muted/50"
+                                                                        >
+                                                                            {showDetails ? (
+                                                                                <p className="text-sm">
+                                                                                    <Button
+                                                                                        variant="link"
+                                                                                        className="p-0 h-auto font-medium relative z-10 no-underline hover:no-underline cursor-pointer"
+                                                                                        data-wallet-link
+                                                                                        onPointerDown={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            router.push(
+                                                                                                ROUTER_MAP.WALLET_OPERATIONS(
+                                                                                                    entry.walletId,
+                                                                                                ),
+                                                                                            );
+                                                                                        }}
+                                                                                    >
+                                                                                        {entry.wallet.name}:
+                                                                                    </Button>{' '}
+                                                                                    {entry.direction === 'credit' ? (
+                                                                                        <>
+                                                                                            <span className="text-muted-foreground">
+                                                                                                {entry.before ?? 0}{' '}
+                                                                                                +{' '}
+                                                                                            </span>
+                                                                                            <span className="text-success/80 font-semibold">
+                                                                                                {entry.amount}
+                                                                                            </span>
+                                                                                            <span className="text-muted-foreground">
+                                                                                                {' '}
+                                                                                                = {entry.after ?? 0}
+                                                                                            </span>
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        <>
+                                                                                            <span className="text-muted-foreground">
+                                                                                                {entry.before ?? 0}{' '}
+                                                                                                -{' '}
+                                                                                            </span>
+                                                                                            <span className="text-destructive/80 font-semibold">
+                                                                                                {entry.amount}
+                                                                                            </span>
+                                                                                            <span className="text-muted-foreground">
+                                                                                                {' '}
+                                                                                                = {entry.after ?? 0}
+                                                                                            </span>
+                                                                                        </>
+                                                                                    )}
+                                                                                </p>
+                                                                            ) : (
+                                                                                <p className="text-sm">
+                                                                                    <Button
+                                                                                        variant="link"
+                                                                                        className="p-0 h-auto font-medium relative z-10 no-underline hover:no-underline cursor-pointer"
+                                                                                        data-wallet-link
+                                                                                        onPointerDown={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            router.push(
+                                                                                                ROUTER_MAP.WALLET_OPERATIONS(
+                                                                                                    entry.walletId,
+                                                                                                ),
+                                                                                            );
+                                                                                        }}
+                                                                                    >
+                                                                                        {entry.wallet.name}:
+                                                                                    </Button>{' '}
+                                                                                    <span
+                                                                                        className={
+                                                                                            entry.direction === 'credit'
+                                                                                                ? 'text-success/80 font-semibold'
+                                                                                                : 'text-destructive/80 font-semibold'
+                                                                                        }
+                                                                                    >
+                                                                                        {entry.amount}
+                                                                                    </span>
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                    ))}
+                                                            </div>
+
+                                                            {operation.description && (
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    {operation.description}
+                                                                </p>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="text-left sm:text-right flex flex-col items-start sm:items-end">
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="mb-2 ml-auto h-8 w-8"
+                                                                    aria-label="Открыть меню операции"
+                                                                    onPointerDown={(e) => e.stopPropagation()}
+                                                                >
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <p className="text-sm text-muted-foreground leading-tight">
+                                                                {formatDateTime(operation.createdAt)}
+                                                            </p>
+                                                            {isUpdated && (
+                                                                <div className="mt-2 text-[11px] text-muted-foreground leading-tight text-left sm:text-right">
+                                                                    <p className="whitespace-nowrap">
+                                                                        Изменено: {formatDateTime(operation.updatedAt)}
+                                                                    </p>
+                                                                    {operation.updated_by?.username && (
+                                                                        <p className="whitespace-nowrap">
+                                                                            Исполнитель: {operation.updated_by.username}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                            <DropdownMenuContent
+                                                align="center"
+                                                className="w-40 bg-background shadow-md rounded-md text-foreground"
                                             >
-                                                <Copy className="mr-2 h-4 w-4 text-primary" />
-                                                Копировать
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                className="text-destructive/60 hover:text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20"
-                                                onClick={() => deleteOperation(operation.id)}
-                                            >
-                                                <Trash className="mr-2 h-4 w-4 text-destructive/60" />
-                                                Удалить
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
+                                                <DropdownMenuItem
+                                                    className="hover:bg-primary/60 dark:hover:bg-primary/60"
+                                                    onClick={() =>
+                                                        router.push(ROUTER_MAP.OPERATIONS_EDIT + '/' + operation.id)
+                                                    }
+                                                >
+                                                    <Pencil className="mr-2 h-4 w-4 text-primary" />
+                                                    Редактировать
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    className="hover:bg-primary/60 dark:hover:bg-primary/60"
+                                                    onClick={() =>
+                                                        setExpandedIds((prev) =>
+                                                            prev.includes(operation.id)
+                                                                ? prev.filter((id) => id !== operation.id)
+                                                                : [...prev, operation.id],
+                                                        )
+                                                    }
+                                                >
+                                                    <MoreHorizontal className="mr-2 h-4 w-4 text-primary" />
+                                                    {showDetails ? 'Скрыть' : 'Подробнее'}
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    className="hover:bg-primary/60 dark:hover:bg-primary/60"
+                                                    onClick={() => copyOperation(operation)}
+                                                >
+                                                    <Copy className="mr-2 h-4 w-4 text-primary" />
+                                                    Копировать
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    className="text-destructive/60 hover:text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20"
+                                                    onClick={() => deleteOperation(operation.id)}
+                                                >
+                                                    <Trash className="mr-2 h-4 w-4 text-destructive/60" />
+                                                    Удалить
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
                                         </DropdownMenu>
                                     );
                                 })}

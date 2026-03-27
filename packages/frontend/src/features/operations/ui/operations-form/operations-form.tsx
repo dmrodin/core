@@ -1073,7 +1073,10 @@ export function OperationForm({
                                     .map((item, realIndex) => ({ item, realIndex }))
                                     .filter(({ item }) => item.direction === dir)
                                     .map(({ item, realIndex }) => (
-                                        <div key={item.fieldId} className="flex flex-col sm:flex-row sm:items-end gap-2">
+                                        <div
+                                            key={item.fieldId}
+                                            className="flex flex-col sm:flex-row sm:items-end gap-2"
+                                        >
                                             <FormField
                                                 control={form.control}
                                                 name={`entries.${realIndex}.wallet.id`}

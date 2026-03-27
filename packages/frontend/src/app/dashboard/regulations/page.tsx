@@ -80,7 +80,14 @@ export default function RegulationsPage() {
                 {isAdmin && (
                     <>
                         <Button onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
-                            {isUploading ? <Loading /> : <><Upload className="w-4 h-4 mr-2" />Загрузить</>}
+                            {isUploading ? (
+                                <Loading />
+                            ) : (
+                                <>
+                                    <Upload className="w-4 h-4 mr-2" />
+                                    Загрузить
+                                </>
+                            )}
                         </Button>
                         <input
                             ref={fileInputRef}
@@ -94,7 +101,9 @@ export default function RegulationsPage() {
             </div>
 
             {isLoading ? (
-                <div className="flex justify-center py-12"><Loading /></div>
+                <div className="flex justify-center py-12">
+                    <Loading />
+                </div>
             ) : regulations.length === 0 ? (
                 <p className="text-muted-foreground text-center py-12">Регламенты ещё не загружены</p>
             ) : (
@@ -112,10 +121,7 @@ export default function RegulationsPage() {
                                 )}
                             </div>
 
-                            <button
-                                className="flex-1 text-left min-w-0"
-                                onClick={() => handleDownload(reg)}
-                            >
+                            <button className="flex-1 text-left min-w-0" onClick={() => handleDownload(reg)}>
                                 <p className="font-medium truncate">{reg.originalName}</p>
                                 <p className="text-xs text-muted-foreground mt-0.5">
                                     {formatSize(reg.size)} · {new Date(reg.createdAt).toLocaleDateString('ru-RU')}
@@ -125,7 +131,11 @@ export default function RegulationsPage() {
                             {isAdmin && (
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="shrink-0 text-destructive hover:text-destructive"
+                                        >
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
                                     </AlertDialogTrigger>

@@ -20,11 +20,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ApiIdParam, ApiReadResponses, ApiTag } from '../common';
-import {
-    DeleteRegulationResponseDto,
-    GetRegulationsResponseDto,
-    UploadRegulationResponseDto,
-} from './dto';
+import { DeleteRegulationResponseDto, GetRegulationsResponseDto, UploadRegulationResponseDto } from './dto';
 import {
     DeleteRegulationUseCase,
     DownloadRegulationUseCase,
