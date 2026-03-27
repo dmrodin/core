@@ -134,9 +134,9 @@ export default function WalletOperationsPage() {
         {} as Record<string, { date: string; operations: typeof allOperations }>,
     );
 
-    // Сортируем операции внутри каждого дня по времени
+    // Сортируем операции внутри каждого дня по убыванию (новые сверху)
     Object.values(groupedByDay).forEach((day) => {
-        day.operations.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        day.operations.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     });
 
     // Вычисляем баланс на конец каждого дня
