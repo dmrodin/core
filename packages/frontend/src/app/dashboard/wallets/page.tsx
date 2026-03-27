@@ -47,6 +47,7 @@ import { useBulkWalletActions } from '../../../features/wallets/hooks/use-bulk-w
 
 const baseFilters: GetWalletsFilter = {
     search: '',
+    searchByName: true,
     balanceStatus: undefined,
     walletKind: undefined,
     walletTypeId: undefined,
@@ -180,6 +181,7 @@ export default function WalletsPage() {
             visible: formValues.visible ?? baseFilters.visible,
             deleted: formValues.deleted ?? baseFilters.deleted,
             includeTabWalletTypes: formValues.includeTabWalletTypes ?? baseFilters.includeTabWalletTypes,
+            searchByName: formValues.searchByName ?? baseFilters.searchByName,
             sortField: formValues.sortField || baseFilters.sortField,
             sortOrder: formValues.sortOrder || baseFilters.sortOrder,
             page: formValues.page || baseFilters.page,
@@ -322,9 +324,12 @@ export default function WalletsPage() {
                     <CardTitle className="text-2xl">Список кошельков</CardTitle>
                     <div className="flex gap-2 items-center flex-wrap">
                         <Input
-                            placeholder="Поиск"
+                            placeholder="Поиск по названию"
                             value={formValues?.search ?? ''}
-                            onChange={(e) => form.setValue('search', e.target.value || undefined)}
+                            onChange={(e) => {
+                                form.setValue('search', e.target.value || undefined);
+                                form.setValue('searchByName', true);
+                            }}
                             className="w-full md:w-64"
                         />
                         <WalletsFiltersSheet form={form} baseFilters={baseFilters} />

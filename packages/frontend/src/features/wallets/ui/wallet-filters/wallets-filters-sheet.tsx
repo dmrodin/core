@@ -77,6 +77,12 @@ export function WalletsFiltersSheet({
             },
         );
 
+        if (localFilters.search) {
+            form.setValue('searchByName', false);
+        } else {
+            form.setValue('searchByName', true);
+        }
+
         setSheetOpen(false);
     };
 
@@ -85,6 +91,7 @@ export function WalletsFiltersSheet({
         setLocalFilters({});
         form.reset({
             ...baseFilters,
+            searchByName: true,
             visible: currentValues.visible,
             deleted: currentValues.deleted,
             pinned: currentValues.pinned,
@@ -93,6 +100,7 @@ export function WalletsFiltersSheet({
     };
 
     const activeFiltersCount = [
+        localFilters.search,
         localFilters.balanceStatus,
         localFilters.walletKind,
         localFilters.currencyId,
@@ -122,6 +130,20 @@ export function WalletsFiltersSheet({
                     <SheetDescription>Настройте параметры для фильтрации списка кошельков</SheetDescription>
                 </SheetHeader>
                 <div className="space-y-6 px-4">
+                    <div className="space-y-2">
+                        <Label>Поиск по всем полям</Label>
+                        <Input
+                            placeholder="Название, карта, телефон, владелец..."
+                            value={localFilters.search ?? ''}
+                            onChange={(e) =>
+                                setLocalFilters((prev) => ({
+                                    ...prev,
+                                    search: e.target.value || undefined,
+                                }))
+                            }
+                        />
+                    </div>
+
                     <div className="space-y-2">
                         <Label>Статус баланса</Label>
                         <Select
