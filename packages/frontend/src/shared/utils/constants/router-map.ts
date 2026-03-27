@@ -45,6 +45,7 @@ export const ROUTER_MAP = {
     REPORTS: '/dashboard/reports',
     CREATE_USER: '/dashboard/create',
     SETTINGS: '/dashboard/settings',
+    REGULATIONS: '/dashboard/regulations',
     ERROR: '/error',
 };
 
@@ -94,4 +95,5 @@ export const ROUTER_TITLES: Record<string, string> = {
     [ROUTER_MAP.ANALYTICS]: 'Аналитика',
     [ROUTER_MAP.REPORTS]: 'Отчеты',
     [ROUTER_MAP.SETTINGS]: 'Настройки',
+    [ROUTER_MAP.REGULATIONS]: 'Регламенты',
 };
