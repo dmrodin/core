@@ -86,7 +86,6 @@ export class GenerateBalancesReportUseCase {
 
             if (walletTypeCodes.length > 0) {
                 orConditions.push({
-                    visible: true,
                     walletType: {
                         code: {
                             in: walletTypeCodes,
