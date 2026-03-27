@@ -3,13 +3,33 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Copy, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 import { useWallet } from '@/entities/wallet';
-import { GetOperationsParams, GetOperationsParamsSchema, useInfiniteOperations } from '@/entities/operations';
+import {
+    GetOperationsParams,
+    GetOperationsParamsSchema,
+    useCopyOperation,
+    useDeleteOperation,
+    useInfiniteOperations,
+} from '@/entities/operations';
 import { OperationsFiltersSheet } from '@/features/operations/ui/operations-filters/operations-filters-sheet';
-import { Button, Card, CardContent, CardHeader, Form, Input, Loading, formatDateTime, ROUTER_MAP } from '@/shared';
+import {
+    Button,
+    Card,
+    CardContent,
+    CardHeader,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    Form,
+    Input,
+    Loading,
+    formatDateTime,
+    ROUTER_MAP,
+} from '@/shared';
 import { formatNumber } from '@/shared/lib/utils/format-number';
 import { format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -49,6 +69,8 @@ export default function WalletOperationsPage() {
     const formValues = form.watch();
 
     const { data: wallet, isLoading: isWalletLoading } = useWallet(walletId);
+    const { copyOperation } = useCopyOperation();
+    const { mutate: deleteOperation } = useDeleteOperation();
     const {
         data: operationsData,
         isLoading: isOperationsLoading,
@@ -236,8 +258,8 @@ export default function WalletOperationsPage() {
                                         new Date(operation.createdAt).getTime();
 
                                     return (
+                                        <DropdownMenu key={operation.id}>
                                         <Card
-                                            key={operation.id}
                                             ref={isLast ? lastOperationRef : null}
                                             className="cursor-pointer hover:bg-accent/50 transition-colors"
                                             onClick={() =>
@@ -365,6 +387,18 @@ export default function WalletOperationsPage() {
                                                     </div>
 
                                                     <div className="text-left sm:text-right flex flex-col items-start sm:items-end">
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="mb-2 ml-auto h-8 w-8"
+                                                                aria-label="Открыть меню операции"
+                                                                onPointerDown={(e) => e.stopPropagation()}
+                                                            >
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
                                                         <p className="text-sm text-muted-foreground leading-tight">
                                                             {formatDateTime(operation.createdAt)}
                                                         </p>
@@ -384,6 +418,48 @@ export default function WalletOperationsPage() {
                                                 </div>
                                             </CardContent>
                                         </Card>
+                                        <DropdownMenuContent
+                                            align="center"
+                                            className="w-40 bg-background shadow-md rounded-md text-foreground"
+                                        >
+                                            <DropdownMenuItem
+                                                className="hover:bg-primary/60 dark:hover:bg-primary/60"
+                                                onClick={() =>
+                                                    router.push(ROUTER_MAP.OPERATIONS_EDIT + '/' + operation.id)
+                                                }
+                                            >
+                                                <Pencil className="mr-2 h-4 w-4 text-primary" />
+                                                Редактировать
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                className="hover:bg-primary/60 dark:hover:bg-primary/60"
+                                                onClick={() =>
+                                                    setExpandedIds((prev) =>
+                                                        prev.includes(operation.id)
+                                                            ? prev.filter((id) => id !== operation.id)
+                                                            : [...prev, operation.id],
+                                                    )
+                                                }
+                                            >
+                                                <MoreHorizontal className="mr-2 h-4 w-4 text-primary" />
+                                                {showDetails ? 'Скрыть' : 'Подробнее'}
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                className="hover:bg-primary/60 dark:hover:bg-primary/60"
+                                                onClick={() => copyOperation(operation)}
+                                            >
+                                                <Copy className="mr-2 h-4 w-4 text-primary" />
+                                                Копировать
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                className="text-destructive/60 hover:text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20"
+                                                onClick={() => deleteOperation(operation.id)}
+                                            >
+                                                <Trash className="mr-2 h-4 w-4 text-destructive/60" />
+                                                Удалить
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                        </DropdownMenu>
                                     );
                                 })}
                             </div>
