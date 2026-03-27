@@ -1073,7 +1073,7 @@ export function OperationForm({
                                     .map((item, realIndex) => ({ item, realIndex }))
                                     .filter(({ item }) => item.direction === dir)
                                     .map(({ item, realIndex }) => (
-                                        <div key={item.fieldId} className="flex flex-row items-end gap-2">
+                                        <div key={item.fieldId} className="flex flex-col sm:flex-row sm:items-end gap-2">
                                             <FormField
                                                 control={form.control}
                                                 name={`entries.${realIndex}.wallet.id`}
@@ -1173,55 +1173,57 @@ export function OperationForm({
                                                 )}
                                             />
 
-                                            <FormField
-                                                control={form.control}
-                                                name={`entries.${realIndex}.amount`}
-                                                render={({ field }) => (
-                                                    <FormItem className="w-24 shrink-0">
-                                                        <FormLabel className="hidden sm:block">
-                                                            Сумма <span className="text-destructive">*</span>
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <Input
-                                                                type="number"
-                                                                {...field}
-                                                                value={field.value ?? ''}
-                                                                onChange={(e) => {
-                                                                    const value = e.target.value;
-                                                                    if (value === '' || value === null) {
-                                                                        field.onChange('');
-                                                                        return;
-                                                                    }
-                                                                    const numValue = parseFloat(value);
-                                                                    field.onChange(isNaN(numValue) ? '' : numValue);
-                                                                }}
-                                                                onFocus={() => {
-                                                                    if (field.value === 0) {
-                                                                        field.onChange('');
-                                                                    }
-                                                                }}
-                                                                onBlur={(e) => {
-                                                                    if (e.currentTarget.value === '') {
-                                                                        field.onChange(0);
-                                                                    }
-                                                                }}
-                                                                className="w-full [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
+                                            <div className="flex items-end gap-2">
+                                                <FormField
+                                                    control={form.control}
+                                                    name={`entries.${realIndex}.amount`}
+                                                    render={({ field }) => (
+                                                        <FormItem className="w-24 shrink-0">
+                                                            <FormLabel className="hidden sm:block">
+                                                                Сумма <span className="text-destructive">*</span>
+                                                            </FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    type="number"
+                                                                    {...field}
+                                                                    value={field.value ?? ''}
+                                                                    onChange={(e) => {
+                                                                        const value = e.target.value;
+                                                                        if (value === '' || value === null) {
+                                                                            field.onChange('');
+                                                                            return;
+                                                                        }
+                                                                        const numValue = parseFloat(value);
+                                                                        field.onChange(isNaN(numValue) ? '' : numValue);
+                                                                    }}
+                                                                    onFocus={() => {
+                                                                        if (field.value === 0) {
+                                                                            field.onChange('');
+                                                                        }
+                                                                    }}
+                                                                    onBlur={(e) => {
+                                                                        if (e.currentTarget.value === '') {
+                                                                            field.onChange(0);
+                                                                        }
+                                                                    }}
+                                                                    className="w-full [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
 
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() => remove(realIndex)}
-                                                className="shrink-0 text-destructive hover:bg-destructive/10"
-                                            >
-                                                <Trash2 className="size-4" />
-                                            </Button>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    onClick={() => remove(realIndex)}
+                                                    className="shrink-0 text-destructive hover:bg-destructive/10"
+                                                >
+                                                    <Trash2 className="size-4" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     ))}
                             </div>
