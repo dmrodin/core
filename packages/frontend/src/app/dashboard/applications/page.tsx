@@ -10,11 +10,13 @@ import { InfiniteApplicationsList } from '@/features/application/ui/infinite-app
 import { Button } from '@/shared/ui/shadcn/button';
 import { Card, CardHeader, CardTitle } from '@/shared/ui/shadcn/card';
 import { Input } from '@/shared/ui/shadcn/input';
+import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/shadcn/tabs';
 import { ROUTER_MAP } from '@/shared/utils/constants/router-map';
 
 export default function ApplicationsPage() {
     const { searchParams, setQueryParam } = useSetApplicationQueryParam();
     const search = searchParams.get('search') ?? '';
+    const activeTab = searchParams.get('status') ?? 'open';
 
     return (
         <div className="space-y-6">
@@ -38,6 +40,18 @@ export default function ApplicationsPage() {
                     </div>
                 </CardHeader>
             </Card>
+
+            <Tabs
+                value={activeTab}
+                onValueChange={(val) => setQueryParam('status', val)}
+            >
+                <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="all">Все</TabsTrigger>
+                    <TabsTrigger value="open">В работе</TabsTrigger>
+                    <TabsTrigger value="done">Завершенные</TabsTrigger>
+                </TabsList>
+            </Tabs>
+
             <InfiniteApplicationsList />
         </div>
     );
