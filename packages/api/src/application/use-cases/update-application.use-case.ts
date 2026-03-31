@@ -229,7 +229,7 @@ export class UpdateApplicationUseCase {
                   direction: entry.direction,
                   amount: entry.amount,
               }))
-            : applicationResponse.operation?.entries?.length
+            : applicationResponse.hasAdvance && applicationResponse.operation?.entries?.length
               ? applicationResponse.operation.entries.map((entry) => ({
                     walletId: entry.walletId,
                     direction: entry.direction,
