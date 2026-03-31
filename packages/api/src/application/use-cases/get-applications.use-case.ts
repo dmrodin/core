@@ -187,13 +187,14 @@ export class GetApplicationsUseCase {
         const applications = await this.prisma.application.findMany(findManyOptions);
 
         const applicationsResponse = applications.map(({ deleted: _, advance, ...application }) => {
-            const advanceEntries = application.hasAdvance && application.operation?.entries?.length
-                ? application.operation.entries.map((entry) => ({
-                      walletId: entry.walletId,
-                      direction: entry.direction,
-                      amount: entry.amount,
-                  }))
-                : null;
+            const advanceEntries =
+                application.hasAdvance && application.operation?.entries?.length
+                    ? application.operation.entries.map((entry) => ({
+                          walletId: entry.walletId,
+                          direction: entry.direction,
+                          amount: entry.amount,
+                      }))
+                    : null;
 
             return {
                 ...application,

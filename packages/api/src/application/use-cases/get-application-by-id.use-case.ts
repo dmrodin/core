@@ -71,13 +71,14 @@ export class GetApplicationByIdUseCase {
         }
 
         const { deleted: _, ...applicationResponse } = application;
-        const advanceEntries = applicationResponse.hasAdvance && applicationResponse.operation?.entries?.length
-            ? applicationResponse.operation.entries.map((entry) => ({
-                  walletId: entry.walletId,
-                  direction: entry.direction,
-                  amount: entry.amount,
-              }))
-            : null;
+        const advanceEntries =
+            applicationResponse.hasAdvance && applicationResponse.operation?.entries?.length
+                ? applicationResponse.operation.entries.map((entry) => ({
+                      walletId: entry.walletId,
+                      direction: entry.direction,
+                      amount: entry.amount,
+                  }))
+                : null;
 
         return {
             application: {

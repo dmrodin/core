@@ -41,10 +41,7 @@ export default function ApplicationsPage() {
                 </CardHeader>
             </Card>
 
-            <Tabs
-                value={activeTab}
-                onValueChange={(val) => setQueryParam('status', val)}
-            >
+            <Tabs value={activeTab} onValueChange={(val) => setQueryParam('status', val)}>
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="all">Все</TabsTrigger>
                     <TabsTrigger value="open">В работе</TabsTrigger>
