@@ -4,7 +4,7 @@ import React, { Fragment, useEffect, useRef } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { BookOpen, Copy, Pencil, Trash } from 'lucide-react';
+import { BookOpen, Copy, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 
 import { GetGuidesParamsRequest } from '@/entities/guides/model/guide-schemas';
 import { useCopyGuide, useDeleteGuide } from '@/features/guides/hooks/use-guide';
@@ -90,24 +90,11 @@ export function GuidesList({ filters }: { filters?: GetGuidesParamsRequest }) {
 
                                     return (
                                         <DropdownMenu key={guide.id}>
-                                            <DropdownMenuTrigger asChild>
-                                                <Card
-                                                    ref={isLast ? lastGuideRef : null}
-                                                    className="relative gap-2 mb-2 cursor-pointer text-foreground"
-                                                    onTouchStart={(e) => {
-                                                        const timer = setTimeout(() => {
-                                                            e.currentTarget.click();
-                                                        }, 600);
-                                                        const cancel = () => clearTimeout(timer);
-                                                        e.currentTarget.addEventListener('touchend', cancel, {
-                                                            once: true,
-                                                        });
-                                                        e.currentTarget.addEventListener('touchmove', cancel, {
-                                                            once: true,
-                                                        });
-                                                    }}
-                                                >
-                                                    <CardHeader className="lg:grid lg:grid-cols-3 flex flex-col">
+                                            <Card
+                                                ref={isLast ? lastGuideRef : null}
+                                                className="relative gap-2 mb-2 text-foreground"
+                                            >
+                                                <CardHeader className="lg:grid lg:grid-cols-3 flex flex-col">
                                                         <p className="col-span-2">
                                                             <span>
                                                                 <strong>ФИО: </strong>
@@ -116,13 +103,25 @@ export function GuidesList({ filters }: { filters?: GetGuidesParamsRequest }) {
                                                                 </span>
                                                             </span>
                                                         </p>
-                                                        <p className="flex justify-end">
+                                                        <p className="flex items-center justify-end gap-1">
                                                             <span>
                                                                 <strong>Создан: </strong>
                                                                 <span className="block lg:inline">
                                                                     {formatDateTime(guide.createdAt)}
                                                                 </span>
                                                             </span>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-8 w-8 shrink-0"
+                                                                    aria-label="Открыть меню гайда"
+                                                                    onPointerDown={(e) => e.stopPropagation()}
+                                                                >
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
                                                         </p>
                                                     </CardHeader>
 
@@ -200,7 +199,6 @@ export function GuidesList({ filters }: { filters?: GetGuidesParamsRequest }) {
                                                         </CardFooter>
                                                     )}
                                                 </Card>
-                                            </DropdownMenuTrigger>
 
                                             <DropdownMenuContent
                                                 align="center"
