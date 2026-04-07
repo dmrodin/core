@@ -527,6 +527,10 @@ export const CryptoWalletCard = ({
                                                         variant="default"
                                                         size="sm"
                                                         onPointerDown={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                        }}
+                                                        onClick={(e) => {
                                                             e.stopPropagation();
                                                             const text = getBybitTrcCopyText(wallet);
                                                             navigator.clipboard
@@ -544,6 +548,10 @@ export const CryptoWalletCard = ({
                                                         variant="default"
                                                         size="sm"
                                                         onPointerDown={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                        }}
+                                                        onClick={(e) => {
                                                             e.stopPropagation();
                                                             const text = getBybitBbCopyText(wallet);
                                                             navigator.clipboard
@@ -564,6 +572,10 @@ export const CryptoWalletCard = ({
                                                     variant="default"
                                                     size="sm"
                                                     onPointerDown={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                    }}
+                                                    onClick={(e) => {
                                                         e.stopPropagation();
                                                         const template = getSpecialWalletTemplate(wallet);
                                                         if (template) handleCopySpecialTemplate(template);
