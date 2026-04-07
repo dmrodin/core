@@ -6,6 +6,7 @@ import { UseFormReturn } from 'react-hook-form';
 
 import { useCurrency } from '@/entities/currency';
 import { useUsers } from '@/entities/users';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { BalanceStatus, GetWalletsFilter, SortOrder, WalletKind, WalletSortField } from '@/entities/wallet';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import {
@@ -20,7 +21,7 @@ import {
     SelectValue,
     Sheet,
     SheetContent,
-    SheetDescription,
+    // SheetDescription,
     SheetHeader,
     SheetTitle,
     SheetTrigger,
@@ -39,15 +40,15 @@ const balanceStatusLabels: Record<BalanceStatus, string> = {
     [BalanceStatus.neutral]: 'Нейтральный',
 };
 
-const SORT_FIELDS: { value: WalletSortField; label: string }[] = [
-    { value: WalletSortField.CREATED_AT, label: 'Дате создания' },
-    { value: WalletSortField.UPDATED_AT, label: 'Дате обновления' },
-];
+// const SORT_FIELDS: { value: WalletSortField; label: string }[] = [
+//     { value: WalletSortField.CREATED_AT, label: 'Дате создания' },
+//     { value: WalletSortField.UPDATED_AT, label: 'Дате обновления' },
+// ];
 
-const SORT_ORDERS: { value: SortOrder; label: string }[] = [
-    { value: SortOrder.DESC, label: 'Сначала новые' },
-    { value: SortOrder.ASC, label: 'Сначала старые' },
-];
+// const SORT_ORDERS: { value: SortOrder; label: string }[] = [
+//     { value: SortOrder.DESC, label: 'Сначала новые' },
+//     { value: SortOrder.ASC, label: 'Сначала старые' },
+// ];
 
 export function WalletsFiltersSheet({
     form,
@@ -107,8 +108,8 @@ export function WalletsFiltersSheet({
         localFilters.ownerId,
         localFilters.minAmount,
         localFilters.maxAmount,
-        localFilters.sortField,
-        localFilters.sortOrder,
+        // localFilters.sortField,
+        // localFilters.sortOrder,
     ].filter(Boolean).length;
 
     return (
@@ -127,9 +128,9 @@ export function WalletsFiltersSheet({
             <SheetContent className="overflow-y-auto">
                 <SheetHeader>
                     <SheetTitle>Фильтры кошельков</SheetTitle>
-                    <SheetDescription>Настройте параметры для фильтрации списка кошельков</SheetDescription>
+                    {/* <SheetDescription>Настройте параметры для фильтрации списка кошельков</SheetDescription> */}
                 </SheetHeader>
-                <div className="space-y-6 px-4">
+                <div className="space-y-3 px-4">
                     <div className="space-y-2">
                         <Label>Поиск по всем полям</Label>
                         <Input
@@ -244,7 +245,7 @@ export function WalletsFiltersSheet({
                         </Select>
                     </div>
 
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                         <Label>Сортировать по</Label>
                         <Select
                             value={localFilters.sortField ?? ''}
@@ -290,7 +291,7 @@ export function WalletsFiltersSheet({
                                 ))}
                             </SelectContent>
                         </Select>
-                    </div>
+                    </div> */}
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
