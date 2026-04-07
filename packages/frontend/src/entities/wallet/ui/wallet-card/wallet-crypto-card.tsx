@@ -17,6 +17,8 @@ import {
     formatSpecialWalletCopyText,
     formatWalletCopyText,
     formatWalletRequisites,
+    getBybitBbCopyText,
+    getBybitTrcCopyText,
     getSpecialWalletTemplate,
     isSpecialWallet,
     isBybitWallet,
@@ -284,9 +286,6 @@ export const CryptoWalletCard = ({
         const parts = [];
 
         if (wallet.details) {
-            if (wallet.details.exchangeUid) {
-                parts.push(`UID: ${wallet.details.exchangeUid}`);
-            }
             if (wallet.details.network || wallet.details.networkType) {
                 const networkParts = [];
                 if (wallet.details.network?.name) {
@@ -449,22 +448,45 @@ export const CryptoWalletCard = ({
                                         onMouseDown={(e) => e.stopPropagation()}
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        {isTrustWallet(wallet) && wallet.details?.address ? (
+                                        {isSpecialWallet(wallet) ? (
                                             <>
-                                                <span>Адрес: </span>
-                                                <span
-                                                    className="text-primary cursor-pointer"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        e.preventDefault();
-                                                        handleCopySpecificRequisite(
-                                                            wallet.details?.address,
-                                                            'Адрес кошелька',
-                                                        );
-                                                    }}
-                                                >
-                                                    {wallet.details.address}
-                                                </span>
+                                                {wallet.details?.address && (
+                                                    <>
+                                                        <span>Адрес: </span>
+                                                        <span
+                                                            className="text-primary cursor-pointer"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                handleCopySpecificRequisite(
+                                                                    wallet.details?.address,
+                                                                    'Адрес кошелька',
+                                                                );
+                                                            }}
+                                                        >
+                                                            {wallet.details.address}
+                                                        </span>
+                                                    </>
+                                                )}
+                                                {wallet.details?.exchangeUid && (
+                                                    <>
+                                                        {wallet.details?.address && ' • '}
+                                                        <span>UID: </span>
+                                                        <span
+                                                            className="text-primary cursor-pointer"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                handleCopySpecificRequisite(
+                                                                    wallet.details?.exchangeUid,
+                                                                    'UID',
+                                                                );
+                                                            }}
+                                                        >
+                                                            {wallet.details.exchangeUid}
+                                                        </span>
+                                                    </>
+                                                )}
                                                 {getFullDescriptionWithoutAddress() &&
                                                     ` • ${getFullDescriptionWithoutAddress()}`}
                                             </>
@@ -506,10 +528,15 @@ export const CryptoWalletCard = ({
                                                         size="sm"
                                                         onPointerDown={(e) => {
                                                             e.stopPropagation();
-                                                            handleCopySpecificRequisite(
-                                                                wallet.details?.address,
-                                                                'Адрес кошелька',
-                                                            );
+                                                            const text = getBybitTrcCopyText(wallet);
+                                                            navigator.clipboard
+                                                                .writeText(text)
+                                                                .then(() =>
+                                                                    toast.success('TRC шаблон скопирован'),
+                                                                )
+                                                                .catch((err) =>
+                                                                    toast.error(`Не удалось скопировать: ${err}`),
+                                                                );
                                                         }}
                                                         className="relative z-10 cursor-pointer"
                                                     >
@@ -520,10 +547,15 @@ export const CryptoWalletCard = ({
                                                         size="sm"
                                                         onPointerDown={(e) => {
                                                             e.stopPropagation();
-                                                            handleCopySpecificRequisite(
-                                                                wallet.details?.exchangeUid,
-                                                                'UID',
-                                                            );
+                                                            const text = getBybitBbCopyText(wallet);
+                                                            navigator.clipboard
+                                                                .writeText(text)
+                                                                .then(() =>
+                                                                    toast.success('BB шаблон скопирован'),
+                                                                )
+                                                                .catch((err) =>
+                                                                    toast.error(`Не удалось скопировать: ${err}`),
+                                                                );
                                                         }}
                                                         className="relative z-10 cursor-pointer"
                                                     >
