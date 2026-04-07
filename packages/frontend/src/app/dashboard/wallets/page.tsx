@@ -83,6 +83,7 @@ export default function WalletsPage() {
     const [isInitialized, setIsInitialized] = useState(false);
     const [selectionMode, setSelectionMode] = useState(false);
     const [selectedWallets, setSelectedWallets] = useState<Set<string>>(new Set());
+    const internalNavRef = useRef(false);
 
     const {
         bulkToggleVisible,
@@ -93,7 +94,14 @@ export default function WalletsPage() {
         bulkBalanceStatusChange,
     } = useBulkWalletActions();
 
+    const searchParamsString = searchParams.toString();
+
     useEffect(() => {
+        if (internalNavRef.current) {
+            internalNavRef.current = false;
+            return;
+        }
+
         const params: Partial<GetWalletsFilter> = {};
 
         searchParams.forEach((value, key) => {
@@ -101,7 +109,14 @@ export default function WalletsPage() {
                 params[key] = value ? Number(value) : null;
             } else if (key === 'page' || key === 'limit') {
                 params[key] = Number(value);
-            } else if (key === 'active' || key === 'pinned' || key === 'visible' || key === 'deleted') {
+            } else if (
+                key === 'active' ||
+                key === 'pinned' ||
+                key === 'visible' ||
+                key === 'deleted' ||
+                key === 'searchByName' ||
+                key === 'includeTabWalletTypes'
+            ) {
                 params[key] = value === 'true';
             } else if (value) {
                 const k = key as keyof GetWalletsFilter;
@@ -115,7 +130,7 @@ export default function WalletsPage() {
 
         setIsInitialized(true);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [searchParamsString]);
 
     useEffect(() => {
         if (!isInitialized) return;
@@ -143,6 +158,7 @@ export default function WalletsPage() {
                 });
 
                 const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+                internalNavRef.current = true;
                 router.replace(newUrl, { scroll: false });
             }, 300);
         });

@@ -282,9 +282,7 @@ export default function OperationsPage() {
                                                                                                         e.preventDefault();
                                                                                                         e.stopPropagation();
                                                                                                     }}
-                                                                                                    onClick={(
-                                                                                                        e,
-                                                                                                    ) => {
+                                                                                                    onClick={(e) => {
                                                                                                         e.preventDefault();
                                                                                                         e.stopPropagation();
                                                                                                         router.push(
@@ -349,9 +347,7 @@ export default function OperationsPage() {
                                                                                                         e.preventDefault();
                                                                                                         e.stopPropagation();
                                                                                                     }}
-                                                                                                    onClick={(
-                                                                                                        e,
-                                                                                                    ) => {
+                                                                                                    onClick={(e) => {
                                                                                                         e.preventDefault();
                                                                                                         e.stopPropagation();
                                                                                                         router.push(
