@@ -94,34 +94,34 @@ export function GuidesList({ filters }: { filters?: GetGuidesParamsRequest }) {
                                                 ref={isLast ? lastGuideRef : null}
                                                 className="relative gap-2 mb-2 text-foreground"
                                             >
-                                                <CardHeader className="lg:grid lg:grid-cols-3 flex flex-col">
-                                                        <p className="col-span-2">
-                                                            <span>
-                                                                <strong>ФИО: </strong>
-                                                                <span className="block lg:inline">
-                                                                    {guide.fullName || 'Не указано'}
-                                                                </span>
+                                                <CardHeader className="grid grid-cols-[1fr_auto] lg:grid-cols-[2fr_1fr_auto] items-start">
+                                                        <p>
+                                                            <strong>ФИО: </strong>
+                                                            <span className="block lg:inline">
+                                                                {guide.fullName || 'Не указано'}
                                                             </span>
                                                         </p>
-                                                        <p className="flex items-center justify-end gap-1">
-                                                            <span>
-                                                                <strong>Создан: </strong>
-                                                                <span className="block lg:inline">
-                                                                    {formatDateTime(guide.createdAt)}
-                                                                </span>
+                                                        <p className="hidden lg:block text-right">
+                                                            <strong>Создан: </strong>
+                                                            <span>{formatDateTime(guide.createdAt)}</span>
+                                                        </p>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8 shrink-0"
+                                                                aria-label="Открыть меню гайда"
+                                                                onPointerDown={(e) => e.stopPropagation()}
+                                                            >
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <p className="lg:hidden">
+                                                            <strong>Создан: </strong>
+                                                            <span className="block">
+                                                                {formatDateTime(guide.createdAt)}
                                                             </span>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-8 w-8 shrink-0"
-                                                                    aria-label="Открыть меню гайда"
-                                                                    onPointerDown={(e) => e.stopPropagation()}
-                                                                >
-                                                                    <MoreHorizontal className="h-4 w-4" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
                                                         </p>
                                                     </CardHeader>
 
