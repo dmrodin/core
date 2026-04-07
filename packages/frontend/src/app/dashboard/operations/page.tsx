@@ -279,6 +279,11 @@ export default function OperationsPage() {
                                                                                                     onPointerDown={(
                                                                                                         e,
                                                                                                     ) => {
+                                                                                                        e.preventDefault();
+                                                                                                        e.stopPropagation();
+                                                                                                    }}
+                                                                                                    onClick={(e) => {
+                                                                                                        e.preventDefault();
                                                                                                         e.stopPropagation();
                                                                                                         router.push(
                                                                                                             ROUTER_MAP.WALLET_OPERATIONS(
@@ -339,6 +344,11 @@ export default function OperationsPage() {
                                                                                                     onPointerDown={(
                                                                                                         e,
                                                                                                     ) => {
+                                                                                                        e.preventDefault();
+                                                                                                        e.stopPropagation();
+                                                                                                    }}
+                                                                                                    onClick={(e) => {
+                                                                                                        e.preventDefault();
                                                                                                         e.stopPropagation();
                                                                                                         router.push(
                                                                                                             ROUTER_MAP.WALLET_OPERATIONS(

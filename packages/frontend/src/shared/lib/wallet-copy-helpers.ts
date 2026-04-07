@@ -145,10 +145,29 @@ export const getSpecialWalletTemplate = (wallet: Wallet): string | null => {
         return `<${currency}>, UID Bybit:`;
     }
 
-    // Траст - показываем шаблон для TRON
+    // Траст - показываем шаблон для TRON с адресом
     if (isTrustWallet(wallet)) {
-        return `<${currency}>, TRON (TRC-20):`;
+        const address = wallet.details?.address ?? '';
+        return `<${currency}>, TRON (TRC-20):\n${address}`;
     }
 
     return null;
+};
+
+/**
+ * Формирует текст для кнопки TRC (Bybit) — адрес с шаблоном TRON
+ */
+export const getBybitTrcCopyText = (wallet: Wallet): string => {
+    const currency = wallet.currency.code;
+    const address = wallet.details?.address ?? '';
+    return `${warningText}\n\n<${currency}>, TRON (TRC-20):\n${address}`;
+};
+
+/**
+ * Формирует текст для кнопки BB (Bybit) — UID с шаблоном
+ */
+export const getBybitBbCopyText = (wallet: Wallet): string => {
+    const currency = wallet.currency.code;
+    const uid = wallet.details?.exchangeUid ?? '';
+    return `${warningText}\n\n<${currency}>, UID: \n${uid}\nПлатформа: Bybit`;
 };
