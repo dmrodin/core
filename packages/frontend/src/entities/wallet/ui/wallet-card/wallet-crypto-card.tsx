@@ -393,7 +393,7 @@ export const CryptoWalletCard = ({
                                 <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
                                     {getWalletTypeLabel(wallet.walletType)}
                                 </span>
-                                {formatWalletRequisites(wallet) && (
+                                {formatWalletRequisites(wallet) && !isSpecialWallet(wallet) && (
                                     <Button
                                         variant="ghost"
                                         size="icon"
