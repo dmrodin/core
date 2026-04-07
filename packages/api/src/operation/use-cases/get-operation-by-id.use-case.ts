@@ -10,7 +10,11 @@ import { OperationResponse } from '../types';
 export class GetOperationByIdUseCase {
     constructor(private readonly prisma: PrismaService) {}
 
-    public async execute(operationId: string, currentUserRoles: RoleCode[] = []): Promise<OperationResponse> {
+    public async execute(
+        operationId: string,
+        currentUserRoles: RoleCode[] = [],
+        currentUserId?: string,
+    ): Promise<OperationResponse> {
         const operation = await this.prisma.operation.findUnique({
             where: { id: operationId },
             include: {
@@ -63,7 +67,8 @@ export class GetOperationByIdUseCase {
 
         if (
             !canViewRestrictedExpenseOperations(currentUserRoles) &&
-            isRestrictedExpenseOperation(operation.type?.code, operation.expenseCategory)
+            isRestrictedExpenseOperation(operation.type?.code, operation.expenseCategory) &&
+            operation.userId !== currentUserId
         ) {
             throw new NotFoundException('Операция не найдена');
         }

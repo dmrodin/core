@@ -176,9 +176,13 @@ export class OperationController {
     @ApiReadResponses()
     public async getOperations(
         @Query() getOperationsDto: GetOperationsDto,
-        @Req() request: { user?: { roles?: RoleCode[] } },
+        @Req() request: { user?: { roles?: RoleCode[]; id?: string } },
     ): Promise<GetOperationsResponseDto> {
-        const result = await this.getOperationsUseCase.execute(getOperationsDto, request.user?.roles ?? []);
+        const result = await this.getOperationsUseCase.execute(
+            getOperationsDto,
+            request.user?.roles ?? [],
+            request.user?.id,
+        );
 
         return {
             operations: result.operations,
@@ -202,9 +206,9 @@ export class OperationController {
     @ApiReadResponses()
     public async getOperationById(
         @Param('id') operationId: string,
-        @Req() request: { user?: { roles?: RoleCode[] } },
+        @Req() request: { user?: { roles?: RoleCode[]; id?: string } },
     ): Promise<OperationResponseDto> {
-        return await this.getOperationByIdUseCase.execute(operationId, request.user?.roles ?? []);
+        return await this.getOperationByIdUseCase.execute(operationId, request.user?.roles ?? [], request.user?.id);
     }
 
     @Post()

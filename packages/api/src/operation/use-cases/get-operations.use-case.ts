@@ -19,6 +19,7 @@ export class GetOperationsUseCase {
     public async execute(
         getOperationsDto: GetOperationsDto,
         currentUserRoles: RoleCode[] = [],
+        currentUserId?: string,
     ): Promise<GetOperationsResponse> {
         const {
             search,
@@ -47,7 +48,11 @@ export class GetOperationsUseCase {
 
         if (!canViewRestrictedExpenseOperations(currentUserRoles)) {
             where.NOT = {
-                AND: [{ type: { code: EXPENSE_OPERATION_TYPE_CODE } }, { expenseCategory: EXPENSE_CATEGORIES.SALARY }],
+                AND: [
+                    { type: { code: EXPENSE_OPERATION_TYPE_CODE } },
+                    { expenseCategory: EXPENSE_CATEGORIES.SALARY },
+                    ...(currentUserId ? [{ userId: { not: currentUserId } }] : []),
+                ],
             };
         }
 
