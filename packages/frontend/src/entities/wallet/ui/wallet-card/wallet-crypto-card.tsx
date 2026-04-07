@@ -531,9 +531,7 @@ export const CryptoWalletCard = ({
                                                             const text = getBybitTrcCopyText(wallet);
                                                             navigator.clipboard
                                                                 .writeText(text)
-                                                                .then(() =>
-                                                                    toast.success('TRC шаблон скопирован'),
-                                                                )
+                                                                .then(() => toast.success('TRC шаблон скопирован'))
                                                                 .catch((err) =>
                                                                     toast.error(`Не удалось скопировать: ${err}`),
                                                                 );
@@ -550,9 +548,7 @@ export const CryptoWalletCard = ({
                                                             const text = getBybitBbCopyText(wallet);
                                                             navigator.clipboard
                                                                 .writeText(text)
-                                                                .then(() =>
-                                                                    toast.success('BB шаблон скопирован'),
-                                                                )
+                                                                .then(() => toast.success('BB шаблон скопирован'))
                                                                 .catch((err) =>
                                                                     toast.error(`Не удалось скопировать: ${err}`),
                                                                 );
