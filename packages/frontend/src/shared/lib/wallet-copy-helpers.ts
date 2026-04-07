@@ -145,9 +145,10 @@ export const getSpecialWalletTemplate = (wallet: Wallet): string | null => {
         return `<${currency}>, UID Bybit:`;
     }
 
-    // Траст - показываем шаблон для TRON
+    // Траст - показываем шаблон для TRON с адресом
     if (isTrustWallet(wallet)) {
-        return `<${currency}>, TRON (TRC-20):`;
+        const address = wallet.details?.address ?? '';
+        return `<${currency}>, TRON (TRC-20):\n${address}`;
     }
 
     return null;

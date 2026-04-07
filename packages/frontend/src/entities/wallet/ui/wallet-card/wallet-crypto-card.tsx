@@ -280,6 +280,34 @@ export const CryptoWalletCard = ({
         return parts.join(' • ');
     };
 
+    const getFullDescriptionWithoutAddress = () => {
+        const parts = [];
+
+        if (wallet.details) {
+            if (wallet.details.exchangeUid) {
+                parts.push(`UID: ${wallet.details.exchangeUid}`);
+            }
+            if (wallet.details.network || wallet.details.networkType) {
+                const networkParts = [];
+                if (wallet.details.network?.name) {
+                    networkParts.push(wallet.details.network.name);
+                }
+                if (wallet.details.networkType?.name) {
+                    networkParts.push(wallet.details.networkType.name);
+                }
+                if (networkParts.length > 0) {
+                    parts.push(`Сеть: ${networkParts.join(' / ')}`);
+                }
+            }
+        }
+
+        if (wallet.description) {
+            parts.push(wallet.description);
+        }
+
+        return parts.join(' • ');
+    };
+
     const getBorderClass = (status: string) => {
         switch (status) {
             case 'positive':
@@ -421,7 +449,28 @@ export const CryptoWalletCard = ({
                                         onMouseDown={(e) => e.stopPropagation()}
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        {getFullDescription()}
+                                        {isTrustWallet(wallet) && wallet.details?.address ? (
+                                            <>
+                                                <span>Адрес: </span>
+                                                <span
+                                                    className="text-primary cursor-pointer"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        handleCopySpecificRequisite(
+                                                            wallet.details?.address,
+                                                            'Адрес кошелька',
+                                                        );
+                                                    }}
+                                                >
+                                                    {wallet.details.address}
+                                                </span>
+                                                {getFullDescriptionWithoutAddress() &&
+                                                    ` • ${getFullDescriptionWithoutAddress()}`}
+                                            </>
+                                        ) : (
+                                            getFullDescription()
+                                        )}
                                     </span>
                                 </CardDescription>
                             )}
@@ -494,7 +543,7 @@ export const CryptoWalletCard = ({
                                                     className="relative z-10 cursor-pointer"
                                                 >
                                                     <Copy className="h-4 w-4 mr-2" />
-                                                    Копировать шаблон
+                                                    Копировать с шаблоном
                                                 </Button>
                                             )}
                                         </>
