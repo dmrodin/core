@@ -455,6 +455,10 @@ export const CryptoWalletCard = ({
                                                         <span>Адрес: </span>
                                                         <span
                                                             className="text-primary cursor-pointer"
+                                                            onPointerDown={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                            }}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 e.preventDefault();
@@ -474,6 +478,10 @@ export const CryptoWalletCard = ({
                                                         <span>UID: </span>
                                                         <span
                                                             className="text-primary cursor-pointer"
+                                                            onPointerDown={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                            }}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 e.preventDefault();

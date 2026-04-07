@@ -90,6 +90,13 @@ export class GetPinnedWalletsUseCase {
                                 name: true,
                             },
                         },
+                        platform: {
+                            select: {
+                                id: true,
+                                code: true,
+                                name: true,
+                            },
+                        },
                     },
                 },
             },
