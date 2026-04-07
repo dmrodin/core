@@ -207,8 +207,13 @@ export default function WalletsPage() {
         return result;
     }, [formValues]);
 
-    const { data: infiniteData, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
-        useInfiniteWallets(filteredValues);
+    const {
+        data: infiniteData,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isFetching,
+    } = useInfiniteWallets(filteredValues);
 
     const wallets = useMemo(() => infiniteData?.pages.flatMap((page) => page.wallets) || [], [infiniteData]);
 
