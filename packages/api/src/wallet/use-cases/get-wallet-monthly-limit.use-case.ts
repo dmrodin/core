@@ -37,6 +37,7 @@ export class GetWalletMonthlyLimitUseCase {
             where: {
                 walletId,
                 deleted: false,
+                operation: { deleted: false },
                 direction: 'credit',
                 createdAt: {
                     gte: startOfMonth,
