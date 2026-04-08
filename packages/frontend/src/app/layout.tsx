@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <meta name="theme-color" content="#0F172A" />
                 <link rel="manifest" href="/manifest.webmanifest" />
                 <link rel="icon" href="/logo-circle.png" type="image/png" />
-                <link rel="apple-touch-icon" href="/logo-circle.png" />
+                <link rel="apple-touch-icon" sizes="180x180" href="/logo-circle.png" />
                 <ThemeInitScript />
             </head>
             <body className="antialiased" suppressHydrationWarning>
