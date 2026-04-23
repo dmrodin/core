@@ -191,9 +191,11 @@ export default function WalletsPage() {
             (filtered as Record<keyof GetWalletsFilter, unknown>)[k] = value;
         });
 
+        const hasSearch = Boolean(formValues.search);
+
         const result = {
             ...filtered,
-            pinned: formValues.pinned ?? baseFilters.pinned,
+            pinned: hasSearch && formValues.pinned === false ? undefined : formValues.pinned ?? baseFilters.pinned,
             visible: formValues.visible ?? baseFilters.visible,
             deleted: formValues.deleted ?? baseFilters.deleted,
             includeTabWalletTypes: formValues.includeTabWalletTypes ?? baseFilters.includeTabWalletTypes,
