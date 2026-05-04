@@ -195,7 +195,7 @@ export default function WalletsPage() {
 
         const result = {
             ...filtered,
-            pinned: hasSearch && formValues.pinned === false ? undefined : formValues.pinned ?? baseFilters.pinned,
+            pinned: hasSearch && formValues.pinned === false ? undefined : (formValues.pinned ?? baseFilters.pinned),
             visible: formValues.visible ?? baseFilters.visible,
             deleted: formValues.deleted ?? baseFilters.deleted,
             includeTabWalletTypes: formValues.includeTabWalletTypes ?? baseFilters.includeTabWalletTypes,
