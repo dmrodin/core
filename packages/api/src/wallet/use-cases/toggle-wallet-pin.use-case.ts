@@ -12,6 +12,7 @@ export class ToggleWalletPinUseCase {
         walletId: string,
         toggleWalletPinDto: ToggleWalletPinDto,
         updatedById: string,
+        currentUserId?: string,
     ): Promise<UpdateWalletOutput> {
         const { pinned, pinOnMain } = toggleWalletPinDto;
 
@@ -101,9 +102,20 @@ export class ToggleWalletPinUseCase {
             },
         });
 
+        let isPinnedByCurrentUser = false;
+
+        if (currentUserId) {
+            const pin = await this.prisma.walletUserPin.findUnique({
+                where: { userId_walletId: { userId: currentUserId, walletId } },
+                select: { id: true },
+            });
+
+            isPinnedByCurrentUser = Boolean(pin);
+        }
+
         return {
             message: 'Настройки закрепления кошелька обновлены',
-            wallet,
+            wallet: { ...wallet, isPinnedByCurrentUser },
         };
     }
 }

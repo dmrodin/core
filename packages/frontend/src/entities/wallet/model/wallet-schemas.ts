@@ -97,6 +97,7 @@ export const WalletSchema = z.object({
     active: z.boolean(),
     pinOnMain: z.boolean(),
     pinned: z.boolean(),
+    isPinnedByCurrentUser: z.boolean().default(false),
     visible: z.boolean(),
     deleted: z.boolean(),
     monthlyLimit: z.number().nullable().optional(),

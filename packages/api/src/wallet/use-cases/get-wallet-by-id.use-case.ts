@@ -7,7 +7,7 @@ import { GetWalletByIdOutput } from '../types';
 export class GetWalletByIdUseCase {
     constructor(private readonly prisma: PrismaService) {}
 
-    public async execute(walletId: string): Promise<GetWalletByIdOutput> {
+    public async execute(walletId: string, currentUserId?: string): Promise<GetWalletByIdOutput> {
         const wallet = await this.prisma.wallet.findUnique({
             where: { id: walletId },
             include: {
@@ -105,8 +105,19 @@ export class GetWalletByIdUseCase {
             throw new NotFoundException('Кошелек не найден');
         }
 
+        let isPinnedByCurrentUser = false;
+
+        if (currentUserId) {
+            const pin = await this.prisma.walletUserPin.findUnique({
+                where: { userId_walletId: { userId: currentUserId, walletId } },
+                select: { id: true },
+            });
+
+            isPinnedByCurrentUser = Boolean(pin);
+        }
+
         return {
-            wallet,
+            wallet: { ...wallet, isPinnedByCurrentUser },
         };
     }
 }

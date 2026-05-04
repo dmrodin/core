@@ -31,6 +31,7 @@ import {
     GetWalletMonthlyLimitResponseDto,
     GetWalletsDto,
     GetWalletsResponseDto,
+    ToggleWalletPersonalPinDto,
     ToggleWalletPinDto,
     UpdateWalletDto,
     UpdateWalletResponseDto,
@@ -48,6 +49,7 @@ import {
     GetWalletMonthlyLimitUseCase,
     GetWalletsAggregationUseCase,
     GetWalletsUseCase,
+    ToggleWalletPersonalPinUseCase,
     ToggleWalletPinUseCase,
     UpdateWalletUseCase,
 } from './use-cases';
@@ -69,6 +71,7 @@ export class WalletController {
         private readonly getWalletByIdUseCase: GetWalletByIdUseCase,
         private readonly updateWalletUseCase: UpdateWalletUseCase,
         private readonly toggleWalletPinUseCase: ToggleWalletPinUseCase,
+        private readonly toggleWalletPersonalPinUseCase: ToggleWalletPersonalPinUseCase,
         private readonly deleteWalletUseCase: DeleteWalletUseCase,
     ) {}
 
@@ -165,8 +168,8 @@ export class WalletController {
         type: GetPinnedWalletsResponseDto,
     })
     @ApiReadResponses()
-    public async getPinnedWallets(): Promise<GetPinnedWalletsResponseDto> {
-        const result = await this.getPinnedWalletsUseCase.execute();
+    public async getPinnedWallets(@CurrentUserId() currentUserId: string): Promise<GetPinnedWalletsResponseDto> {
+        const result = await this.getPinnedWalletsUseCase.execute(currentUserId);
 
         return {
             currencyGroups: result.currencyGroups,
@@ -189,8 +192,11 @@ export class WalletController {
         type: WalletResponseDto,
     })
     @ApiReadResponses()
-    public async getWalletById(@Param('id') walletId: string): Promise<WalletResponseDto> {
-        const result = await this.getWalletByIdUseCase.execute(walletId);
+    public async getWalletById(
+        @Param('id') walletId: string,
+        @CurrentUserId() currentUserId: string,
+    ): Promise<WalletResponseDto> {
+        const result = await this.getWalletByIdUseCase.execute(walletId, currentUserId);
 
         return result.wallet;
     }
@@ -288,7 +294,36 @@ export class WalletController {
         @Body() toggleWalletPinDto: ToggleWalletPinDto,
         @CurrentUserId() userId: string,
     ): Promise<UpdateWalletResponseDto> {
-        const result = await this.toggleWalletPinUseCase.execute(walletId, toggleWalletPinDto, userId);
+        const result = await this.toggleWalletPinUseCase.execute(walletId, toggleWalletPinDto, userId, userId);
+
+        return {
+            message: result.message,
+            wallet: result.wallet,
+        };
+    }
+
+    @Put(':id/pin-personal')
+    @HttpCode(HttpStatus.OK)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
+    @ApiOperation({
+        summary: 'Закрепить/открепить кошелек на главной для себя',
+        description:
+            'Закрепляет или открепляет кошелек на главной странице только для текущего пользователя. Доступно всем ролям.',
+    })
+    @ApiIdParam('Уникальный идентификатор кошелька')
+    @ApiBody({ type: ToggleWalletPersonalPinDto })
+    @ApiResponse({
+        status: 200,
+        description: 'Личное закрепление успешно изменено',
+        type: UpdateWalletResponseDto,
+    })
+    @ApiCrudResponses()
+    public async toggleWalletPersonalPin(
+        @Param('id') walletId: string,
+        @Body() toggleDto: ToggleWalletPersonalPinDto,
+        @CurrentUserId() currentUserId: string,
+    ): Promise<UpdateWalletResponseDto> {
+        const result = await this.toggleWalletPersonalPinUseCase.execute(walletId, toggleDto, currentUserId);
 
         return {
             message: result.message,

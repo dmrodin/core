@@ -9,11 +9,11 @@ import { GetPinnedWalletsOutput } from '../types';
 export class GetPinnedWalletsUseCase {
     constructor(private readonly prisma: PrismaService) {}
 
-    public async execute(): Promise<GetPinnedWalletsOutput> {
+    public async execute(currentUserId: string): Promise<GetPinnedWalletsOutput> {
         const where: Prisma.WalletWhereInput = {
-            pinOnMain: true,
             deleted: false,
             visible: true,
+            OR: [{ pinOnMain: true }, { userPins: { some: { userId: currentUserId } } }],
         };
 
         const wallets = await this.prisma.wallet.findMany({
@@ -103,6 +103,12 @@ export class GetPinnedWalletsUseCase {
             orderBy: [{ currency: { name: 'asc' } }, { amount: 'desc' }],
         });
 
+        const userPins = await this.prisma.walletUserPin.findMany({
+            where: { userId: currentUserId },
+            select: { walletId: true },
+        });
+        const personalPinIds = new Set(userPins.map((p) => p.walletId));
+
         const currencyGroupsMap = new Map<string, WalletResponseDto[]>();
 
         wallets.forEach((wallet) => {
@@ -112,7 +118,10 @@ export class GetPinnedWalletsUseCase {
                 currencyGroupsMap.set(currencyCode, []);
             }
 
-            currencyGroupsMap.get(currencyCode)!.push(wallet);
+            currencyGroupsMap.get(currencyCode)!.push({
+                ...wallet,
+                isPinnedByCurrentUser: personalPinIds.has(wallet.id),
+            });
         });
 
         const currencyGroups = Array.from(currencyGroupsMap.entries()).map(([currency, walletsGroup]) => ({

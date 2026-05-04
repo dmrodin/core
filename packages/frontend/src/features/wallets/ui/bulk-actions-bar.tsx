@@ -18,6 +18,7 @@ interface BulkActionsBarProps {
     onToggleActive: (active: boolean) => void;
     onTogglePinned: (pinned: boolean) => void;
     onTogglePinOnMain: (pinOnMain: boolean) => void;
+    onTogglePersonalPin: (pinned: boolean) => void;
     onDelete: () => void;
     onBalanceStatusChange: (status: string) => void;
     totalCount: number;
@@ -33,6 +34,7 @@ export function BulkActionsBar({
     onToggleActive,
     onTogglePinned,
     onTogglePinOnMain,
+    onTogglePersonalPin,
     onDelete,
     onBalanceStatusChange,
     totalCount,
@@ -126,13 +128,19 @@ export function BulkActionsBar({
                             className={isUserRole ? 'hidden' : ''}
                             onSelect={() => handleAction(() => onTogglePinOnMain(true))}
                         >
-                            Закрепить на главной
+                            Закрепить на главной для всех
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className={isUserRole ? 'hidden' : ''}
                             onSelect={() => handleAction(() => onTogglePinOnMain(false))}
                         >
-                            Открепить с главной
+                            Открепить с главной для всех
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleAction(() => onTogglePersonalPin(true))}>
+                            Закрепить на главной для себя
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleAction(() => onTogglePersonalPin(false))}>
+                            Открепить с главной для себя
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className={isUserRole ? 'hidden' : ''}

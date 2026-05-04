@@ -136,9 +136,14 @@ export class ChangeWalletOwnerUseCase {
             },
         });
 
+        const personalPin = await this.prisma.walletUserPin.findUnique({
+            where: { userId_walletId: { userId: updatedById, walletId } },
+            select: { id: true },
+        });
+
         return {
             message: 'Держатель кошелька успешно изменен',
-            wallet,
+            wallet: { ...wallet, isPinnedByCurrentUser: Boolean(personalPin) },
         };
     }
 }

@@ -302,9 +302,14 @@ export class UpdateWalletUseCase {
             }
         }
 
+        const personalPin = await this.prisma.walletUserPin.findUnique({
+            where: { userId_walletId: { userId: updatedById, walletId } },
+            select: { id: true },
+        });
+
         return {
             message: 'Кошелек успешно обновлен',
-            wallet,
+            wallet: { ...wallet, isPinnedByCurrentUser: Boolean(personalPin) },
         };
     }
 }

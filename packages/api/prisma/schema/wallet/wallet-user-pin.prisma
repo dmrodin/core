@@ -1,0 +1,14 @@
+model WalletUserPin {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  walletId  String   @map("wallet_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User   @relation("wallet_user_pins", fields: [userId], references: [id], onDelete: Cascade)
+  wallet Wallet @relation("wallet_user_pins", fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, walletId], map: "wallet_user_pins_user_wallet_unique")
+  @@index([userId], map: "wallet_user_pins_user_idx")
+  @@index([walletId], map: "wallet_user_pins_wallet_idx")
+  @@map("wallet_user_pins")
+}

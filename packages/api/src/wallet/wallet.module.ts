@@ -15,6 +15,7 @@ import {
     GetWalletMonthlyLimitUseCase,
     GetWalletsAggregationUseCase,
     GetWalletsUseCase,
+    ToggleWalletPersonalPinUseCase,
     ToggleWalletPinUseCase,
     UpdateWalletUseCase,
 } from './use-cases';
@@ -37,6 +38,7 @@ import { WalletController } from './wallet.controller';
         GetWalletMonthlyAnalyticsUseCase,
         GetWalletMonthlyLimitUseCase,
         GetWalletByIdUseCase,
+        ToggleWalletPersonalPinUseCase,
         ToggleWalletPinUseCase,
         UpdateWalletUseCase,
         DeleteWalletUseCase,
@@ -51,6 +53,7 @@ import { WalletController } from './wallet.controller';
         GetWalletMonthlyAnalyticsUseCase,
         GetWalletMonthlyLimitUseCase,
         GetWalletByIdUseCase,
+        ToggleWalletPersonalPinUseCase,
         ToggleWalletPinUseCase,
         UpdateWalletUseCase,
         DeleteWalletUseCase,

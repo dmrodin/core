@@ -67,6 +67,31 @@ export const useBulkWalletActions = () => {
         });
     };
 
+    const bulkPersonalPinMutation = useMutation({
+        mutationFn: async ({ walletIds, pinned }: { walletIds: string[]; pinned: boolean }) => {
+            const settled = await Promise.allSettled(
+                walletIds.map((id) => axiosInstance.put(`${API_MAP.WALLETS.WALLETS}/${id}/pin-personal`, { pinned })),
+            );
+            const ok = settled.filter((r) => r.status === 'fulfilled').length;
+            return { ok, total: walletIds.length };
+        },
+        onSuccess: ({ ok, total }) => {
+            queryClient.invalidateQueries({ queryKey: ['wallets'] });
+            queryClient.invalidateQueries({ queryKey: ['pinned-wallets'] });
+            if (ok === total) {
+                toast.success('Кошельки успешно обновлены');
+            } else if (ok === 0) {
+                toast.error('Не удалось обновить кошельки');
+            } else {
+                toast.warning(`Обновлено ${ok} из ${total}. Не удалось обновить ${total - ok}.`);
+            }
+        },
+    });
+
+    const bulkTogglePersonalPin = (walletIds: string[], pinned: boolean) => {
+        bulkPersonalPinMutation.mutate({ walletIds, pinned });
+    };
+
     const bulkDelete = (walletIds: string[]) => {
         bulkUpdateMutation.mutate({
             walletIds,
@@ -100,8 +125,9 @@ export const useBulkWalletActions = () => {
         bulkToggleActive,
         bulkTogglePinned,
         bulkTogglePinOnMain,
+        bulkTogglePersonalPin,
         bulkDelete,
         bulkBalanceStatusChange,
-        isPending: bulkUpdateMutation.isPending,
+        isPending: bulkUpdateMutation.isPending || bulkPersonalPinMutation.isPending,
     };
 };

@@ -305,6 +305,19 @@ export class GetWalletsUseCase {
             wallets = (await this.prisma.wallet.findMany(findManyOptions)) as unknown as WalletResponseDto[];
         }
 
+        if (currentUserId && wallets.length > 0) {
+            const ids = wallets.map((w) => w.id);
+            const pins = await this.prisma.walletUserPin.findMany({
+                where: { userId: currentUserId, walletId: { in: ids } },
+                select: { walletId: true },
+            });
+            const pinnedSet = new Set(pins.map((p) => p.walletId));
+
+            wallets = wallets.map((w) => ({ ...w, isPinnedByCurrentUser: pinnedSet.has(w.id) })) as WalletResponseDto[];
+        } else {
+            wallets = wallets.map((w) => ({ ...w, isPinnedByCurrentUser: false })) as WalletResponseDto[];
+        }
+
         const paginationResponse = pagination.shouldPaginate
             ? createPaginationResponse(total, page, limit)
             : createAllDataPaginationResponse(total);

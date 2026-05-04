@@ -66,9 +66,25 @@ export const CryptoWalletCard = ({
             queryClient.invalidateQueries({ queryKey: ['wallets'] });
             queryClient.invalidateQueries({ queryKey: ['wallet', wallet.id] });
             queryClient.invalidateQueries({ queryKey: ['pinnedWallets'] });
+            queryClient.invalidateQueries({ queryKey: ['pinned-wallets'] });
             toast.success('Настройки обновлены');
         },
     });
+
+    const togglePersonalPinMutation = useMutation({
+        mutationFn: (pinned: boolean) => WalletService.toggleWalletPersonalPin(wallet.id, pinned),
+        onSuccess: (_data, pinned) => {
+            queryClient.invalidateQueries({ queryKey: ['wallets'] });
+            queryClient.invalidateQueries({ queryKey: ['wallet', wallet.id] });
+            queryClient.invalidateQueries({ queryKey: ['pinned-wallets'] });
+            toast.success(pinned ? 'Кошелек закреплен на главной для вас' : 'Кошелек откреплен с главной для вас');
+        },
+    });
+
+    const handleTogglePersonalPin = () => {
+        togglePersonalPinMutation.mutate(!wallet.isPinnedByCurrentUser);
+        setMenuOpen(false);
+    };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -629,7 +645,12 @@ export const CryptoWalletCard = ({
                         onSelect={isUserRole ? () => undefined : handleTogglePinOnMain}
                         className={isUserRole ? 'hidden' : ''}
                     >
-                        {wallet.pinOnMain ? 'Открепить с главной' : 'Закрепить на главной'}
+                        {wallet.pinOnMain ? 'Открепить с главной для всех' : 'Закрепить на главной для всех'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={handleTogglePersonalPin}>
+                        {wallet.isPinnedByCurrentUser
+                            ? 'Открепить с главной для себя'
+                            : 'Закрепить на главной для себя'}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onSelect={isUserRole ? () => undefined : handleToggleActive}
