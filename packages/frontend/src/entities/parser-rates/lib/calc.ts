@@ -21,7 +21,5 @@ export function calcRoutes(rates: TajikRates): RouteCalculation {
 }
 
 export function formatUsdtRu(n: number): string {
-    return n
-        .toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        .replace(/ /g, ' ');
+    return n.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/ /g, ' ');
 }
