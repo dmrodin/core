@@ -6,10 +6,7 @@ export const TajikRatesPayloadSchema = z.object({
     tinkoff: z.number().nullable().optional(),
 });
 
-export const TajikRatesRawResponseSchema = z.tuple([
-    z.object({ response: TajikRatesPayloadSchema }),
-    z.number(),
-]);
+export const TajikRatesRawResponseSchema = z.tuple([z.object({ response: TajikRatesPayloadSchema }), z.number()]);
 
 export type TajikRates = {
     usdtRub: number | null;
