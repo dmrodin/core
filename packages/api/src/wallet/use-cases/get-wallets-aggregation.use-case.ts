@@ -9,7 +9,7 @@ import { GetWalletsAggregationOutput } from '../types';
 export class GetWalletsAggregationUseCase {
     constructor(private readonly prisma: PrismaService) {}
 
-    public async execute(getWalletsDto: GetWalletsDto): Promise<GetWalletsAggregationOutput> {
+    public async execute(getWalletsDto: GetWalletsDto, currentUserId?: string): Promise<GetWalletsAggregationOutput> {
         const {
             search,
             balanceStatus,
@@ -29,8 +29,12 @@ export class GetWalletsAggregationUseCase {
 
         const where: Prisma.WalletWhereInput = {};
 
-        if (pinned !== undefined) {
-            where.pinned = pinned;
+        if (pinned === true) {
+            where.fastAccessPins = currentUserId
+                ? { some: { userId: currentUserId } }
+                : { some: { userId: '00000000-0000-0000-0000-000000000000' } };
+        } else if (pinned === false) {
+            where.pinned = false;
         }
 
         if (visible !== undefined) {

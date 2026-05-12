@@ -60,6 +60,20 @@ export const BankWalletCard = ({
         },
     });
 
+    const toggleFastAccessPersonalMutation = useMutation({
+        mutationFn: (pinned: boolean) => WalletService.toggleWalletFastAccessPersonal(wallet.id, pinned),
+        onSuccess: (_data, pinned) => {
+            queryClient.invalidateQueries({ queryKey: ['wallets'] });
+            queryClient.invalidateQueries({ queryKey: ['wallet', wallet.id] });
+            toast.success(pinned ? 'Добавлено в быстрый доступ' : 'Убрано из быстрого доступа');
+        },
+    });
+
+    const handleToggleFastAccessPersonal = () => {
+        toggleFastAccessPersonalMutation.mutate(!wallet.isFastAccessByCurrentUser);
+        setMenuOpen(false);
+    };
+
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -415,8 +429,14 @@ export const BankWalletCard = ({
                     >
                         {wallet.visible ? 'Скрыть' : 'Показать'}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={handleTogglePinned}>
-                        {wallet.pinned ? 'Открепить' : 'Быстрый доступ'}
+                    <DropdownMenuItem
+                        onSelect={isUserRole ? () => undefined : handleTogglePinned}
+                        className={isUserRole ? 'hidden' : ''}
+                    >
+                        {wallet.pinned ? 'Убрать из быстрого доступа для всех' : 'В быстрый доступ для всех'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={handleToggleFastAccessPersonal}>
+                        {wallet.isFastAccessByCurrentUser ? 'Убрать из быстрого доступа' : 'В быстрый доступ для себя'}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onSelect={isUserRole ? () => undefined : handleTogglePinOnMain}

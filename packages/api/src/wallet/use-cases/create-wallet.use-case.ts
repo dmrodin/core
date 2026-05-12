@@ -216,7 +216,7 @@ export class CreateWalletUseCase {
 
         return {
             message: 'Кошелек успешно создан',
-            wallet,
+            wallet: { ...wallet, isFastAccessByCurrentUser: false },
         };
     }
 }

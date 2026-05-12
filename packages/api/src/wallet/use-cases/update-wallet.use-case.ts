@@ -302,9 +302,14 @@ export class UpdateWalletUseCase {
             }
         }
 
+        const fastAccessPin = await this.prisma.walletFastAccessPin.findUnique({
+            where: { userId_walletId: { userId: updatedById, walletId } },
+            select: { id: true },
+        });
+
         return {
             message: 'Кошелек успешно обновлен',
-            wallet,
+            wallet: { ...wallet, isFastAccessByCurrentUser: Boolean(fastAccessPin) },
         };
     }
 }

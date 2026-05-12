@@ -18,6 +18,7 @@ interface BulkActionsBarProps {
     onToggleActive: (active: boolean) => void;
     onTogglePinned: (pinned: boolean) => void;
     onTogglePinOnMain: (pinOnMain: boolean) => void;
+    onToggleFastAccessPersonal: (pinned: boolean) => void;
     onDelete: () => void;
     onBalanceStatusChange: (status: string) => void;
     totalCount: number;
@@ -33,6 +34,7 @@ export function BulkActionsBar({
     onToggleActive,
     onTogglePinned,
     onTogglePinOnMain,
+    onToggleFastAccessPersonal,
     onDelete,
     onBalanceStatusChange,
     totalCount,
@@ -116,11 +118,23 @@ export function BulkActionsBar({
                         >
                             Показать
                         </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleAction(() => onTogglePinned(true))}>
-                            Быстрый доступ
+                        <DropdownMenuItem
+                            className={isUserRole ? 'hidden' : ''}
+                            onSelect={() => handleAction(() => onTogglePinned(true))}
+                        >
+                            В быстрый доступ для всех
                         </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleAction(() => onTogglePinned(false))}>
-                            Открепить
+                        <DropdownMenuItem
+                            className={isUserRole ? 'hidden' : ''}
+                            onSelect={() => handleAction(() => onTogglePinned(false))}
+                        >
+                            Убрать из быстрого доступа для всех
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleAction(() => onToggleFastAccessPersonal(true))}>
+                            В быстрый доступ для себя
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleAction(() => onToggleFastAccessPersonal(false))}>
+                            Убрать из быстрого доступа
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className={isUserRole ? 'hidden' : ''}

@@ -112,7 +112,7 @@ export class GetPinnedWalletsUseCase {
                 currencyGroupsMap.set(currencyCode, []);
             }
 
-            currencyGroupsMap.get(currencyCode)!.push(wallet);
+            currencyGroupsMap.get(currencyCode)!.push({ ...wallet, isFastAccessByCurrentUser: false });
         });
 
         const currencyGroups = Array.from(currencyGroupsMap.entries()).map(([currency, walletsGroup]) => ({

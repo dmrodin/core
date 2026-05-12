@@ -46,6 +46,7 @@ model User {
   banksUpdated            Bank[]           @relation("banks_updated_by")
   lockedPeriods           LockedPeriod[]
   regulationsUploaded     Regulation[]     @relation("regulations_uploaded_by")
+  walletFastAccessPins    WalletFastAccessPin[] @relation("wallet_fast_access_pins")
 
   @@unique([username], map: "users_username_unique")
   @@unique([telegramId], map: "users_telegram_id_unique")

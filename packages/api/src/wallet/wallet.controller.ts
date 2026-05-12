@@ -31,6 +31,7 @@ import {
     GetWalletMonthlyLimitResponseDto,
     GetWalletsDto,
     GetWalletsResponseDto,
+    ToggleWalletFastAccessPinDto,
     ToggleWalletPinDto,
     UpdateWalletDto,
     UpdateWalletResponseDto,
@@ -48,6 +49,7 @@ import {
     GetWalletMonthlyLimitUseCase,
     GetWalletsAggregationUseCase,
     GetWalletsUseCase,
+    ToggleWalletFastAccessPinUseCase,
     ToggleWalletPinUseCase,
     UpdateWalletUseCase,
 } from './use-cases';
@@ -69,6 +71,7 @@ export class WalletController {
         private readonly getWalletByIdUseCase: GetWalletByIdUseCase,
         private readonly updateWalletUseCase: UpdateWalletUseCase,
         private readonly toggleWalletPinUseCase: ToggleWalletPinUseCase,
+        private readonly toggleWalletFastAccessPinUseCase: ToggleWalletFastAccessPinUseCase,
         private readonly deleteWalletUseCase: DeleteWalletUseCase,
     ) {}
 
@@ -118,8 +121,8 @@ export class WalletController {
         description: 'Агрегация успешно получена',
     })
     @ApiReadResponses()
-    public async getWalletsAggregation(@Query() getWalletsDto: GetWalletsDto) {
-        const result = await this.getWalletsAggregationUseCase.execute(getWalletsDto);
+    public async getWalletsAggregation(@Query() getWalletsDto: GetWalletsDto, @CurrentUserId() currentUserId: string) {
+        const result = await this.getWalletsAggregationUseCase.execute(getWalletsDto, currentUserId);
 
         return result;
     }
@@ -189,8 +192,11 @@ export class WalletController {
         type: WalletResponseDto,
     })
     @ApiReadResponses()
-    public async getWalletById(@Param('id') walletId: string): Promise<WalletResponseDto> {
-        const result = await this.getWalletByIdUseCase.execute(walletId);
+    public async getWalletById(
+        @Param('id') walletId: string,
+        @CurrentUserId() currentUserId: string,
+    ): Promise<WalletResponseDto> {
+        const result = await this.getWalletByIdUseCase.execute(walletId, currentUserId);
 
         return result.wallet;
     }
@@ -288,7 +294,36 @@ export class WalletController {
         @Body() toggleWalletPinDto: ToggleWalletPinDto,
         @CurrentUserId() userId: string,
     ): Promise<UpdateWalletResponseDto> {
-        const result = await this.toggleWalletPinUseCase.execute(walletId, toggleWalletPinDto, userId);
+        const result = await this.toggleWalletPinUseCase.execute(walletId, toggleWalletPinDto, userId, userId);
+
+        return {
+            message: result.message,
+            wallet: result.wallet,
+        };
+    }
+
+    @Put(':id/fast-access-personal')
+    @HttpCode(HttpStatus.OK)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
+    @ApiOperation({
+        summary: 'Добавить/убрать кошелек из личного быстрого доступа',
+        description:
+            'Добавляет или убирает кошелек из быстрого доступа только для текущего пользователя. Доступно всем ролям.',
+    })
+    @ApiIdParam('Уникальный идентификатор кошелька')
+    @ApiBody({ type: ToggleWalletFastAccessPinDto })
+    @ApiResponse({
+        status: 200,
+        description: 'Личный быстрый доступ успешно изменён',
+        type: UpdateWalletResponseDto,
+    })
+    @ApiCrudResponses()
+    public async toggleWalletFastAccessPin(
+        @Param('id') walletId: string,
+        @Body() toggleDto: ToggleWalletFastAccessPinDto,
+        @CurrentUserId() currentUserId: string,
+    ): Promise<UpdateWalletResponseDto> {
+        const result = await this.toggleWalletFastAccessPinUseCase.execute(walletId, toggleDto, currentUserId);
 
         return {
             message: result.message,
