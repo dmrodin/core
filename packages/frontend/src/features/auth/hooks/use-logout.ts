@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { AuthService } from '@/entities/auth/api/auth-service';
 import { deleteAuthMarker } from '@/features/auth/actions/set-auth-marker';
@@ -12,12 +12,14 @@ import { ROUTER_MAP } from '@/shared/utils/constants/router-map';
 export const useLogout = () => {
     const clearToken = useAuthStore().clearToken;
     const router = useRouter();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationKey: [LOGOUT_QUERY_KEY],
         mutationFn: async () => await AuthService.Logout(),
         onSettled: async () => {
             await clearToken();
+            queryClient.clear();
 
             if (env.USE_DEV_AUTH_MARKER) {
                 await deleteAuthMarker();

@@ -53,13 +53,6 @@ export const useBulkWalletActions = () => {
         });
     };
 
-    const bulkTogglePinned = (walletIds: string[], pinned: boolean) => {
-        bulkUpdateMutation.mutate({
-            walletIds,
-            updates: { pinned },
-        });
-    };
-
     const bulkTogglePinOnMain = (walletIds: string[], pinOnMain: boolean) => {
         bulkUpdateMutation.mutate({
             walletIds,
@@ -124,7 +117,6 @@ export const useBulkWalletActions = () => {
     return {
         bulkToggleVisible,
         bulkToggleActive,
-        bulkTogglePinned,
         bulkTogglePinOnMain,
         bulkToggleFastAccessPersonal,
         bulkDelete,

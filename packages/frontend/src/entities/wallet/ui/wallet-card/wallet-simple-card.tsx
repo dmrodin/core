@@ -193,14 +193,6 @@ export const SimpleWalletCard = ({
         setChangeOwnerDialogOpen(true);
     };
 
-    const handleTogglePinned = () => {
-        togglePinMutation.mutate({
-            pinned: !wallet.pinned,
-            pinOnMain: wallet.pinOnMain,
-        });
-        setMenuOpen(false);
-    };
-
     const handleTogglePinOnMain = () => {
         togglePinMutation.mutate({
             pinned: wallet.pinned,
@@ -411,14 +403,8 @@ export const SimpleWalletCard = ({
                     >
                         {wallet.visible ? 'Скрыть' : 'Показать'}
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onSelect={isUserRole ? () => undefined : handleTogglePinned}
-                        className={isUserRole ? 'hidden' : ''}
-                    >
-                        {wallet.pinned ? 'Убрать из быстрого доступа для всех' : 'В быстрый доступ для всех'}
-                    </DropdownMenuItem>
                     <DropdownMenuItem onSelect={handleToggleFastAccessPersonal}>
-                        {wallet.isFastAccessByCurrentUser ? 'Убрать из быстрого доступа' : 'В быстрый доступ для себя'}
+                        {wallet.isFastAccessByCurrentUser ? 'Убрать из быстрого доступа' : 'В быстрый доступ'}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onSelect={isUserRole ? () => undefined : handleTogglePinOnMain}

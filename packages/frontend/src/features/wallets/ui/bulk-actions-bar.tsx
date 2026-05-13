@@ -16,7 +16,6 @@ interface BulkActionsBarProps {
     onCancel: () => void;
     onToggleVisible: (visible: boolean) => void;
     onToggleActive: (active: boolean) => void;
-    onTogglePinned: (pinned: boolean) => void;
     onTogglePinOnMain: (pinOnMain: boolean) => void;
     onToggleFastAccessPersonal: (pinned: boolean) => void;
     onDelete: () => void;
@@ -32,7 +31,6 @@ export function BulkActionsBar({
     onCancel,
     onToggleVisible,
     onToggleActive,
-    onTogglePinned,
     onTogglePinOnMain,
     onToggleFastAccessPersonal,
     onDelete,
@@ -118,20 +116,8 @@ export function BulkActionsBar({
                         >
                             Показать
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                            className={isUserRole ? 'hidden' : ''}
-                            onSelect={() => handleAction(() => onTogglePinned(true))}
-                        >
-                            В быстрый доступ для всех
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            className={isUserRole ? 'hidden' : ''}
-                            onSelect={() => handleAction(() => onTogglePinned(false))}
-                        >
-                            Убрать из быстрого доступа для всех
-                        </DropdownMenuItem>
                         <DropdownMenuItem onSelect={() => handleAction(() => onToggleFastAccessPersonal(true))}>
-                            В быстрый доступ для себя
+                            В быстрый доступ
                         </DropdownMenuItem>
                         <DropdownMenuItem onSelect={() => handleAction(() => onToggleFastAccessPersonal(false))}>
                             Убрать из быстрого доступа
