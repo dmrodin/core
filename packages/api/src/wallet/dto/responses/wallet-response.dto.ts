@@ -224,6 +224,9 @@ export class WalletResponseDto {
     @ApiProperty({ description: 'Закреплен ли кошелек', example: false })
     public pinned: boolean;
 
+    @ApiProperty({ description: 'Кошелек в личном быстром доступе текущего пользователя', example: false })
+    public isFastAccessByCurrentUser: boolean;
+
     @ApiProperty({ description: 'Видим ли кошелек', example: true })
     public visible: boolean;
 

@@ -84,6 +84,14 @@ export class WalletService {
         return WalletSchema.parse(wallet);
     }
 
+    public static async toggleWalletFastAccessPersonal(walletId: string, pinned: boolean): Promise<Wallet> {
+        const { data } = await axiosInstance.put(`${API_MAP.WALLETS.WALLETS}/${walletId}/fast-access-personal`, {
+            pinned,
+        });
+        const wallet = data?.wallet ?? data;
+        return WalletSchema.parse(wallet);
+    }
+
     public static async updateWallet(walletId: string, payload: UpdateWalletRequest): Promise<Wallet> {
         const validated = UpdateWalletSchema.parse(payload);
         const { data } = await axiosInstance.put(`${API_MAP.WALLETS.WALLETS}/${walletId}`, validated);

@@ -45,6 +45,7 @@ model Wallet {
   operations      Operation[]
   operationEntries OperationEntry[] @relation("operation_entry_wallet")
   details         WalletDetail?
+  fastAccessPins  WalletFastAccessPin[] @relation("wallet_fast_access_pins")
 
   lastReconciledAt  DateTime? @map("last_reconciled_at")
   lastReconciledBy  String?   @map("last_reconciled_by") @db.Uuid

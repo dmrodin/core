@@ -88,8 +88,8 @@ export default function WalletsPage() {
     const {
         bulkToggleVisible,
         bulkToggleActive,
-        bulkTogglePinned,
         bulkTogglePinOnMain,
+        bulkToggleFastAccessPersonal,
         bulkDelete,
         bulkBalanceStatusChange,
     } = useBulkWalletActions();
@@ -457,8 +457,8 @@ export default function WalletsPage() {
                 onCancel={handleCancelSelection}
                 onToggleVisible={(visible) => handleBulkAction(bulkToggleVisible, visible)}
                 onToggleActive={(active) => handleBulkAction(bulkToggleActive, active)}
-                onTogglePinned={(pinned) => handleBulkAction(bulkTogglePinned, pinned)}
                 onTogglePinOnMain={(pinOnMain) => handleBulkAction(bulkTogglePinOnMain, pinOnMain)}
+                onToggleFastAccessPersonal={(pinned) => handleBulkAction(bulkToggleFastAccessPersonal, pinned)}
                 onDelete={handleBulkDelete}
                 onBalanceStatusChange={handleBulkBalanceStatusChange}
                 totalCount={totalCount}

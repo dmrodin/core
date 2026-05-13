@@ -53,18 +53,37 @@ export const useBulkWalletActions = () => {
         });
     };
 
-    const bulkTogglePinned = (walletIds: string[], pinned: boolean) => {
-        bulkUpdateMutation.mutate({
-            walletIds,
-            updates: { pinned },
-        });
-    };
-
     const bulkTogglePinOnMain = (walletIds: string[], pinOnMain: boolean) => {
         bulkUpdateMutation.mutate({
             walletIds,
             updates: { pinOnMain },
         });
+    };
+
+    const bulkFastAccessPersonalMutation = useMutation({
+        mutationFn: async ({ walletIds, pinned }: { walletIds: string[]; pinned: boolean }) => {
+            const settled = await Promise.allSettled(
+                walletIds.map((id) =>
+                    axiosInstance.put(`${API_MAP.WALLETS.WALLETS}/${id}/fast-access-personal`, { pinned }),
+                ),
+            );
+            const ok = settled.filter((r) => r.status === 'fulfilled').length;
+            return { ok, total: walletIds.length };
+        },
+        onSuccess: ({ ok, total }) => {
+            queryClient.invalidateQueries({ queryKey: ['wallets'] });
+            if (ok === total) {
+                toast.success('Кошельки успешно обновлены');
+            } else if (ok === 0) {
+                toast.error('Не удалось обновить кошельки');
+            } else {
+                toast.warning(`Обновлено ${ok} из ${total}. Не удалось обновить ${total - ok}.`);
+            }
+        },
+    });
+
+    const bulkToggleFastAccessPersonal = (walletIds: string[], pinned: boolean) => {
+        bulkFastAccessPersonalMutation.mutate({ walletIds, pinned });
     };
 
     const bulkDelete = (walletIds: string[]) => {
@@ -98,10 +117,10 @@ export const useBulkWalletActions = () => {
     return {
         bulkToggleVisible,
         bulkToggleActive,
-        bulkTogglePinned,
         bulkTogglePinOnMain,
+        bulkToggleFastAccessPersonal,
         bulkDelete,
         bulkBalanceStatusChange,
-        isPending: bulkUpdateMutation.isPending,
+        isPending: bulkUpdateMutation.isPending || bulkFastAccessPersonalMutation.isPending,
     };
 };

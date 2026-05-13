@@ -39,8 +39,13 @@ export class GetWalletsUseCase {
 
         const where: Prisma.WalletWhereInput = {};
 
-        if (pinned !== undefined) {
-            where.pinned = pinned;
+        if (pinned === true) {
+            // "Быстрый доступ" tab — показываем только личные пины текущего пользователя
+            where.fastAccessPins = currentUserId
+                ? { some: { userId: currentUserId } }
+                : { some: { userId: '00000000-0000-0000-0000-000000000000' } }; // anon fallback: пусто
+        } else if (pinned === false) {
+            where.pinned = false;
         }
 
         if (visible !== undefined) {
@@ -303,6 +308,22 @@ export class GetWalletsUseCase {
                 : baseOptions;
 
             wallets = (await this.prisma.wallet.findMany(findManyOptions)) as unknown as WalletResponseDto[];
+        }
+
+        if (currentUserId && wallets.length > 0) {
+            const ids = wallets.map((w) => w.id);
+            const pins = await this.prisma.walletFastAccessPin.findMany({
+                where: { userId: currentUserId, walletId: { in: ids } },
+                select: { walletId: true },
+            });
+            const pinnedSet = new Set(pins.map((p) => p.walletId));
+
+            wallets = wallets.map((w) => ({
+                ...w,
+                isFastAccessByCurrentUser: pinnedSet.has(w.id),
+            })) as WalletResponseDto[];
+        } else {
+            wallets = wallets.map((w) => ({ ...w, isFastAccessByCurrentUser: false })) as WalletResponseDto[];
         }
 
         const paginationResponse = pagination.shouldPaginate
