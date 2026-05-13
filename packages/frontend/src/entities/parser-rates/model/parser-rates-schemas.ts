@@ -22,3 +22,9 @@ export function parseTajikRatesResponse(raw: unknown): TajikRates {
         tinkoff: response.tinkoff ?? null,
     };
 }
+
+export const BankRatesResponseSchema = z.object({
+    sberCourse: z.number().nullable(),
+});
+
+export type BankRates = z.infer<typeof BankRatesResponseSchema>;
