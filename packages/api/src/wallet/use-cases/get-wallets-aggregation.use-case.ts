@@ -66,9 +66,11 @@ export class GetWalletsAggregationUseCase {
                 { user: { username: { contains: search, mode: 'insensitive' } } },
             );
 
-            const searchLower = search.toLowerCase();
+            const searchLower = search.toLowerCase().trim();
 
-            if ('касса'.startsWith(searchLower) || searchLower.startsWith('касс')) {
+            // Подмешиваем все simple-кошельки (кассы), только когда ввод —
+            // строгий префикс слова «касса» (т.е. юзер ещё печатает первое слово).
+            if (searchLower.length > 0 && 'касса'.startsWith(searchLower)) {
                 orConditions.push({ walletKind: 'simple' });
             }
         }
