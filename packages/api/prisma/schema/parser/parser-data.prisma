@@ -13,6 +13,7 @@ model ParserData {
   additionalMontenegroRsdUsdt Decimal? @map("additional_montenegro_rsd_usdt") @db.Decimal(18, 6)
   additionalMontenegroRsdRub  Decimal? @map("additional_montenegro_rsd_rub") @db.Decimal(18, 6)
   tinkoffCourse               Decimal? @map("tinkoff_course") @db.Decimal(18, 6)
+  sberCourse                  Decimal? @map("sber_course") @db.Decimal(18, 6)
   usdtTjs                     Decimal? @map("usdt_tjs") @db.Decimal(18, 6)
   createdAt                   DateTime @default(now()) @map("created_at")
   updatedAt                   DateTime @updatedAt @map("updated_at")

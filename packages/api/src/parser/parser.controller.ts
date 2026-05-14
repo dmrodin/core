@@ -1,8 +1,21 @@
 import { Controller, Get } from '@nestjs/common';
 
+import { PrismaService } from '../common/services/prisma.service';
+
 @Controller('parser')
 export class ParserController {
-    constructor() {}
+    constructor(private readonly prisma: PrismaService) {}
+
+    @Get('latest-bank-rates')
+    public async getLatestBankRates(): Promise<{ sberCourse: number | null }> {
+        const row = await this.prisma.parserData.findFirst({
+            where: { sberCourse: { not: null } },
+            orderBy: { createdAt: 'desc' },
+            select: { sberCourse: true },
+        });
+
+        return { sberCourse: row?.sberCourse ? Number(row.sberCourse) : null };
+    }
 
     @Get('rates-snapshot')
     public parseData() {
