@@ -48,23 +48,33 @@ export class GetWalletsAggregationUseCase {
         const orConditions: Prisma.WalletWhereInput[] = [];
 
         if (search) {
-            orConditions.push(
-                { name: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
-                { walletType: { name: { contains: search, mode: 'insensitive' } } },
-                { details: { ownerFullName: { contains: search, mode: 'insensitive' } } },
-                { details: { card: { contains: search, mode: 'insensitive' } } },
-                { details: { phone: { contains: search, mode: 'insensitive' } } },
-                { details: { address: { contains: search, mode: 'insensitive' } } },
-                { details: { exchangeUid: { contains: search, mode: 'insensitive' } } },
-                { details: { username: { contains: search, mode: 'insensitive' } } },
-                { details: { accountId: { contains: search, mode: 'insensitive' } } },
-                { details: { network: { name: { contains: search, mode: 'insensitive' } } } },
-                { details: { networkType: { name: { contains: search, mode: 'insensitive' } } } },
-                { currency: { code: { contains: search, mode: 'insensitive' } } },
-                { currency: { name: { contains: search, mode: 'insensitive' } } },
-                { user: { username: { contains: search, mode: 'insensitive' } } },
-            );
+            // Поиск токенизируется по пробелам: каждый токен должен совпасть как
+            // подстрока хотя бы одного из полей (порядок токенов не важен).
+            const tokens = search.split(/\s+/).filter(Boolean);
+
+            const fieldsForToken = (t: string): Prisma.WalletWhereInput[] => [
+                { name: { contains: t, mode: 'insensitive' } },
+                { description: { contains: t, mode: 'insensitive' } },
+                { walletType: { name: { contains: t, mode: 'insensitive' } } },
+                { details: { ownerFullName: { contains: t, mode: 'insensitive' } } },
+                { details: { card: { contains: t, mode: 'insensitive' } } },
+                { details: { phone: { contains: t, mode: 'insensitive' } } },
+                { details: { address: { contains: t, mode: 'insensitive' } } },
+                { details: { exchangeUid: { contains: t, mode: 'insensitive' } } },
+                { details: { username: { contains: t, mode: 'insensitive' } } },
+                { details: { accountId: { contains: t, mode: 'insensitive' } } },
+                { details: { network: { name: { contains: t, mode: 'insensitive' } } } },
+                { details: { networkType: { name: { contains: t, mode: 'insensitive' } } } },
+                { currency: { code: { contains: t, mode: 'insensitive' } } },
+                { currency: { name: { contains: t, mode: 'insensitive' } } },
+                { user: { username: { contains: t, mode: 'insensitive' } } },
+            ];
+
+            if (tokens.length > 0) {
+                orConditions.push({
+                    AND: tokens.map((t) => ({ OR: fieldsForToken(t) })),
+                });
+            }
 
             const searchLower = search.toLowerCase().trim();
 
