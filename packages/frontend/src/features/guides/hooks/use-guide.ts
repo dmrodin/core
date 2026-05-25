@@ -12,7 +12,7 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { formatDate, formatDateTime } from '@/shared/lib/utils';
+import { formatDate } from '@/shared/lib/utils';
 
 import { GuideService } from '@/entities/guides/api/guide-service';
 import {
@@ -144,7 +144,7 @@ export const useDeleteGuide = (filters?: GetGuidesParamsRequest) => {
 
 export function useCopyGuide() {
     const copyGuide = useCallback(async (guide: GuideResponse) => {
-        const lines = [`ФИО: ${guide.fullName}`, `Создан: ${formatDateTime(guide.createdAt)}`];
+        const lines = [`ФИО: ${guide.fullName}`];
 
         if (guide.phone) {
             lines.push(`Телефон: ${guide.phone}`);
