@@ -67,6 +67,7 @@ export class GetWalletsUseCase {
                 if (searchByName) {
                     return [{ name: { contains: t, mode: 'insensitive' } }];
                 }
+
                 return [
                     { name: { contains: t, mode: 'insensitive' } },
                     { description: { contains: t, mode: 'insensitive' } },
