@@ -333,7 +333,7 @@ export class WalletController {
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
-    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
+    @Roles(RoleCode.admin, RoleCode.moderator)
     @ApiOperation({
         summary: 'Частично обновить кошелек',
         description:
