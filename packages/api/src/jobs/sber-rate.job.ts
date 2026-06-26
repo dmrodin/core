@@ -57,7 +57,8 @@ export class SberRateJobService {
             await this.prisma.parserData.create({ data: { sberCourse } });
             this.logger.log(`Sber TJS course saved: ${sberCourse}`);
 
-            await this.notifyIfChanged(sberCourse);
+            // Telegram-отбивка «Курсы P2P/DC обновились» отключена — раскомментируй строку ниже, чтобы вернуть.
+            // await this.notifyIfChanged(sberCourse);
         } catch (err) {
             this.logger.error('Sber rate job failed', err instanceof Error ? err.stack : undefined);
         }
