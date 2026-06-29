@@ -6,3 +6,4 @@ export { GetWalletsDto, WalletSortField } from './get-wallets.dto';
 export { ToggleWalletFastAccessPinDto } from './toggle-wallet-fast-access-pin.dto';
 export { ToggleWalletPinDto } from './toggle-wallet-pin.dto';
 export { UpdateWalletDto } from './update-wallet.dto';
+export { UpdateWalletBalanceStatusDto } from './update-wallet-balance-status.dto';

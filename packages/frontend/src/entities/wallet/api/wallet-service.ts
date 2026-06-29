@@ -105,7 +105,9 @@ export class WalletService {
     }
 
     public static async updateBalanceStatus(walletId: string, payload: BalanceStatusPayload): Promise<Wallet> {
-        const { data } = await axiosInstance.patch(`${API_MAP.WALLETS.WALLETS}/${walletId}`, payload);
+        const { data } = await axiosInstance.patch(API_MAP.WALLETS.WALLET_BALANCE_STATUS(walletId), {
+            balanceStatus: payload.balanceStatus,
+        });
         const wallet = data?.wallet ?? data;
         return WalletSchema.parse(wallet);
     }

@@ -95,7 +95,7 @@ export const useBulkWalletActions = () => {
 
     const bulkBalanceStatusChange = (walletIds: string[], balanceStatus: string) => {
         const promises = walletIds.map((id) =>
-            axiosInstance.patch(`${API_MAP.WALLETS.WALLETS}/${id}`, {
+            axiosInstance.patch(API_MAP.WALLETS.WALLET_BALANCE_STATUS(id), {
                 balanceStatus,
             }),
         );

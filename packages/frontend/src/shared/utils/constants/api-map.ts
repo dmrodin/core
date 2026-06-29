@@ -65,6 +65,7 @@ export const API_MAP = {
         ANALYTICS: '/wallets/analytics',
         PINNED: '/wallets/pinned',
         WALLET_BY_ID: (id: string) => `/wallets/${id}`,
+        WALLET_BALANCE_STATUS: (id: string) => `/wallets/${id}/balance-status`,
         WALLET_BALANCE: (id: string) => `/wallets/${id}/balance`,
         WALLET_TRANSACTIONS: (id: string) => `/wallets/${id}/transactions`,
         WALLET_TRANSACTION_BY_ID: (walletId: string, transactionId: string) =>

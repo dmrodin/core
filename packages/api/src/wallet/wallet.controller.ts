@@ -33,6 +33,7 @@ import {
     GetWalletsResponseDto,
     ToggleWalletFastAccessPinDto,
     ToggleWalletPinDto,
+    UpdateWalletBalanceStatusDto,
     UpdateWalletDto,
     UpdateWalletResponseDto,
     WalletResponseDto,
@@ -349,6 +350,34 @@ export class WalletController {
     public async patchWallet(
         @Param('id') walletId: string,
         @Body() body: UpdateWalletDto,
+        @CurrentUserId() userId: string,
+    ): Promise<UpdateWalletResponseDto> {
+        const result = await this.updateWalletUseCase.execute(walletId, body, userId);
+
+        return {
+            message: result.message,
+            wallet: result.wallet,
+        };
+    }
+
+    @Patch(':id/balance-status')
+    @HttpCode(HttpStatus.OK)
+    @Roles(RoleCode.admin, RoleCode.moderator, RoleCode.user)
+    @ApiOperation({
+        summary: 'Изменить статус баланса кошелька',
+        description: 'Обновляет только статус баланса (цвет) кошелька. Доступно всем ролям.',
+    })
+    @ApiIdParam('Уникальный идентификатор кошелька')
+    @ApiBody({ type: UpdateWalletBalanceStatusDto })
+    @ApiResponse({
+        status: 200,
+        description: 'Статус баланса успешно обновлен',
+        type: UpdateWalletResponseDto,
+    })
+    @ApiCrudResponses()
+    public async updateWalletBalanceStatus(
+        @Param('id') walletId: string,
+        @Body() body: UpdateWalletBalanceStatusDto,
         @CurrentUserId() userId: string,
     ): Promise<UpdateWalletResponseDto> {
         const result = await this.updateWalletUseCase.execute(walletId, body, userId);
