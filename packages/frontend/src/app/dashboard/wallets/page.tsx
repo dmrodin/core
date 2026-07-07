@@ -388,7 +388,7 @@ export default function WalletsPage() {
                         form.setValue('walletTypeId', undefined);
                         form.setValue('visible', false);
                         form.setValue('deleted', false);
-                        form.setValue('pinned', false);
+                        form.setValue('pinned', undefined);
                         form.setValue('includeTabWalletTypes', undefined);
                     } else if (val === 'pinned') {
                         form.setValue('walletTypeId', undefined);
@@ -398,7 +398,7 @@ export default function WalletsPage() {
                         form.setValue('includeTabWalletTypes', undefined);
                     } else {
                         form.setValue('walletTypeId', val);
-                        form.setValue('pinned', false);
+                        form.setValue('pinned', undefined);
                         form.setValue('visible', true);
                         form.setValue('deleted', false);
                         form.setValue('includeTabWalletTypes', undefined);
