@@ -84,7 +84,7 @@ export default function CurrenciesPage() {
         <div className="space-y-6">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <CardTitle className="text-2xl">Валюты</CardTitle>
+                    <CardTitle className="hidden text-2xl md:block">Валюты</CardTitle>
                     <Button asChild>
                         <Link href={ROUTER_MAP.CURRENCIES_CREATE}>
                             <Plus className="w-4 h-4 mr-2" />

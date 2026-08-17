@@ -4,7 +4,7 @@ import React, { Fragment, useMemo, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { CheckCircle, Copy, FileText, Info, MoreHorizontal, Pencil, RotateCcw, Trash } from 'lucide-react';
+import { CheckCircle, Copy, FileText, Info, MoreHorizontal, Pencil, RefreshCw, RotateCcw, Trash } from 'lucide-react';
 
 import {
     CardApplication,
@@ -28,8 +28,9 @@ import {
     EmptyHeader,
     EmptyMedia,
     EmptyTitle,
+    Card,
     ROUTER_MAP,
-    Loading,
+    Skeleton,
 } from '@/shared';
 import { useLastItemObserver } from '@/shared/lib/hooks/use-last-Item-observer';
 
@@ -44,6 +45,9 @@ export const InfiniteApplicationsList = () => {
     const {
         data: infiniteData,
         isLoading,
+        isFetchingNextPage,
+        error,
+        refetch,
         fetchNextPage,
         hasNextPage,
     } = useInfiniteApplications(params, 10, canLoadApplications);
@@ -63,7 +67,36 @@ export const InfiniteApplicationsList = () => {
     return (
         <Fragment>
             {isLoading ? (
-                <Loading />
+                <div className="space-y-2">
+                    {[0, 1, 2].map((item) => (
+                        <Card key={item} className="gap-3 px-4 py-4">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 space-y-3">
+                                    <Skeleton className="h-5 w-40" />
+                                    <Skeleton className="h-8 w-48 max-w-full" />
+                                    <Skeleton className="h-4 w-56 max-w-full" />
+                                </div>
+                                <Skeleton className="h-11 w-11 rounded-md" />
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+            ) : error ? (
+                <Empty>
+                    <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                            <FileText />
+                        </EmptyMedia>
+                        <EmptyContent>
+                            <EmptyTitle>Не удалось загрузить заявки</EmptyTitle>
+                            <EmptyDescription>Проверьте соединение и попробуйте ещё раз.</EmptyDescription>
+                            <Button variant="outline" onClick={() => void refetch()}>
+                                <RefreshCw className="h-4 w-4" />
+                                Повторить
+                            </Button>
+                        </EmptyContent>
+                    </EmptyHeader>
+                </Empty>
             ) : applications.length === 0 ? (
                 <Empty>
                     <EmptyHeader>
@@ -90,7 +123,7 @@ export const InfiniteApplicationsList = () => {
                                         type="button"
                                         variant="ghost"
                                         size="icon"
-                                        className="absolute top-2 right-2 h-8 w-8 z-10"
+                                        className="absolute right-1 top-1 z-10 h-9 w-9 sm:right-2 sm:top-2"
                                         aria-label="Открыть меню заявки"
                                         onPointerDown={(event) => event.stopPropagation()}
                                     >
@@ -166,6 +199,14 @@ export const InfiniteApplicationsList = () => {
                         </DropdownMenu>
                     );
                 })
+            )}
+
+            {isFetchingNextPage && (
+                <Card className="gap-3 px-4 py-4">
+                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-8 w-48 max-w-full" />
+                    <Skeleton className="h-4 w-56 max-w-full" />
+                </Card>
             )}
 
             <OperationViewDialog

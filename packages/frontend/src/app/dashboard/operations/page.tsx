@@ -5,7 +5,7 @@ import { Fragment, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarIcon, Copy, FileText, MoreHorizontal, Pencil, Trash } from 'lucide-react';
+import { CalendarIcon, Copy, FileText, MoreHorizontal, Pencil, Plus, Trash } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -22,8 +22,6 @@ import {
     Button,
     Card,
     CardContent,
-    CardHeader,
-    CardTitle,
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -37,9 +35,11 @@ import {
     Form,
     formatDate,
     formatDateTime,
+    formatNumber,
     Input,
     Loading,
     ROUTER_MAP,
+    Skeleton,
     Tabs,
     TabsList,
     TabsTrigger,
@@ -127,37 +127,36 @@ export default function OperationsPage() {
 
     return (
         <Form {...form}>
-            <form className="max-w-5xl mx-auto space-y-6">
-                <Card>
-                    <CardHeader className="flex flex-col gap-4">
-                        <CardTitle className="text-2xl">Операции</CardTitle>
-                        <div className="flex gap-2 items-center flex-wrap">
-                            <Input
-                                placeholder="Поиск..."
-                                value={form.watch('search') ?? ''}
-                                onChange={(e) => form.setValue('search', e.target.value || '')}
-                                className="w-full md:w-64"
-                            />
-                            <OperationsFiltersSheet form={form} onReset={handleReset} />
-                            <Button
-                                type="button"
-                                onClick={() => router.push(ROUTER_MAP.OPERATIONS_CREATE)}
-                                className="md:w-auto"
-                            >
-                                Создать операцию
-                            </Button>
+            <form className="max-w-5xl mx-auto space-y-3 sm:space-y-6">
+                <div className="space-y-3">
+                    <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 md:flex md:flex-wrap">
+                        <Input
+                            placeholder="Поиск..."
+                            value={form.watch('search') ?? ''}
+                            onChange={(e) => form.setValue('search', e.target.value || '')}
+                            className="min-w-0 md:w-64"
+                        />
+                        <OperationsFiltersSheet form={form} onReset={handleReset} />
+                        <Button
+                            type="button"
+                            onClick={() => router.push(ROUTER_MAP.OPERATIONS_CREATE)}
+                            className="h-9 px-3 sm:h-10 sm:px-4"
+                            aria-label="Создать операцию"
+                        >
+                            <Plus className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Создать операцию</span>
+                        </Button>
+                    </div>
+                    {activeLockedPeriod && (
+                        <div className="w-full rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                            Сейчас закрыт период {formatRange(activeLockedPeriod.dateFrom, activeLockedPeriod.dateTo)}.
+                            Создание операций за даты в пределах периода запрещено.
                         </div>
-                        {activeLockedPeriod && (
-                            <div className="w-full rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                                Сейчас закрыт период{' '}
-                                {formatRange(activeLockedPeriod.dateFrom, activeLockedPeriod.dateTo)}. Создание операций
-                                за даты в пределах периода запрещено.
-                            </div>
-                        )}
-                    </CardHeader>
-                </Card>
+                    )}
+                </div>
 
                 <Tabs
+                    className="sticky top-0 z-20 -mx-1 bg-background/95 px-1 py-1 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:static sm:mx-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none"
                     value={activeTab}
                     onValueChange={(val) => {
                         form.setValue('typeId', val === 'all' ? null : val);
@@ -165,16 +164,21 @@ export default function OperationsPage() {
                 >
                     <div className="w-full overflow-x-auto">
                         <TabsList
-                            className="flex w-max min-w-full flex-nowrap md:grid"
+                            className="flex h-10 w-max min-w-full flex-nowrap md:grid"
                             style={{
                                 gridTemplateColumns: `repeat(${1 + tabTypes.length}, minmax(0, 1fr))`,
                             }}
                         >
-                            <TabsTrigger value="all" className="w-auto shrink-0 md:w-full">
-                                Все операции
+                            <TabsTrigger value="all" className="min-h-9 w-auto shrink-0 px-4 md:w-full">
+                                <span className="sm:hidden">Все</span>
+                                <span className="hidden sm:inline">Все операции</span>
                             </TabsTrigger>
                             {tabTypes.map((type) => (
-                                <TabsTrigger key={type.id} value={type.id} className="w-auto shrink-0 md:w-full">
+                                <TabsTrigger
+                                    key={type.id}
+                                    value={type.id}
+                                    className="min-h-9 w-auto shrink-0 px-4 md:w-full"
+                                >
                                     {type.name}
                                 </TabsTrigger>
                             ))}
@@ -185,11 +189,27 @@ export default function OperationsPage() {
                 <div className="space-y-2">
                     <div className="">
                         {isLoading ? (
-                            <Loading />
+                            <div className="space-y-2">
+                                {[0, 1, 2].map((item) => (
+                                    <Card key={item} className="gap-3 px-4 py-4">
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div className="flex-1 space-y-3">
+                                                <Skeleton className="h-5 w-32" />
+                                                <Skeleton className="h-8 w-48 max-w-full" />
+                                                <Skeleton className="h-4 w-40 max-w-full" />
+                                            </div>
+                                            <Skeleton className="h-10 w-10 rounded-md" />
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
                         ) : error ? (
                             <div className="justify-items-center">
-                                <Card className="h-[100] w-full p-0 justify-center items-center text-lg">
-                                    {/* <p className="text-destructive">Ошибка при загрузке: {error.message}</p> */}
+                                <Card className="w-full items-center justify-center gap-2 px-4 py-8 text-center">
+                                    <p className="font-semibold text-destructive">Не удалось загрузить операции</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Обновите страницу или попробуйте позже.
+                                    </p>
                                 </Card>
                             </div>
                         ) : !data?.pages[0]?.operations.length ? (
@@ -229,11 +249,11 @@ export default function OperationsPage() {
                                                     <DropdownMenu key={operation.id}>
                                                         <Card
                                                             ref={isLast ? lastOperationRef : null}
-                                                            className="relative hover:bg-accent/50 transition-colors mb-1"
+                                                            className="relative mb-2 gap-0 py-4 transition-colors hover:bg-accent/50 sm:mb-1 sm:gap-6 sm:py-6"
                                                         >
-                                                            <CardContent className="py-0 relative">
+                                                            <CardContent className="relative px-4 py-0 sm:px-6">
                                                                 <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                                                    <div className="space-y-1 sm:space-y-2 flex-1">
+                                                                    <div className="min-w-0 flex-1 space-y-2 pr-11 sm:pr-0">
                                                                         <div className="flex items-center gap-2 flex-wrap">
                                                                             <p className="font-semibold">
                                                                                 {operation.type.name}
@@ -250,9 +270,15 @@ export default function OperationsPage() {
                                                                                 </span>
                                                                             )}
                                                                         </div>
-                                                                        <p className="text-sm text-muted-foreground">
-                                                                            {operation.created_by?.username}
-                                                                        </p>
+                                                                        <div className="flex flex-wrap items-center gap-x-2 text-muted-foreground">
+                                                                            <p className="text-sm">
+                                                                                {operation.created_by?.username}
+                                                                            </p>
+                                                                            <span className="text-xs sm:hidden">•</span>
+                                                                            <p className="text-xs sm:hidden">
+                                                                                {formatDateTime(operation.createdAt)}
+                                                                            </p>
+                                                                        </div>
 
                                                                         <div className="space-y-1">
                                                                             {[...operation.entries]
@@ -367,7 +393,13 @@ export default function OperationsPage() {
                                                                                                             : 'text-destructive/80 font-semibold'
                                                                                                     }
                                                                                                 >
-                                                                                                    {entry.amount}{' '}
+                                                                                                    {entry.direction ===
+                                                                                                    'credit'
+                                                                                                        ? '+'
+                                                                                                        : '−'}
+                                                                                                    {formatNumber(
+                                                                                                        entry.amount,
+                                                                                                    )}{' '}
                                                                                                     {
                                                                                                         entry.wallet
                                                                                                             .currency
@@ -381,19 +413,41 @@ export default function OperationsPage() {
                                                                         </div>
 
                                                                         {operation.description && (
-                                                                            <p className="text-sm text-muted-foreground">
+                                                                            <p
+                                                                                className={
+                                                                                    showDetails
+                                                                                        ? 'text-sm text-muted-foreground'
+                                                                                        : 'line-clamp-2 text-sm text-muted-foreground'
+                                                                                }
+                                                                            >
                                                                                 {operation.description}
                                                                             </p>
                                                                         )}
+                                                                        {showDetails && isUpdated && (
+                                                                            <div className="text-xs leading-relaxed text-muted-foreground sm:hidden">
+                                                                                <p>
+                                                                                    Изменено:{' '}
+                                                                                    {formatDateTime(
+                                                                                        operation.updatedAt,
+                                                                                    )}
+                                                                                </p>
+                                                                                {operation.updated_by?.username && (
+                                                                                    <p>
+                                                                                        Исполнитель:{' '}
+                                                                                        {operation.updated_by.username}
+                                                                                    </p>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
                                                                     </div>
 
-                                                                    <div className="text-left sm:text-right flex flex-col items-start sm:items-end">
+                                                                    <div className="absolute right-3 top-0 flex flex-col items-end text-right sm:static">
                                                                         <DropdownMenuTrigger asChild>
                                                                             <Button
                                                                                 type="button"
                                                                                 variant="ghost"
                                                                                 size="icon"
-                                                                                className="mb-2 ml-auto h-8 w-8"
+                                                                                className="mb-2 ml-auto h-11 w-11 sm:h-9 sm:w-9"
                                                                                 aria-label="Открыть меню операции"
                                                                                 onPointerDown={(event) =>
                                                                                     event.stopPropagation()
@@ -402,11 +456,11 @@ export default function OperationsPage() {
                                                                                 <MoreHorizontal className="h-4 w-4" />
                                                                             </Button>
                                                                         </DropdownMenuTrigger>
-                                                                        <p className="text-sm text-muted-foreground leading-tight">
+                                                                        <p className="hidden text-sm leading-tight text-muted-foreground sm:block">
                                                                             {formatDateTime(operation.createdAt)}
                                                                         </p>
                                                                         {isUpdated && (
-                                                                            <div className="mt-2 text-[11px] text-muted-foreground leading-tight text-left sm:text-right">
+                                                                            <div className="mt-2 hidden text-left text-[11px] leading-tight text-muted-foreground sm:block sm:text-right">
                                                                                 <p className="whitespace-nowrap">
                                                                                     Изменено:{' '}
                                                                                     {formatDateTime(

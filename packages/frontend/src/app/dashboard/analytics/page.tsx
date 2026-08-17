@@ -15,7 +15,7 @@ export default function AnalyticsPage() {
         <div className="space-y-6">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <CardTitle className="text-2xl">Аналитика</CardTitle>
+                    <CardTitle className="hidden text-2xl md:block">Аналитика</CardTitle>
                     <AnalyticsFilters />
                 </CardHeader>
             </Card>

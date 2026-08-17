@@ -51,7 +51,7 @@ export default function UsersPage() {
         <div className="space-y-6">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <CardTitle className="text-2xl">Пользователи</CardTitle>
+                    <CardTitle className="hidden text-2xl md:block">Пользователи</CardTitle>
                     <div className="flex gap-2 items-center">
                         <Input
                             placeholder="Поиск по имени..."

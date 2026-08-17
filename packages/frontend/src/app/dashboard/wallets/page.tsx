@@ -24,9 +24,6 @@ import { useWalletTypes } from '@/entities/wallet-type';
 import { useAuthStore } from '@/features/users/ui/user-stores/user-store';
 import {
     Button,
-    Card,
-    CardHeader,
-    CardTitle,
     Empty,
     EmptyContent,
     EmptyDescription,
@@ -340,37 +337,38 @@ export default function WalletsPage() {
                 : 'all';
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6 pb-24">
-            <Card>
-                <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <CardTitle className="text-2xl">Список кошельков</CardTitle>
-                    <div className="flex gap-2 items-center flex-wrap">
-                        <Input
-                            placeholder="Поиск по названию"
-                            value={formValues?.search ?? ''}
-                            onChange={(e) => {
-                                form.setValue('search', e.target.value || undefined);
-                                form.setValue('searchByName', true);
-                            }}
-                            className="w-full md:w-64"
-                        />
-                        <WalletsFiltersSheet form={form} baseFilters={baseFilters} />
-                        {!isUserRole && (
-                            <Button asChild className="md:w-auto">
-                                <Link href={ROUTER_MAP.WALLETS_CREATE} className="inline-flex items-center gap-2">
-                                    <Plus className="size-4" />
-                                    <span>Создать кошелек</span>
-                                </Link>
-                            </Button>
-                        )}
-                    </div>
-                </CardHeader>
-            </Card>
+        <div className="mx-auto max-w-5xl space-y-3 pb-24 sm:space-y-6">
+            <div
+                className={`grid w-full items-center gap-2 md:flex md:flex-wrap ${
+                    isUserRole ? 'grid-cols-[minmax(0,1fr)_auto]' : 'grid-cols-[minmax(0,1fr)_auto_auto]'
+                }`}
+            >
+                <Input
+                    placeholder="Поиск по названию"
+                    value={formValues?.search ?? ''}
+                    onChange={(e) => {
+                        form.setValue('search', e.target.value || undefined);
+                        form.setValue('searchByName', true);
+                    }}
+                    className="min-w-0 md:w-64"
+                />
+                <WalletsFiltersSheet form={form} baseFilters={baseFilters} />
+                {!isUserRole && (
+                    <Button asChild className="h-9 px-3 sm:h-10 sm:px-4">
+                        <Link href={ROUTER_MAP.WALLETS_CREATE}>
+                            <Plus className="size-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Создать кошелек</span>
+                            <span className="sr-only sm:hidden">Создать кошелек</span>
+                        </Link>
+                    </Button>
+                )}
+            </div>
 
             <WalletsAggregationSwiper filters={filteredValues} />
 
             <Tabs
                 value={activeTabValue}
+                className="sticky top-0 z-20 -mx-1 bg-background/95 px-1 py-1 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:static sm:mx-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none"
                 onValueChange={(val) => {
                     if (val === 'all') {
                         form.setValue('walletTypeId', undefined);

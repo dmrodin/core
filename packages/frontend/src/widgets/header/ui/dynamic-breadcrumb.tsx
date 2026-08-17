@@ -15,7 +15,7 @@ import {
 } from '@/shared/ui/shadcn/breadcrumb';
 import { ROUTER_MAP, ROUTER_TITLES } from '@/shared/utils/constants/router-map';
 
-export function DynamicBreadcrumb() {
+export function DynamicBreadcrumb({ compact = false }: { compact?: boolean }) {
     const pathname = usePathname();
 
     const segments = pathname.split('/').filter(Boolean);
@@ -39,6 +39,20 @@ export function DynamicBreadcrumb() {
 
             return { href, title, isLast };
         });
+
+    if (compact) {
+        const currentTitle = items.at(-1)?.title ?? dashboardTitle;
+
+        return (
+            <Breadcrumb className="min-w-0 overflow-hidden">
+                <BreadcrumbList className="flex-nowrap overflow-hidden">
+                    <BreadcrumbItem className="min-w-0">
+                        <BreadcrumbPage className="truncate text-sm">{currentTitle}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                </BreadcrumbList>
+            </Breadcrumb>
+        );
+    }
 
     return (
         <Breadcrumb>

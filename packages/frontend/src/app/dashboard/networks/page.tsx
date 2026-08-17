@@ -84,7 +84,7 @@ export default function NetworksPage() {
         <div className="space-y-6">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <CardTitle className="text-2xl">Сети</CardTitle>
+                    <CardTitle className="hidden text-2xl md:block">Сети</CardTitle>
                     <Button asChild>
                         <Link href={ROUTER_MAP.NETWORKS_CREATE}>
                             <Plus className="w-4 h-4 mr-2" />

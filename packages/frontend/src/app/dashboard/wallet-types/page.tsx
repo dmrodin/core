@@ -86,7 +86,7 @@ export default function WalletTypesPage() {
         <div className="space-y-6">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <CardTitle className="text-2xl">Типы кошельков</CardTitle>
+                    <CardTitle className="hidden text-2xl md:block">Типы кошельков</CardTitle>
                     <Button asChild>
                         <Link href={ROUTER_MAP.WALLET_TYPES_CREATE}>
                             <Plus className="w-4 h-4 mr-2" />

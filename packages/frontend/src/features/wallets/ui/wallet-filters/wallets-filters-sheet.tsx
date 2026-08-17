@@ -115,11 +115,15 @@ export function WalletsFiltersSheet({
     return (
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="relative">
-                    <FilterIcon className="h-4 w-4 mr-2" />
-                    Фильтры
+                <Button variant="outline" size="sm" className="relative h-9 px-3 sm:h-10">
+                    <FilterIcon className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Фильтры</span>
+                    <span className="sr-only sm:hidden">Фильтры</span>
                     {activeFiltersCount > 0 && (
-                        <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1 flex items-center justify-center">
+                        <Badge
+                            variant="destructive"
+                            className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center px-1 sm:static sm:ml-2"
+                        >
                             {activeFiltersCount}
                         </Badge>
                     )}
@@ -326,7 +330,7 @@ export function WalletsFiltersSheet({
                         </div>
                     </div>
 
-                    <div className="flex gap-3 pt-6">
+                    <div className="sticky bottom-0 flex gap-3 border-t bg-background py-4">
                         <Button variant="outline" onClick={resetFilters} className="flex-1">
                             Сбросить
                         </Button>

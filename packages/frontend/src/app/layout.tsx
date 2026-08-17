@@ -20,7 +20,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html lang="ru" suppressHydrationWarning>
             <head>
                 <title>MonteMove</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+                />
                 <meta name="theme-color" content="#0F172A" />
                 <link rel="manifest" href="/manifest.webmanifest" />
                 <link rel="icon" href="/logo-circle.png" type="image/png" />

@@ -41,15 +41,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const user = useAuthStore((state) => state.user);
     const token = useAuthStore((state) => state.token);
     const isAuthInitialized = useAuthStore((state) => state.isAuthInitialized);
+    const clearToken = useAuthStore((state) => state.clearToken);
     const logoutMutation = useLogout();
 
     const hasAdminRole = user?.roles?.some((role) => role.code === UserRole.ADMIN) ?? false;
     const isUserRole = user?.roles?.some((role) => role.code === UserRole.USER) ?? false;
     const isAuthResolving = !isAuthInitialized || (Boolean(token) && !user);
+    const isRouteActive = (route: string) => pathname === route || pathname.startsWith(`${route}/`);
     const isRestrictedRole =
         isAuthResolving ||
         (!hasAdminRole &&
             (user?.roles?.some((role) => role.code === UserRole.USER || role.code === UserRole.MODERATOR) ?? false));
+
+    useEffect(() => {
+        if (!isAuthInitialized || (token && user)) return;
+
+        void clearToken();
+
+        const loginUrl = new URL(ROUTER_MAP.LOGIN, window.location.origin);
+        loginUrl.searchParams.set('next', `${pathname}${window.location.search}`);
+        router.replace(`${loginUrl.pathname}${loginUrl.search}`);
+    }, [clearToken, isAuthInitialized, pathname, router, token, user]);
 
     useEffect(() => {
         if (!isRestrictedRole) return;
@@ -63,11 +75,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         }
     }, [isRestrictedRole, pathname, router]);
 
+    if (!isAuthInitialized || !token || !user) {
+        return null;
+    }
+
     return (
         <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2">
+                <header className="flex h-14 shrink-0 items-center gap-2 sm:h-16">
                     <div className="flex items-center gap-2 px-4 w-full">
                         {isMobile ? (
                             <>
@@ -80,11 +96,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                 >
                                     <Home className="h-5 w-5" />
                                 </Button>
-                                <DynamicBreadcrumb />
-                                <div className="ml-auto flex items-center gap-1">
+                                <div className="min-w-0 flex-1 overflow-hidden">
+                                    <DynamicBreadcrumb compact />
+                                </div>
+                                <div className="ml-auto flex shrink-0 items-center gap-1">
                                     <ThemeToggle />
                                     {user?.username && (
-                                        <span className="text-sm font-medium max-w-[80px] truncate">
+                                        <span className="hidden max-w-[64px] truncate text-sm font-medium min-[360px]:inline">
                                             {user.username}
                                         </span>
                                     )}
@@ -141,36 +159,40 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
                     <div className="max-w-5xl mx-auto w-full">
                         {isMobile && (
-                            <div className="space-y-2 pb-3">
-                                <div className="grid grid-cols-4 gap-2">
+                            <div className="pb-2">
+                                <div className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 gap-1 border-t bg-background/95 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-lg backdrop-blur">
                                     <Button
-                                        variant="default"
-                                        className="flex flex-col h-auto py-3 gap-1"
+                                        variant={isRouteActive(ROUTER_MAP.OPERATIONS) ? 'default' : 'ghost'}
+                                        className="flex h-auto flex-col gap-1 py-2"
                                         onClick={() => router.push(ROUTER_MAP.OPERATIONS)}
+                                        aria-current={isRouteActive(ROUTER_MAP.OPERATIONS) ? 'page' : undefined}
                                     >
                                         <HandshakeIcon className="h-5 w-5" />
                                         <span className="text-xs">Операции</span>
                                     </Button>
                                     <Button
-                                        variant="default"
-                                        className="flex flex-col h-auto py-3 gap-1"
+                                        variant={isRouteActive(ROUTER_MAP.WALLETS) ? 'default' : 'ghost'}
+                                        className="flex h-auto flex-col gap-1 py-2"
                                         onClick={() => router.push(ROUTER_MAP.WALLETS)}
+                                        aria-current={isRouteActive(ROUTER_MAP.WALLETS) ? 'page' : undefined}
                                     >
                                         <Wallet className="h-5 w-5" />
                                         <span className="text-xs">Кошельки</span>
                                     </Button>
                                     <Button
-                                        variant="default"
-                                        className="flex flex-col h-auto py-3 gap-1"
+                                        variant={isRouteActive(ROUTER_MAP.APPLICATIONS) ? 'default' : 'ghost'}
+                                        className="flex h-auto flex-col gap-1 py-2"
                                         onClick={() => router.push(ROUTER_MAP.APPLICATIONS)}
+                                        aria-current={isRouteActive(ROUTER_MAP.APPLICATIONS) ? 'page' : undefined}
                                     >
                                         <Ticket className="h-5 w-5" />
                                         <span className="text-xs">Заявки</span>
                                     </Button>
                                     <Button
-                                        variant="default"
-                                        className="flex flex-col h-auto py-3 gap-1"
+                                        variant={isRouteActive(ROUTER_MAP.GUIDES) ? 'default' : 'ghost'}
+                                        className="flex h-auto flex-col gap-1 py-2"
                                         onClick={() => router.push(ROUTER_MAP.GUIDES)}
+                                        aria-current={isRouteActive(ROUTER_MAP.GUIDES) ? 'page' : undefined}
                                     >
                                         <Book className="h-5 w-5" />
                                         <span className="text-xs">Гайды</span>
@@ -179,31 +201,39 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                 <div className={`grid gap-2 ${isUserRole ? 'grid-cols-2' : 'grid-cols-3'}`}>
                                     <Button
                                         variant="default"
-                                        className="text-sm"
+                                        className="h-10 min-w-0 gap-1 overflow-hidden px-2 text-xs"
                                         onClick={() => router.push(ROUTER_MAP.OPERATIONS_CREATE)}
+                                        aria-label="Новая операция"
                                     >
-                                        Новая операция
+                                        <Plus className="h-4 w-4 shrink-0" />
+                                        <span className="truncate">Операция</span>
                                     </Button>
                                     {!isUserRole && (
                                         <Button
                                             variant="default"
-                                            className="text-sm"
+                                            className="h-10 min-w-0 gap-1 overflow-hidden px-2 text-xs"
                                             onClick={() => router.push(ROUTER_MAP.WALLETS_CREATE)}
+                                            aria-label="Новый кошелек"
                                         >
-                                            Новый кошелек
+                                            <Plus className="h-4 w-4 shrink-0" />
+                                            <span className="truncate">Кошелек</span>
                                         </Button>
                                     )}
                                     <Button
                                         variant="default"
-                                        className="text-sm"
+                                        className="h-10 min-w-0 gap-1 overflow-hidden px-2 text-xs"
                                         onClick={() => router.push(ROUTER_MAP.APPLICATIONS_CREATE)}
+                                        aria-label="Новая заявка"
                                     >
-                                        Новая заявка
+                                        <Plus className="h-4 w-4 shrink-0" />
+                                        <span className="truncate">Заявка</span>
                                     </Button>
                                 </div>
                             </div>
                         )}
-                        <PageTransition>{children}</PageTransition>
+                        <div className={isMobile ? 'pb-20' : undefined}>
+                            <PageTransition>{children}</PageTransition>
+                        </div>
                     </div>
                 </main>
             </SidebarInset>

@@ -34,7 +34,7 @@ export const GuidesPageContent = () => {
         <Fragment>
             <Card>
                 <CardHeader className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                    <CardTitle className="text-2xl">Список гайдов</CardTitle>
+                    <CardTitle className="hidden text-2xl md:block">Список гайдов</CardTitle>
                     <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                         <GuidesFilters className="w-full sm:w-64" onFiltersChange={handleFiltersChange} />
                         {!isUserRole && (

@@ -28,6 +28,7 @@ import {
     Popover,
     PopoverContent,
     PopoverTrigger,
+    useIsMobile,
 } from '@/shared';
 
 import { CalendarIcon } from 'lucide-react';
@@ -42,16 +43,9 @@ const SORT_ORDERS: {
     { value: 'asc', label: 'Сначала старые' },
 ];
 
-const STATUS_OPTIONS: {
-    value: NonNullable<ApplicationsFiltersState['status']>;
-    label: string;
-}[] = [
-    { value: 'open', label: 'В работе' },
-    { value: 'done', label: 'Завершена' },
-];
-
 export function ApplicationsFilters() {
-    const { setAllQueryParams } = useSetApplicationQueryParam();
+    const { searchParams, setAllQueryParams } = useSetApplicationQueryParam();
+    const { isMobile } = useIsMobile();
     const [sheetOpen, setSheetOpen] = useState(false);
     const [calendarOpen, setCalendarOpen] = useState(false);
 
@@ -63,16 +57,17 @@ export function ApplicationsFilters() {
         [],
     );
     const [localFilters, setLocalFilters] = useState<ApplicationsFiltersState>(defaults);
+    const currentStatus = (searchParams.get('status') ?? 'open') as ApplicationsFiltersState['status'];
 
     const handleApplyFilters = () => {
-        setAllQueryParams(localFilters);
+        setAllQueryParams({ ...localFilters, status: currentStatus });
         setSheetOpen(false);
     };
 
     const resetFilters = () => {
         const resetState = { page: 1, limit: 10 };
         setLocalFilters(resetState);
-        setAllQueryParams(resetState);
+        setAllQueryParams({ ...resetState, status: currentStatus });
     };
 
     useEffect(() => {
@@ -80,7 +75,6 @@ export function ApplicationsFilters() {
     }, [defaults]);
 
     const activeFiltersCount = [
-        localFilters.status,
         localFilters.sortField,
         localFilters.sortOrder,
         localFilters.createdFrom,
@@ -90,11 +84,15 @@ export function ApplicationsFilters() {
     return (
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="relative">
-                    <FilterIcon className="h-4 w-4 mr-2" />
-                    Фильтры
+                <Button variant="outline" size="sm" className="relative h-9 px-3 sm:h-10">
+                    <FilterIcon className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Фильтры</span>
+                    <span className="sr-only sm:hidden">Фильтры</span>
                     {activeFiltersCount > 0 && (
-                        <Badge variant="destructive" className="ml-2 h-5 min-w-5 px-1 flex items-center justify-center">
+                        <Badge
+                            variant="destructive"
+                            className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center px-1 sm:static sm:ml-2"
+                        >
                             {activeFiltersCount}
                         </Badge>
                     )}
@@ -106,30 +104,6 @@ export function ApplicationsFilters() {
                     <SheetDescription>Настройте параметры для фильтрации списка заявок</SheetDescription>
                 </SheetHeader>
                 <div className="space-y-6 px-4">
-                    <div className="space-y-2">
-                        <Label>Статус</Label>
-                        <Select
-                            value={localFilters.status ?? ''}
-                            onValueChange={(val) =>
-                                setLocalFilters((prev) => ({
-                                    ...prev,
-                                    status: val ? (val as ApplicationsFiltersState['status']) : undefined,
-                                }))
-                            }
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Все" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {STATUS_OPTIONS.map((s) => (
-                                    <SelectItem key={s.value} value={s.value}>
-                                        {s.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
                     <div className="space-y-2">
                         <Label>Период</Label>
                         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
@@ -171,7 +145,7 @@ export function ApplicationsFilters() {
                                 <div className="bg-popover">
                                     <Calendar
                                         mode="range"
-                                        numberOfMonths={2}
+                                        numberOfMonths={isMobile ? 1 : 2}
                                         selected={{
                                             from: localFilters.createdFrom
                                                 ? new Date(localFilters.createdFrom)
@@ -294,7 +268,7 @@ export function ApplicationsFilters() {
                         </Select>
                     </div>
 
-                    <div className="flex gap-3 pt-6">
+                    <div className="sticky bottom-0 flex gap-3 border-t bg-background py-4">
                         <Button variant="outline" onClick={resetFilters} className="flex-1">
                             Сбросить
                         </Button>
