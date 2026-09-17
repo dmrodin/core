@@ -64,6 +64,25 @@ const EXPENSE_CATEGORY_OPTIONS = [
 const INSKESH_WALLET_TYPE_ID = 'dbc78423-dfb0-4ba4-86f4-533bd9efd027';
 const INSKESH_WALLET_TYPE_CODES = new Set(['inskech', 'inscash']);
 const INSKESH_WALLET_TYPE_NAMES = new Set(['инскеш']);
+// Направление единственной строки у типов, где форма не даёт его выбирать
+const SINGLE_ENTRY_DIRECTION = 'credit' as const;
+
+type EntryDirection = 'debit' | 'credit';
+
+/** Направления строк, которые форма показывает для типа операции */
+function getVisibleDirections(operationType: {
+    isCorrection?: boolean;
+    isDebit?: boolean;
+    isCredit?: boolean;
+}): EntryDirection[] {
+    if (operationType.isCorrection) return [SINGLE_ENTRY_DIRECTION];
+
+    const directions: EntryDirection[] = [];
+    if (operationType.isDebit) directions.push('debit');
+    if (operationType.isCredit) directions.push('credit');
+
+    return directions;
+}
 
 export function OperationForm({
     initialData,
@@ -511,14 +530,10 @@ export function OperationForm({
     const isAvans = selectedOperationType?.isAvans ?? false;
     const isSingleSideOperation = selectedOperationType ? isCreditAllowed !== isDebitAllowed : false;
 
-    const directions = React.useMemo(() => {
-        const result: Array<'credit' | 'debit'> = [];
-
-        if (isDebitAllowed) result.push('debit');
-        if (isCreditAllowed) result.push('credit');
-
-        return result;
-    }, [isCreditAllowed, isDebitAllowed]);
+    const directions = React.useMemo(
+        () => getVisibleDirections({ isDebit: isDebitAllowed, isCredit: isCreditAllowed }),
+        [isCreditAllowed, isDebitAllowed],
+    );
 
     const handleOperationTypeChange = React.useCallback(
         (value: string) => {
@@ -532,15 +547,22 @@ export function OperationForm({
                 return;
             }
 
+            // Сохраняем введённые строки, но только те, чьё направление новый тип показывает.
+            // Направление строки не меняется, скрытые строки отбрасываются.
+            const currentEntries = form.getValues('entries') ?? [];
             const nextEntries: CreateOperationDto['entries'] = [];
-            if (operationType.isCorrection) {
-                nextEntries.push({ wallet: { id: '', name: '' }, direction: 'credit', amount: 0 });
-            } else {
-                if (operationType.isDebit) {
-                    nextEntries.push({ wallet: { id: '', name: '' }, direction: 'debit', amount: 0 });
-                }
-                if (operationType.isCredit) {
-                    nextEntries.push({ wallet: { id: '', name: '' }, direction: 'credit', amount: 0 });
+            const visibleDirections = getVisibleDirections(operationType);
+            const maxEntriesPerDirection = operationType.isCorrection ? 1 : Infinity;
+
+            for (const direction of visibleDirections) {
+                const sameDirectionEntries = currentEntries
+                    .filter((entry) => entry.direction === direction)
+                    .slice(0, maxEntriesPerDirection);
+
+                if (sameDirectionEntries.length > 0) {
+                    nextEntries.push(...sameDirectionEntries);
+                } else {
+                    nextEntries.push({ wallet: { id: '', name: '' }, direction, amount: 0 });
                 }
             }
 
@@ -554,7 +576,7 @@ export function OperationForm({
             if (fields.length === 0) {
                 append({
                     wallet: { id: '', name: '' },
-                    direction: 'debit',
+                    direction: SINGLE_ENTRY_DIRECTION,
                     amount: 0,
                 });
             } else if (fields.length > 1) {
@@ -1174,7 +1196,9 @@ export function OperationForm({
                                 <FormField
                                     control={form.control}
                                     name={`entries.${realIndex}.direction`}
-                                    render={({ field }) => <input type="hidden" {...field} value="credit" />}
+                                    render={({ field }) => (
+                                        <input type="hidden" {...field} value={SINGLE_ENTRY_DIRECTION} />
+                                    )}
                                 />
 
                                 <FormField

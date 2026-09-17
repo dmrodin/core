@@ -130,7 +130,7 @@ export const CardApplication = ({ application }: CardApplicationProps) => {
                     <Button
                         size="icon"
                         variant="ghost"
-                        className="hidden h-11 w-11 shrink-0 sm:inline-flex"
+                        className="h-8 w-8 shrink-0 sm:h-11 sm:w-11"
                         aria-label="Скопировать описание"
                         onPointerDown={(e) => {
                             e.preventDefault();
