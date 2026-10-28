@@ -43,7 +43,7 @@ export class DeleteOperationUseCase {
 
                 await this.walletRecalculationService.recalculateForOperation(tx, operationId, deletedById);
             },
-            { timeout: 30000 },
+            { timeout: 120000 },
         );
 
         return {

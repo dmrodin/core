@@ -419,7 +419,7 @@ export class UpdateOperationUseCase {
                     },
                 };
             },
-            { timeout: 30000 },
+            { timeout: 120000 },
         );
     }
 }

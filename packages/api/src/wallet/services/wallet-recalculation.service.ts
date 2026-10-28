@@ -142,45 +142,34 @@ export class WalletRecalculationService {
         return BalanceStatus.neutral;
     }
 
+    // Пересчитывает before/after по всей цепочке записей кошелька одним запросом.
+    // Обновляются только строки, у которых значения реально изменились.
     private async updateBeforeAfterForWallets(tx: Prisma.TransactionClient, walletIds: string[]): Promise<void> {
-        for (const walletId of walletIds) {
-            await this.updateBeforeAfterForWallet(tx, walletId);
+        if (walletIds.length === 0) {
+            return;
         }
-    }
 
-    private async updateBeforeAfterForWallet(tx: Prisma.TransactionClient, walletId: string): Promise<void> {
-        const entries = await tx.operationEntry.findMany({
-            where: {
-                walletId,
-                deleted: false,
-                operation: { deleted: false },
-            },
-            orderBy: [{ operation: { createdAt: 'asc' } }, { createdAt: 'asc' }, { id: 'asc' }],
-            select: {
-                id: true,
-                direction: true,
-                amount: true,
-            },
-        });
-
-        let runningBalance = 0;
-
-        for (const entry of entries) {
-            const before = runningBalance;
-            const after =
-                entry.direction === OperationDirection.credit
-                    ? runningBalance + entry.amount
-                    : runningBalance - entry.amount;
-
-            await tx.operationEntry.update({
-                where: { id: entry.id },
-                data: {
-                    before,
-                    after,
-                },
-            });
-
-            runningBalance = after;
-        }
+        await tx.$executeRaw`
+            UPDATE "operation_entries" AS e
+            SET "before" = s.running - s.signed,
+                "after"  = s.running
+            FROM (
+                SELECT e.id,
+                       CASE WHEN e.direction = 'credit' THEN e.amount ELSE -e.amount END AS signed,
+                       SUM(CASE WHEN e.direction = 'credit' THEN e.amount ELSE -e.amount END)
+                           OVER (
+                               PARTITION BY e.wallet_id
+                               ORDER BY o.created_at, e.created_at, e.id
+                           ) AS running
+                FROM "operation_entries" e
+                JOIN "operations" o ON o.id = e.operation_id
+                WHERE e.wallet_id = ANY(${walletIds}::uuid[])
+                  AND e.deleted = false
+                  AND o.deleted = false
+            ) s
+            WHERE e.id = s.id
+              AND (e."before" IS DISTINCT FROM s.running - s.signed
+                   OR e."after" IS DISTINCT FROM s.running)
+        `;
     }
 }
